@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment QR Code - BlissMake Creations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #fff;
+            color: #000;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-height: 100vh;
+        }
+        header {
+            background: #7f19ec;
+            color: #fff;
+            padding: 1rem 2rem;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-bottom: 2px solid #7f19ec;
+        }
+        .logo-img {
+            height: 70px;
+            width: 70px;
+        }
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding-left: 120px;
+            color: #fff;
+            text-shadow: #000;
+            text-align: center;
+            align-items: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .user-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding-right: 2rem;
+        }
+        .user-actions .username {
+            font-size: 1.2rem;
+            padding-right: 2rem;
+        }
+        .user-actions .icons {
+            display: flex;
+            gap: 1rem;
+            padding-right: 2rem;
+        }
+        .user-actions a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #fff;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .user-actions a:hover {
+            background-color: #fff;
+            color: #7f19ec;
+        }
+        main {
+            margin-top: 150px;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #7f19ec;
+            margin-bottom: 1rem;
+        }
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        img {
+            width: 300px;
+            height: 300px;
+            margin-top: 1rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        <div class="header-center">BlissMake Creations</div>
+        <div class="user-actions">
+            <div class="username">Welcome, {{ username }}</div>
+            <div class="icons">
+                <a href="{{ url_for('blissmake.get_cart', username=username) }}"><i class="fas fa-shopping-cart"></i></a>
+                <a href="#"><i class="fas fa-heart"></i></a>
+                <a href="#"><i class="fas fa-user"></i></a>
+                <a href="#"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <h1>Payment for {{ username }}</h1>
+        <p>Total Amount: Rs. {{ total_price }}</p>
+        <p>Please scan the QR code below to proceed with the payment:</p>
+        <img src="{{ url_for('static', filename=qr_image.split('static/')[-1]) }}" alt="Payment QR Code">
+    </main>
+
+    <footer>
+        &copy; 2024 BlissMake Creations. All rights reserved.
+    </footer>
+</body>
+</html>

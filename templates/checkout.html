@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - BlissMake Creations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        <div class="header-center">BlissMake Creations</div>
+    </header>
+
+    <main>
+        <section class="payment-detail">
+            <h2>Payment for {{ username }}</h2>
+            <p>Total Amount: Rs. {{ total_price }}</p>
+            <p>Please scan the QR code below to proceed with the payment.</p>
+            <img src="{{ url_for('blissmake.payment_qr', username=username) }}" alt="Payment QR Code">
+            <form action="{{ url_for('blissmake.payment', username=username) }}" method="POST">
+                <button type="submit">Complete Payment</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 BlissMake Creations. All rights reserved.</p>
+    </footer>
+</body>
+</html>
