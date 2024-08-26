@@ -16,7 +16,10 @@ blissmake = Blueprint(Constants.BLISSMAKE, __name__, url_prefix=Constants.ROOT_U
 
 @blissmake.route(Constants.ROOT)
 def index():
-    return render_template(Constants.INDEX_HTML)
+    products = mongo.db.products.find({})
+    product_list = list(products)
+    print(product_list)
+    return render_template(Constants.INDEX_HTML, products=product_list)
 
 @blissmake.route(Constants.LOGIN, methods=[Constants.GET, Constants.POST])
 def login():
@@ -89,7 +92,8 @@ def authenticate_user():
         
         return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.USER_NOT_EXISTS))
     
-@blissmake.route(Constants.PRODUCT_DETAIL)
+@blissmake.route(Constants.PRODUCT_DETAIL, defaults={'username': None})
+@blissmake.route(Constants.PRODUCT_DETAIL_1)
 def product_detail(product_id, username):
     print(f'Product ID : {product_id}')
     product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
