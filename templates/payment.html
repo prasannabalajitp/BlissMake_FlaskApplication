@@ -175,7 +175,7 @@
                 <a href="{{ url_for('blissmake.get_cart', username=username) }}"><i class="fas fa-shopping-cart"></i></a>
                 <a href="#"><i class="fas fa-heart"></i></a>
                 <a href="#"><i class="fas fa-user"></i></a>
-                <a href="#"><i class="fas fa-sign-out-alt"></i></a>
+                <a href="{{ url_for('blissmake.logout', username=username)}}"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>
     </header>

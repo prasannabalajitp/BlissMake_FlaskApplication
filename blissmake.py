@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, redirect, url_for, session, rende
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+from bson import ObjectId
 from app import mongo
 from AppConstants.Constants import Constants
 import pyqrcode, io, os
@@ -16,10 +17,7 @@ blissmake = Blueprint(Constants.BLISSMAKE, __name__, url_prefix=Constants.ROOT_U
 
 @blissmake.route(Constants.ROOT)
 def index():
-    products = mongo.db.products.find({})
-    product_list = list(products)
-    print(product_list)
-    return render_template(Constants.INDEX_HTML, products=product_list)
+    return render_template(Constants.INDEX_HTML)
 
 @blissmake.route(Constants.LOGIN, methods=[Constants.GET, Constants.POST])
 def login():
@@ -92,7 +90,6 @@ def authenticate_user():
         
         return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.USER_NOT_EXISTS))
     
-@blissmake.route('/product/<product_id>', defaults={'username': None})
 @blissmake.route(Constants.PRODUCT_DETAIL)
 def product_detail(product_id, username):
     print(f'Product ID : {product_id}')
@@ -133,7 +130,7 @@ def delete_from_cart(product_id, quantity, username):
     print(f'After Deletion : {res}')
     return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username))
 
-@blissmake.route(Constants.ADD_TO_CART, methods=['POST'])
+@blissmake.route(Constants.ADD_TO_CART, methods=[Constants.POST])
 def add_to_cart(product_id, username):
     if request.method == Constants.POST:
         quantity = request.form.get(Constants.QUANTITY)
@@ -242,8 +239,59 @@ def payment_qr(username):
 
     return render_template(Constants.QR_PAYMENT_HTML, username=username, qr_image=qr_filename, total_price=round(total_price))
 
+
+@blissmake.route(Constants.ADD_TO_WISHLIST, methods=[Constants.POST, Constants.GET])
+def add_to_wishlist(username, product_id):
+    
+    product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
+    if not product:
+        return jsonify({Constants.ERROR1: Constants.PROD_NOT_FOUND}), 404
+    
+    user_favorites = mongo.db.favorites.find_one({
+        Constants.USERNAME: username,
+    })
+    if user_favorites:
+        if any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS]):
+            return jsonify({Constants.MESSAGE: Constants.PROD_EXISTS}), 200
+        
+        mongo.db.favorites.update_one(
+            {Constants.USERNAME: username},
+            {Constants.PUSH: {
+                Constants.PRODUCTS: {
+                    'product_id': product[Constants.PRODUCT_ID],
+                    'product_name': product[Constants.PRODUCT_NAME],
+                    'product_price': product[Constants.PRODUCT_PRICE],
+                    'product_img': product[Constants.PRODUCT_IMG]
+                }
+            }}
+        )
+        return jsonify({Constants.MESSAGE: Constants.PROD_ADD_WISHLIST}), 200
+    
+    else:
+        favorite_data = {
+            'username': username,
+            'products':[{
+                'product_id': product[Constants.PRODUCT_ID],
+                'product_name': product[Constants.PRODUCT_NAME],
+                'product_price': product[Constants.PRODUCT_PRICE],
+                'product_img': product[Constants.PRODUCT_IMG]
+            }]
+        }
+        result = mongo.db.favorites.insert_one(favorite_data)
+        favorite_data[Constants.ID] = str(result.inserted_id)
+
+        return jsonify(favorite_data)
+    
+@blissmake.route(Constants.GET_FAV)
+def get_favorite(username):
+    favorites = mongo.db.favorites.find_one({'username': username})
+    if not favorites:
+        return render_template(Constants.FAV_HTML,username=username, message=Constants.FAV_NOT_EXISTS)
+    
+    favorites[Constants.ID] = str(favorites[Constants.ID])
+    return render_template(Constants.FAV_HTML, username=username, favorites=favorites, message=None)
+
 @blissmake.route(Constants.LOGOUT, methods=[Constants.GET])
-def logout():
-    print(f'Session: {session}')
+def logout(username):
     session.clear()
     return redirect(url_for(Constants.BLISSMAKE_INDEX))
