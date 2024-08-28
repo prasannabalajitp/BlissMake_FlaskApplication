@@ -51,6 +51,7 @@ def profile():
     return f'Hello, {session["user"]}!'
 
 @blissmake.route(Constants.HOME)
+@blissmake.route('/home/<username>', methods=['POST', 'GET'])
 def home(username):
     products = mongo.db.products.find({})
     product_list = list(products)
@@ -174,8 +175,6 @@ def update_quantity(product_id, action, username):
             if item[Constants.PRODUCT_ID_1] == product_id:
 
                 current_quantity = int(item[Constants.QUANTITY])
-                print(f'Quantity : {current_quantity}')
-                print(type(current_quantity))
                 if action == Constants.INCREASE:
                     item[Constants.QUANTITY] = current_quantity + 1
                 elif action == Constants.DECREASE and current_quantity > 1:

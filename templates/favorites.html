@@ -175,7 +175,7 @@
 </head>
 <body>
     <header>
-        <a href="{{ url_for('blissmake.index') }}">
+        <a href="{{ url_for('blissmake.home', username=username) }}">
             <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
         </a>
         <div class="header-center">BlissMake Creations</div>
