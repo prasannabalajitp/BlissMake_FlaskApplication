@@ -114,9 +114,9 @@
             padding: 20px;
         }
         .product-detail h2 {
-            font-size: 2.2rem; /* Match home.html featured-products title */
+            font-size: 2.2rem; 
             margin-bottom: 10px;
-            color: #7f19ec; /* Match home.html featured-products title color */
+            color: #7f19ec; 
         }
         .product-detail p {
             font-size: 1.2em;
@@ -129,7 +129,7 @@
             color: #ff5b77;
         }
         .product-detail .form-container {
-            background: rgba(255, 255, 255, 0.2); /* Match home.html container background */
+            background: rgba(255, 255, 255, 0.2); 
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
@@ -189,8 +189,27 @@
         .message {
             margin-top: 20px;
             font-size: 1.2rem;
-            color: #7f19ec; /* Match home.html featured-products title color */
+            color: #7f19ec; 
         }
+        .flash-messages {
+            margin-top: 10px;
+        }
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            color: #fff;
+        }
+        .flash-message.success {
+            background-color: #28a745; 
+        }
+        .flash-message.error {
+            background-color: #dc3545; 
+        }
+        .flash-message.info {
+            background-color: #17a2b8; 
+        }
+        
         footer {
             background: #222;
             color: #fff;
@@ -205,13 +224,15 @@
 </head>
 <body>
     <header>
-        <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        <a href="{{ url_for('blissmake.index') }}">
+            <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        </a>
         <div class="header-center">BlissMake Creations</div>
         <div class="user-actions">
             <div class="username">Welcome, {{ username }}</div>
             <div class="icons">
                 <a href="{{ url_for('blissmake.get_cart', username=username ) }}"><i class="fas fa-shopping-cart"></i></a>
-                <a href="#"><i class="fas fa-heart"></i></a>
+                <a href="{{ url_for('blissmake.get_favorite', username=username )}}"><i class="fas fa-heart"></i></a>
                 <a href="#"><i class="fas fa-user"></i></a>
                 <a href="{{ url_for('blissmake.logout', username=username)}}"><i class="fas fa-sign-out-alt"></i></a>
             </div>
@@ -219,6 +240,7 @@
     </header>
 
     <main>
+
         <section class="product-detail">
             <div class="product-image">
                 <img src="{{ url_for('static', filename='img/' + product['product_image']) }}" alt="{{ product['product_name'] }}">
@@ -234,10 +256,22 @@
                         <button type="submit">Add to Cart</button>
                         <a href="{{ url_for('blissmake.add_to_wishlist', username=username, product_id=product.product_id) }}" class="add-to-wishlist">Add to Wishlist</a>
                     </form>
+                    
+                    
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="flash-messages">
+                                {% for category, message in messages %}
+                                    <div class="flash-message {{ category }}">{{ message }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
                 </div>
             </div>
         </section>
     </main>
+    
 
     <footer>
         <p>&copy; 2024 BlissMake Creations. All rights reserved.</p>

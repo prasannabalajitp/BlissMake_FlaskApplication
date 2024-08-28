@@ -15,6 +15,7 @@ class Constants:
     USER = 'user'
     ERROR = 'error'
     ERROR1  = "error"
+    INFO = 'info'
 
     #urls
     ROOT = '/'
@@ -66,6 +67,8 @@ class Constants:
     PROD_EXISTS = "Product Already Exists in Cart"
     PROD_ADD_WISHLIST = "Product added to wishlist"
     FAV_NOT_EXISTS = 'Favorites Not Exists!'
+    PROD_IN_WISHLIST = 'Product already in Wishlist'
+    ADDED_TO_WISHLIST = 'Product added to Wishlist'
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
