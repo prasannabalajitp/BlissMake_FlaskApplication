@@ -25,14 +25,15 @@ class Constants:
     HOME = '/home/<username>'
     CHECKOUT = '/checkout/<username>'
     MAIN_HOME_PAGE = '/home'
-    PRODUCT_DETAIL_1 = '/product/<product_id>/<username>'
-    PRODUCT_DETAIL = '/product/<product_id>'
+    PRODUCT_DETAIL = '/product/<product_id>/<username>'
     GET_CART = '/cart/<username>'
     DELETE_FROM_CART = '/cart/delete/<product_id>/<quantity>/<username>'
     ADD_TO_CART = '/addToCart/<product_id>/<username>'
     UPDATE_QUANTITY = '/cart/update/<product_id>/<action>/<username>'
     PAYMENT = '/payment/<username>'
     PAYMENT_QR = '/payment_qr/<username>'
+    ADD_TO_WISHLIST = '/addToWishlist/<username>/<product_id>'
+    GET_FAV = '/getfavorite/<username>'
 
     #HTML
     INDEX_HTML = 'index.html'
@@ -44,6 +45,7 @@ class Constants:
     USER_CART_HTML = 'user_cart.html'
     PAYMENT_HTML = 'payment.html'
     QR_PAYMENT_HTML = 'payment_qr.html'
+    FAV_HTML = 'favorites.html'
 
 
     #Route HTML
@@ -60,6 +62,10 @@ class Constants:
     ADDED_TO_CART = 'Added to Cart Successfully'
     CART_UPDATED = "Cart updated successfully!"
     PAYMENT_SUCCESS = 'Payment Processed successfully'
+    PROD_NOT_FOUND = "Product Not Found"
+    PROD_EXISTS = "Product Already Exists in Cart"
+    PROD_ADD_WISHLIST = "Product added to wishlist"
+    FAV_NOT_EXISTS = 'Favorites Not Exists!'
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
@@ -77,6 +83,7 @@ class Constants:
     PULL = '$pull'
     PUSH = '$push'
     SET = '$set'
+    ID = '_id'
     INCREASE = 'increase'
     DECREASE = 'decrease'
     SUCCESS = "success"
