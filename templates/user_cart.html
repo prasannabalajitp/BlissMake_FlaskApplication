@@ -205,6 +205,11 @@
             border-color: #000;
             color: #7f19ec;
         }
+        
+        .error-message {
+            color: red;
+            margin-bottom: 10px;
+        }
 
         footer {
             text-align: center;
@@ -219,13 +224,15 @@
 </head>
 <body>
     <header>
-        <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        <a href="{{ url_for('blissmake.home', username=username) }}">
+            <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        </a>
         <div class="header-center">BlissMake Creations</div>
         <div class="user-actions">
             <div class="username">Welcome, {{ username }}</div>
             <div class="icons">
                 <a href="{{ url_for('blissmake.get_cart', username=username) }}"><i class="fas fa-shopping-cart"></i></a>
-                <a href="#"><i class="fas fa-heart"></i></a>
+                <a href="{{ url_for('blissmake.get_favorite', username=username )}}"><i class="fas fa-heart"></i></a>
                 <a href="#"><i class="fas fa-user"></i></a>
                 <a href="{{ url_for('blissmake.logout', username=username)}}"><i class="fas fa-sign-out-alt"></i></a>
             </div>
@@ -235,7 +242,9 @@
     <main>
         <br><br>
         <section class="cart-detail">
-            {% if cart_products %}
+            {% if message %}
+            <p class="error-message">{{ message }}</p>
+            {% elif cart_products %}
                 <h2>Your Cart Items</h2>
                 <div class="cart-items-container">
                     {% for item in cart_products %}

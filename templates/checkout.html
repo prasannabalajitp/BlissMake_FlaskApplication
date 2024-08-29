@@ -19,7 +19,9 @@
 </head>
 <body>
     <header>
-        <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        <a href="{{ url_for('blissmake.index') }}">
+            <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        </a>
         <div class="header-center">BlissMake Creations</div>
     </header>
 

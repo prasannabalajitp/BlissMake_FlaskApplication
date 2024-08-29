@@ -51,6 +51,7 @@ def profile():
     return f'Hello, {session["user"]}!'
 
 @blissmake.route(Constants.HOME)
+@blissmake.route('/home/<username>', methods=['POST', 'GET'])
 def home(username):
     products = mongo.db.products.find({})
     product_list = list(products)
@@ -179,17 +180,25 @@ def update_quantity(product_id, action, username):
                 elif action == Constants.DECREASE and current_quantity > 1:
                     item[Constants.QUANTITY] = current_quantity - 1
                 break
-        
-        print(mongo.db.usercart.find({Constants.USERNAME: username}))
         mongo.db.usercart.update_one(
             {Constants.USERNAME: username},
             {Constants.SET: {'products': products}}
         )
-        flash(Constants.CART_UPDATED, Constants.SUCCESS)
+        cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
+        cart_products = cart[Constants.PRODUCTS] if cart else []
+        total_price = 0
+        if not cart_products:
+            flash(Constants.CART_EMPTY, Constants.WARNING)
+        
+        for item in cart_products:
+            price = float(item[Constants.PRODUCT_PRICE])
+            quantity = int(item[Constants.QUANTITY])
+            total_price += price * quantity
+        return render_template(Constants.USER_CART_HTML, username=username, cart_products=cart_products, total_price=total_price)
     else:
         flash(Constants.CART_NOT_FOUND, Constants.ERROR1)
 
-    return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username))
+    return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username, ))
 
 
 @blissmake.route(Constants.PAYMENT, methods=[Constants.GET, Constants.POST])
@@ -245,14 +254,16 @@ def add_to_wishlist(username, product_id):
     
     product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
     if not product:
-        return jsonify({Constants.ERROR1: Constants.PROD_NOT_FOUND}), 404
+        flash(Constants.PROD_NOT_FOUND, Constants.ERROR)
+        return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
     
     user_favorites = mongo.db.favorites.find_one({
         Constants.USERNAME: username,
     })
     if user_favorites:
         if any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS]):
-            return jsonify({Constants.MESSAGE: Constants.PROD_EXISTS}), 200
+            flash(Constants.PROD_IN_WISHLIST, Constants.INFO)
+            return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
         
         mongo.db.favorites.update_one(
             {Constants.USERNAME: username},
@@ -265,8 +276,8 @@ def add_to_wishlist(username, product_id):
                 }
             }}
         )
-        return jsonify({Constants.MESSAGE: Constants.PROD_ADD_WISHLIST}), 200
-    
+        flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
+        print(session)
     else:
         favorite_data = {
             'username': username,
@@ -279,8 +290,9 @@ def add_to_wishlist(username, product_id):
         }
         result = mongo.db.favorites.insert_one(favorite_data)
         favorite_data[Constants.ID] = str(result.inserted_id)
-
-        return jsonify(favorite_data)
+        flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
+        print(session)
+    return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
     
 @blissmake.route(Constants.GET_FAV)
 def get_favorite(username):
