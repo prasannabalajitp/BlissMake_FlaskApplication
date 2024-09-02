@@ -26,6 +26,7 @@ class Constants:
     HOME = '/home/<username>'
     CHECKOUT = '/checkout/<username>'
     MAIN_HOME_PAGE = '/home'
+    PROD_DET_GUEST = '/product/<product_id>/'
     PRODUCT_DETAIL = '/product/<product_id>/<username>'
     GET_CART = '/cart/<username>'
     DELETE_FROM_CART = '/cart/delete/<product_id>/<quantity>/<username>'
@@ -82,6 +83,7 @@ class Constants:
     PRODUCT_PRICE = "product_price"
     PRODUCT_IMG = "product_img"
     PRODUCTS = "products"
+    GUEST = 'guest'
     WARNING = "warning"
     PULL = '$pull'
     PUSH = '$push'

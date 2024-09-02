@@ -17,7 +17,9 @@ blissmake = Blueprint(Constants.BLISSMAKE, __name__, url_prefix=Constants.ROOT_U
 
 @blissmake.route(Constants.ROOT)
 def index():
-    return render_template(Constants.INDEX_HTML)
+    products = mongo.db.products.find({})
+    product_list = list(products)
+    return render_template(Constants.INDEX_HTML, products=product_list)
 
 @blissmake.route(Constants.LOGIN, methods=[Constants.GET, Constants.POST])
 def login():
@@ -91,6 +93,7 @@ def authenticate_user():
         
         return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.USER_NOT_EXISTS))
     
+@blissmake.route(Constants.PROD_DET_GUEST, defaults={'username': 'guest'})
 @blissmake.route(Constants.PRODUCT_DETAIL)
 def product_detail(product_id, username):
     print(f'Product ID : {product_id}')
@@ -134,6 +137,9 @@ def delete_from_cart(product_id, quantity, username):
 @blissmake.route(Constants.ADD_TO_CART, methods=[Constants.POST])
 def add_to_cart(product_id, username):
     if request.method == Constants.POST:
+        if username == Constants.GUEST:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        
         quantity = request.form.get(Constants.QUANTITY)
         product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
         product_name = product[Constants.PRODUCT_NAME]
@@ -166,7 +172,7 @@ def add_to_cart(product_id, username):
 
 @blissmake.route(Constants.UPDATE_QUANTITY, methods=[Constants.POST])
 def update_quantity(product_id, action, username):
-    print(f'Received request with the update quantity: product_id={product_id}, action={action}, username={username}')
+
     cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
 
     if cart:
@@ -251,6 +257,9 @@ def payment_qr(username):
 
 @blissmake.route(Constants.ADD_TO_WISHLIST, methods=[Constants.POST, Constants.GET])
 def add_to_wishlist(username, product_id):
+
+    if username == Constants.GUEST:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     
     product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
     if not product:

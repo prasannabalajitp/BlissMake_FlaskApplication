@@ -272,30 +272,14 @@
         <section class="section featured-products">
             <h2>Featured Products</h2>
             <div class="product-list">
+                {% for product in products %}
                 <div class="product-card">
-                    <img src="{{ url_for('static', filename='img/HBD.png') }}" alt="Handmade Birthday Card">
-                    <h3>Handmade Birthday Card</h3>
-                    <p class="price">Rs. 45.00</p>
-                    <a href="#">View Details</a>
+                    <img src="{{ url_for('static', filename='img/'+product['product_img']) }}" alt="{{ product['product_name'] }}">
+                    <h3>{{ product['product_name'] }}</h3>
+                    <p class="price">Rs. {{ product['product_price'] }}</p>
+                    <a href="{{ url_for('blissmake.product_detail', product_id=product['product_id'] ) }}">View Details</a>
                 </div>
-                <div class="product-card">
-                    <img src="{{ url_for('static', filename='img/WD1.png') }}" alt="Wedding Card">
-                    <h3>Wedding Card</h3>
-                    <p class="price">Rs. 75.00</p>
-                    <a href="#">View Details</a>
-                </div>
-                <div class="product-card">
-                    <img src="{{ url_for('static', filename='img/WD2.png') }}" alt="Wedding Card Roll">
-                    <h3>Wedding Card Roll</h3>
-                    <p class="price">Rs. 25.00</p>
-                    <a href="#">View Details</a>
-                </div>
-                <div class="product-card">
-                    <img src="{{ url_for('static', filename='img/WD4.png') }}" alt="Album">
-                    <h3>Album</h3>
-                    <p class="price">Rs. 25.00</p>
-                    <a href="#">View Details</a>
-                </div>
+                {% endfor %}
             </div>
         </section>
 
