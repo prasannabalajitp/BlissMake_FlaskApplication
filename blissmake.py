@@ -1,11 +1,10 @@
-from flask import Blueprint, request, jsonify, redirect, url_for, session, render_template, flash, send_file
+from flask import Blueprint, request, jsonify, redirect, url_for, session, render_template, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from bson import ObjectId
 from app import mongo
 from AppConstants.Constants import Constants
-import pyqrcode, io, os
+import pyqrcode, os
 
 load_dotenv()
 
@@ -52,12 +51,12 @@ def profile():
 
     return f'Hello, {session["user"]}!'
 
-@blissmake.route(Constants.HOME)
-@blissmake.route('/home/<username>', methods=['POST', 'GET'])
+
+@blissmake.route(Constants.HOME, methods=[Constants.POST, Constants.GET])
 def home(username):
     products = mongo.db.products.find({})
     product_list = list(products)
-    return render_template(Constants.HOME_HTML, username=username, products=product_list)
+    return render_template(Constants.HOME_HTML, username=username, products=product_list), 200
 
 @blissmake.route(Constants.CHECKOUT)
 def checkout(username):
@@ -73,7 +72,7 @@ def checkout(username):
         product_price = float(product.get(Constants.PRODUCT_PRICE, 0))
         total_price += quantity * product_price
 
-    return render_template(Constants.CHECKOUT_HTML, username=username, products=products, total_price=round(total_price, 2))
+    return render_template(Constants.CHECKOUT_HTML, username=username, products=products, total_price=round(total_price, 2)), 200
     
 
 @blissmake.route(Constants.MAIN_HOME_PAGE, methods=[Constants.POST])
@@ -86,26 +85,24 @@ def authenticate_user():
         if user:
             if check_password_hash(user[Constants.PASSWORD], password):
                 session[Constants.USER] = username
-                return redirect(url_for(Constants.BLISSMAKE_HOME, username=username))
+                return redirect(url_for(Constants.BLISSMAKE_HOME, username=username)), 303
                 
             else:
-                return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.INVALID_PASSWORD))
+                return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.INVALID_PASSWORD)), 409
         
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.USER_NOT_EXISTS))
+        return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.USER_NOT_EXISTS)), 404
     
-@blissmake.route(Constants.PROD_DET_GUEST, defaults={'username': 'guest'})
+@blissmake.route(Constants.PROD_DET_GUEST, defaults={Constants.USERNAME: Constants.GUEST})
 @blissmake.route(Constants.PRODUCT_DETAIL)
 def product_detail(product_id, username):
-    print(f'Product ID : {product_id}')
     product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
-    print(product)
     product_data = {
         'product_id': product[Constants.PRODUCT_ID],
         'product_name': product[Constants.PRODUCT_NAME],
         'product_price': product[Constants.PRODUCT_PRICE],
         'product_image': product[Constants.PRODUCT_IMG]
     }
-    return render_template(Constants.PROD_DET_HTML, product=product_data, username=username)
+    return render_template(Constants.PROD_DET_HTML, product=product_data, username=username), 200
 
 
 @blissmake.route(Constants.GET_CART, methods=[Constants.GET])
@@ -120,7 +117,7 @@ def get_cart(username):
         price = float(item[Constants.PRODUCT_PRICE])
         quantity = int(item[Constants.QUANTITY])
         total_price += price * quantity
-    return render_template(Constants.USER_CART_HTML, username=username, cart_products=cart_products, total_price=total_price)
+    return render_template(Constants.USER_CART_HTML, username=username, cart_products=cart_products, total_price=total_price), 200
 
 
 @blissmake.route(Constants.DELETE_FROM_CART, methods=[Constants.POST])
@@ -132,7 +129,7 @@ def delete_from_cart(product_id, quantity, username):
     )
     res = mongo.db.usercart.find_one({Constants.USERNAME: username})
     print(f'After Deletion : {res}')
-    return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username))
+    return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username)), 200
 
 @blissmake.route(Constants.ADD_TO_CART, methods=[Constants.POST])
 def add_to_cart(product_id, username):
@@ -167,7 +164,7 @@ def add_to_cart(product_id, username):
             mongo.db.usercart.insert_one(data)
         
         flash(Constants.ADDED_TO_CART)
-        return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
+        return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)), 200
 
 
 @blissmake.route(Constants.UPDATE_QUANTITY, methods=[Constants.POST])
@@ -200,7 +197,7 @@ def update_quantity(product_id, action, username):
             price = float(item[Constants.PRODUCT_PRICE])
             quantity = int(item[Constants.QUANTITY])
             total_price += price * quantity
-        return render_template(Constants.USER_CART_HTML, username=username, cart_products=cart_products, total_price=total_price)
+        return render_template(Constants.USER_CART_HTML, username=username, cart_products=cart_products, total_price=total_price), 200
     else:
         flash(Constants.CART_NOT_FOUND, Constants.ERROR1)
 

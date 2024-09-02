@@ -96,3 +96,34 @@ class Constants:
     PAYEE_NAME = 'payee_name'
     TXN_NOTE = "Payment for QR"
     STRF_TIME = '%Y%m%dT%H%M%SZ'
+
+    #AnalyticClient.py
+    INTERCEPTION_KEY = "interception"
+    INTERCEPTION = 'HTT_INBOUND'
+    USER_ID = 'user_id'
+    REQUEST = 'request'
+    RESPONSE = 'response'
+    HTTP_STATUS_CODE = 'httpStatusCode'
+    HTTP_STATUS = 'httpStatus'
+    HEADERS = 'headers'
+    DATA = 'data'
+    HTTP_METHOD_KEY = 'httpMethod'
+    HTTP_HEADERS = "httpHeaders"
+    CONTENT_TYPE_KEY = "content-type"
+    CONTENT_LENGTH_KEY = "content-length"
+    DATE = "date"
+    ACCEPT = "Accept"
+    HOST = "host"
+
+    CONTENT_TYPE = "application/json"
+    ACCEPT_TYPE = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+    CONNECTION_KEY = "Connection"
+    CONNECTION = "keep-alive"
+    ACCEPT_LANGUAGE_KEY = "Accept-Language"
+    ACCEPT_LANGUAGE = "en-US,en;q=0.9"
+    START_TIME = "start time"
+    END_TIME = "end time"
+    RESPONSE_TIME = "response time"
+    RESPONSE_OK = "OK"
+    RESPONSE_INT_SER_ERR = "INTERNAL SERVER ERROR"
+    RESPONSE_BAD_REQ = "BAD REQUEST"
