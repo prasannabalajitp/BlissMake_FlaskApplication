@@ -375,7 +375,7 @@ def add_to_wishlist(username, product_id):
     
 @blissmake.route(Constants.GET_FAV)
 def get_favorite(username):
-    favorites = mongo.db.favorites.find_one({'username': username})
+    favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
     if not favorites:
         return render_template(Constants.FAV_HTML,username=username, message=Constants.FAV_NOT_EXISTS)
     
