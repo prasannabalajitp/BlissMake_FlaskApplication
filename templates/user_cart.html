@@ -253,18 +253,18 @@
                         <div class="item-details">
                             <h3>{{ item['product_name'] }}</h3>
                             <h3>Rs. {{ item['product_price'] }} /-</h3>
-                            <p>Product ID: {{ item['product id'] }}</p>
+                            <p>Product ID: {{ item['product_id'] }}</p>
                             <div class="quantity-control">
-                                <form action="{{ url_for('blissmake.update_quantity', product_id=item['product id'], action='decrease', username=username) }}" method="post" style="display: inline;">
+                                <form action="{{ url_for('blissmake.update_quantity', product_id=item['product_id'], action='decrease', username=username) }}" method="post" style="display: inline;">
                                     <button type="submit" class="quantity-btn">-</button>
                                 </form>
                                 <span>{{ item['quantity'] }}</span>
-                                <form action="{{ url_for('blissmake.update_quantity', product_id=item['product id'], action='increase', username=username) }}" method="post" style="display: inline;">
+                                <form action="{{ url_for('blissmake.update_quantity', product_id=item['product_id'], action='increase', username=username) }}" method="post" style="display: inline;">
                                     <button type="submit" class="quantity-btn">+</button>
                                 </form>
                             </div>
                         </div>
-                        <form action="{{ url_for('blissmake.delete_from_cart', product_id=item['product id'], quantity=item['quantity'], username=username) }}" method="post">
+                        <form action="{{ url_for('blissmake.delete_from_cart', product_id=item['product_id'], quantity=item['quantity'], username=username) }}" method="post">
                             <button type="submit" class="delete-icon">
                                 <i class="fas fa-trash-alt"></i>
                             </button>

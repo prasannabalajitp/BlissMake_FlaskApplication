@@ -12,7 +12,24 @@ load_dotenv()
 # Define the blueprint
 blissmake = Blueprint(Constants.BLISSMAKE, __name__, url_prefix=Constants.ROOT_URL)
 
+def update_product_quantity_in_cart(cart, product_id, action):
+    for item in cart.get(Constants.PRODUCTS, []):
+        if item[Constants.PRODUCT_ID] == product_id:
+            current_quantity = int(item[Constants.QUANTITY])
+            if action == Constants.INCREASE:
+                item[Constants.QUANTITY] = current_quantity + 1
+            elif action == Constants.DECREASE and current_quantity > 1:
+                item[Constants.QUANTITY] = current_quantity - 1
+            return True
+    return False
 
+def calculate_total_price(cart_products):
+    total_price = 0
+    for item in cart_products:
+        price = float(item[Constants.PRODUCT_PRICE])
+        quantity = int(item[Constants.QUANTITY])
+        total_price += price * quantity
+    return total_price
 
 @blissmake.route(Constants.ROOT)
 def index():
@@ -28,7 +45,6 @@ def login():
     return render_template(
         Constants.LOGIN_HTML
     )
-
 
 @blissmake.route(Constants.REGISTER, methods=[Constants.GET, Constants.POST])
 def register():
@@ -56,14 +72,12 @@ def register():
         Constants.REGISTER_HTML
     )
 
-
 @blissmake.route(Constants.PROFILE)
 def profile():
     if Constants.USER not in session:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
 
     return f'Hello, {session["user"]}!'
-
 
 @blissmake.route(Constants.HOME, methods=[Constants.POST, Constants.GET])
 def home(username):
@@ -87,11 +101,7 @@ def checkout(username):
     
     products = cart.get(Constants.PRODUCTS, [])
 
-    total_price = 0
-    for product in products:
-        quantity = float(product.get(Constants.QUANTITY, 0))
-        product_price = float(product.get(Constants.PRODUCT_PRICE, 0))
-        total_price += quantity * product_price
+    total_price = calculate_total_price(products)
 
     return render_template(
         Constants.CHECKOUT_HTML, 
@@ -99,7 +109,6 @@ def checkout(username):
         products=products, 
         total_price=round(total_price, 2)
     )
-    
 
 @blissmake.route(Constants.MAIN_HOME_PAGE, methods=[Constants.POST])
 def authenticate_user():
@@ -126,7 +135,7 @@ def authenticate_user():
             Constants.BLISSMAKE_LOGIN, 
             error=Constants.USER_NOT_EXISTS
         ))
-    
+
 @blissmake.route(Constants.PROD_DET_GUEST, defaults={Constants.USERNAME: Constants.GUEST})
 @blissmake.route(Constants.PRODUCT_DETAIL)
 def product_detail(product_id, username):
@@ -143,19 +152,14 @@ def product_detail(product_id, username):
         username=username
     )
 
-
 @blissmake.route(Constants.GET_CART, methods=[Constants.GET])
 def get_cart(username):
     cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
     cart_products = cart[Constants.PRODUCTS] if cart else []
-    total_price = 0
+    total_price = calculate_total_price(cart_products)
     if not cart_products:
         flash(Constants.CART_EMPTY, Constants.WARNING)
     
-    for item in cart_products:
-        price = float(item[Constants.PRODUCT_PRICE])
-        quantity = int(item[Constants.QUANTITY])
-        total_price += price * quantity
     return render_template(
         Constants.USER_CART_HTML, 
         username=username, 
@@ -163,12 +167,11 @@ def get_cart(username):
         total_price=total_price
     )
 
-
 @blissmake.route(Constants.DELETE_FROM_CART, methods=[Constants.POST])
 def delete_from_cart(product_id, quantity, username):
     mongo.db.usercart.update_one(
         {Constants.USERNAME: username},
-        {Constants.PULL: {Constants.PRODUCTS: {Constants.PRODUCT_ID_1: product_id, Constants.QUANTITY: quantity}}}
+        {Constants.PULL: {Constants.PRODUCTS: {Constants.PRODUCT_ID: product_id, Constants.QUANTITY: quantity}}}
     )
     
     return redirect(url_for(
@@ -182,7 +185,7 @@ def add_to_cart(product_id, username):
         if username == Constants.GUEST:
             return redirect(url_for(
                 Constants.BLISSMAKE_LOGIN
-                ))
+            ))
         
         quantity = request.form.get(Constants.QUANTITY)
         product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
@@ -216,62 +219,43 @@ def add_to_cart(product_id, username):
                 username=username
             ))
 
-
 @blissmake.route(Constants.UPDATE_QUANTITY, methods=[Constants.POST])
 def update_quantity(product_id, action, username):
-
     cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
 
-    if cart:
-        products = cart.get(Constants.PRODUCTS, [])
-        for item in products:
-            if item[Constants.PRODUCT_ID_1] == product_id:
-
-                current_quantity = int(item[Constants.QUANTITY])
-                if action == Constants.INCREASE:
-                    item[Constants.QUANTITY] = current_quantity + 1
-                elif action == Constants.DECREASE and current_quantity > 1:
-                    item[Constants.QUANTITY] = current_quantity - 1
-                break
-        mongo.db.usercart.update_one(
-            {Constants.USERNAME: username},
-            {Constants.SET: {Constants.PRODUCTS: products}}
-        )
-        cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-        cart_products = cart[Constants.PRODUCTS] if cart else []
-        total_price = 0
-        if not cart_products:
-            flash(Constants.CART_EMPTY, Constants.WARNING)
-        
-        for item in cart_products:
-            price = float(item[Constants.PRODUCT_PRICE])
-            quantity = int(item[Constants.QUANTITY])
-            total_price += price * quantity
-        return render_template(
-                Constants.USER_CART_HTML, 
-                username=username, 
-                cart_products=cart_products, 
-                total_price=total_price
-            )
-    else:
+    if not cart:
         flash(Constants.CART_NOT_FOUND, Constants.ERROR1)
+        return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username))
 
-    return redirect(url_for(
-        Constants.BLISSMAKE_GETCART, 
-        username=username
-    ))
+    updated = update_product_quantity_in_cart(cart, product_id, action)
+    if not updated:
+        flash(Constants.PRODUCT_NOT_FOUND, Constants.ERROR)
+        return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username))
 
+    mongo.db.usercart.update_one(
+        {Constants.USERNAME: username},
+        {Constants.SET: {Constants.PRODUCTS: cart[Constants.PRODUCTS]}}
+    )
+
+    cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
+    cart_products = cart[Constants.PRODUCTS] if cart else []
+    
+    total_price = calculate_total_price(cart_products)
+    if not cart_products:
+        flash(Constants.CART_EMPTY, Constants.WARNING)
+
+    return render_template(
+        Constants.USER_CART_HTML, 
+        username=username, 
+        cart_products=cart_products, 
+        total_price=total_price
+    )
 
 @blissmake.route(Constants.PAYMENT, methods=[Constants.GET, Constants.POST])
 def payment(username):
     cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
     cart_products = cart[Constants.PRODUCTS] if cart else []
-    total_price = 0
-
-    for item in cart_products:
-        price = float(item[Constants.PRODUCT_PRICE])
-        quantity = float(item[Constants.QUANTITY])
-        total_price += price * quantity
+    total_price = calculate_total_price(cart_products)
 
     if request.method == Constants.POST:
         flash(Constants.PAYMENT_SUCCESS, Constants.SUCCESS)
@@ -287,7 +271,6 @@ def payment(username):
             total_price=total_price
         )
 
-
 @blissmake.route(Constants.PAYMENT_QR, methods=[Constants.POST])
 def payment_qr(username):
     cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
@@ -297,12 +280,7 @@ def payment_qr(username):
                 Constants.BLISSMAKE_HOME, username=username
             ))
     
-    total_price = 0
-    for item in cart.get(Constants.PRODUCTS, []):
-        price = float(item[Constants.PRODUCT_PRICE])
-        quantity = float(item[Constants.QUANTITY])
-        total_price += price * quantity
-    
+    total_price = calculate_total_price(cart.get(Constants.PRODUCTS, []))
     
     upi_id = os.getenv(Constants.UPI_ID)
     payee_name = os.getenv(Constants.PAYEE_NAME)
@@ -310,7 +288,6 @@ def payment_qr(username):
     transaction_note = Constants.TXN_NOTE
 
     upi_url = f"upi://pay?pa={upi_id}&pn={payee_name}&am={amount}&cu=INR&tn={transaction_note}"
-
 
     time = datetime.now(timezone.utc).strftime(Constants.STRF_TIME)
     qr = pyqrcode.create(upi_url)
@@ -324,12 +301,10 @@ def payment_qr(username):
             total_price=round(total_price)
         )
 
-
 @blissmake.route(Constants.ADD_TO_WISHLIST, methods=[Constants.POST, Constants.GET])
 def add_to_wishlist(username, product_id):
-
     if username == Constants.GUEST:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     
     product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
     if not product:
@@ -372,12 +347,12 @@ def add_to_wishlist(username, product_id):
         flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
         print(session)
     return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
-    
+
 @blissmake.route(Constants.GET_FAV)
 def get_favorite(username):
     favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
     if not favorites:
-        return render_template(Constants.FAV_HTML,username=username, message=Constants.FAV_NOT_EXISTS)
+        return render_template(Constants.FAV_HTML, username=username, message=Constants.FAV_NOT_EXISTS)
     
     favorites[Constants.ID] = str(favorites[Constants.ID])
     return render_template(Constants.FAV_HTML, username=username, favorites=favorites, message=None)
