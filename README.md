@@ -1,33 +1,9 @@
-# BlissMake - Flask Application
-
-BlissMake is a sophisticated Flask-based web application designed to streamline user authentication, product management, and a dynamic shopping cart experience with integrated payment processing. Leveraging MongoDB for data storage, BlissMake provides a seamless and interactive online shopping experience.
-
-## Features
-
-- **User Authentication**: 
-  - Register new users, log in, and manage user sessions with ease.
-  
-- **Product Listings**: 
-  - Browse and display a variety of products fetched directly from MongoDB.
-  
-- **Shopping Cart**: 
-  - Add, update, and remove items from your cart effortlessly.
-  
-- **Payment Processing**: 
-  - Generate QR codes for payment transactions and handle payment confirmations smoothly.
-  
-- **Blueprint Architecture**: 
-  - Maintain a clean and organized codebase using Flask Blueprints.
-  
-- **Environment Configuration**: 
-  - Manage application settings and secrets with environment variables for secure and flexible configuration.
-
 ## Installation
 
 ### Prerequisites
 
-- **Python**: Version 3.9 or higher
-- **MongoDB**: Make sure you have MongoDB installed and running
+- **Python**: Version 3.6 or higher
+- **MongoDB**: Ensure MongoDB is installed and running
 - **Git**: For cloning the repository
 
 ### Setup
@@ -35,7 +11,7 @@ BlissMake is a sophisticated Flask-based web application designed to streamline 
 1. **Clone the Repository**:
 
     ```bash
-    git clone https://github.com/prasannabalajitp/BlissMake---Flask-Application.git
+    git clone https://github.com/your-username/blissmake.git
     cd blissmake
     ```
 
@@ -54,17 +30,43 @@ BlissMake is a sophisticated Flask-based web application designed to streamline 
 
 4. **Configure Environment Variables**:
 
-    Create a `.env` file in the root directory and add your configuration variables. You can use the provided `.env.example` as a reference.
-
-5. **Run the Application**:
+    Copy the `.env.example` file to `.env` and update it with your actual configuration values:
 
     ```bash
-    python app.py
+    cp .env.example .env
     ```
 
-6. **Access the Application**:
+    Edit the `.env` file with your MongoDB URI and other details:
 
-    Open your web browser and navigate to `http://localhost:5000/blissmake` to start using the application.
+    ```dotenv
+    # MongoDB URI
+    MONGO_URI=mongodb://<username>:<password>@<hostname>:<port>/<database>
+
+    # Secret key for session management and other cryptographic operations
+    SECRET_KEY=your_secret_key
+
+    # UPI ID and payment details (if applicable)
+    UPI_ID=your_upi_id
+    PAYEE_NAME=your_payee_name
+    ```
+
+### Running the Application
+
+- **To Run the Application**:
+
+    ```bash
+    flask --app app.py run
+    ```
+
+- **To Run the Application with Debug Enabled**:
+
+    ```bash
+    flask --app app.py --debug run
+    ```
+
+### Access the Application
+
+Open your web browser and navigate to `http://localhost:5000` to start using the application.
 
 ## License
 
