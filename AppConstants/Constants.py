@@ -58,6 +58,7 @@ class Constants:
     BLISSMAKE_PROD_DETAIL = 'blissmake.product_detail'
 
     USERNAME = 'username'
+    EMAIL = 'email'
     PASSWORD = 'password'
     USER_EXISTS = "User Already Exists!"
     USER_NOT_EXISTS = 'User Not Exists'

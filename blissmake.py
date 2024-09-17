@@ -50,6 +50,7 @@ def login():
 def register():
     if request.method == Constants.POST:
         username = request.form.get(Constants.USERNAME)
+        email = request.form.get(Constants.EMAIL)
         password = request.form.get(Constants.PASSWORD)
 
         user_exists = mongo.db.users.find_one({Constants.USERNAME: username})
@@ -59,7 +60,7 @@ def register():
             })
 
         hashed_password = generate_password_hash(password, method=Constants.PASSWORD_HASH_METHOD)
-        mongo.db.users.insert_one({Constants.USERNAME: username, Constants.PASSWORD: hashed_password})
+        mongo.db.users.insert_one({Constants.USERNAME: username, Constants.EMAIL: email, Constants.PASSWORD: hashed_password})
         products = mongo.db.products.find({})
         product_list = list(products)
         return render_template(
