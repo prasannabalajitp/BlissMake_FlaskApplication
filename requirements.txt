@@ -4,3 +4,4 @@ python-dotenv==1.0.0
 werkzeug==2.2.3
 pyqrcode==1.2.1
 pymongo==3.12.1
+pydantic==1.10.12
