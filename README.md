@@ -26,7 +26,7 @@ BlissMake is a sophisticated Flask-based web application designed to streamline 
 
 ### Prerequisites
 
-- **Python**: Version 3.6 or higher
+- **Python**: Version 3.9 or higher
 - **MongoDB**: Make sure you have MongoDB installed and running
 - **Git**: For cloning the repository
 
@@ -64,7 +64,7 @@ BlissMake is a sophisticated Flask-based web application designed to streamline 
 
 6. **Access the Application**:
 
-    Open your web browser and navigate to `http://localhost:5000` to start using the application.
+    Open your web browser and navigate to `http://localhost:5000/blissmake` to start using the application.
 
 ## License
 
