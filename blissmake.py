@@ -358,6 +358,32 @@ def get_favorite(username):
     favorites[Constants.ID] = str(favorites[Constants.ID])
     return render_template(Constants.FAV_HTML, username=username, favorites=favorites, message=None)
 
+@blissmake.route(Constants.REMOVE_FAV, methods=[Constants.POST])
+def remove_favorite(username, product_id):
+    if username == Constants.GUEST:
+        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    
+    product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
+    if not product:
+        flash(Constants.PROD_NOT_FOUND, Constants.ERROR)
+        return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
+    
+    user_favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
+    if user_favorites:
+        product_exist = any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS])
+        if product_exist:
+            mongo.db.favorites.update_one(
+                {Constants.USERNAME: username},
+                {Constants.PULL: {Constants.PRODUCTS: {Constants.PRODUCT_ID: product_id}}}
+            )
+            flash(Constants.REM_FRM_WISHLIST, Constants.SUCCESS)
+        else:
+            flash(Constants.PROD_NOT_WISHLIST, Constants.INFO)
+    else:
+        flash(Constants.NO_FAV_FOUND, Constants.INFO)
+    
+    return redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username))
+
 @blissmake.route(Constants.LOGOUT, methods=[Constants.GET])
 def logout(username):
     session.clear()

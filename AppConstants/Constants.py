@@ -36,6 +36,7 @@ class Constants:
     PAYMENT_QR = '/payment_qr/<username>'
     ADD_TO_WISHLIST = '/addToWishlist/<username>/<product_id>'
     GET_FAV = '/getfavorite/<username>'
+    REMOVE_FAV = '/remove_favorite/<username>/<product_id>'
 
     #HTML
     INDEX_HTML = 'index.html'
@@ -56,6 +57,7 @@ class Constants:
     BLISSMAKE_HOME = 'blissmake.home'
     BLISSMAKE_GETCART = 'blissmake.get_cart'
     BLISSMAKE_PROD_DETAIL = 'blissmake.product_detail'
+    BLISSMAKE_GET_FAV = 'blissmake.get_favorite'
 
     USERNAME = 'username'
     EMAIL = 'email'
@@ -71,6 +73,9 @@ class Constants:
     FAV_NOT_EXISTS = 'Favorites Not Exists!'
     PROD_IN_WISHLIST = 'Product already in Wishlist'
     ADDED_TO_WISHLIST = 'Product added to Wishlist'
+    REM_FRM_WISHLIST = 'Removed From Wishlist'
+    PROD_NOT_WISHLIST = 'Product Not in Wishlist'
+    NO_FAV_FOUND = 'No Favorites Found'
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
