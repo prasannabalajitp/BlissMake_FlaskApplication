@@ -4,7 +4,7 @@ class ProductDetail(BaseModel):
     product_id: str
     product_name: str
     product_price: str
-    product_image: str
+    product_img: str
 
 class Product(BaseModel):
     product_id: str

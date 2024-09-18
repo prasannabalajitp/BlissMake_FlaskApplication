@@ -145,7 +145,7 @@ def product_detail(product_id, username):
         product_id=product[Constants.PRODUCT_ID],
         product_name=product[Constants.PRODUCT_NAME],
         product_price=product[Constants.PRODUCT_PRICE],
-        product_image=product[Constants.PRODUCT_IMG]).dict()
+        product_img=product[Constants.PRODUCT_IMG]).dict()
     
     return render_template(
         Constants.PROD_DET_HTML, 
@@ -332,7 +332,6 @@ def add_to_wishlist(username, product_id):
             }}
         )
         flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
-        print(session)
     else:
         favorite_data = {
             'username': username,
@@ -346,7 +345,6 @@ def add_to_wishlist(username, product_id):
         result = mongo.db.favorites.insert_one(favorite_data)
         favorite_data[Constants.ID] = str(result.inserted_id)
         flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
-        print(session)
     return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
 
 @blissmake.route(Constants.GET_FAV)
