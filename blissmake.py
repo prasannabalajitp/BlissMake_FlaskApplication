@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from app import mongo
 from AppConstants.Constants import Constants
 from models.Product import ProductDetail, Product
+from models.Favorite import Favorite
 import pyqrcode, os
 
 load_dotenv()
@@ -323,25 +324,28 @@ def add_to_wishlist(username, product_id):
         mongo.db.favorites.update_one(
             {Constants.USERNAME: username},
             {Constants.PUSH: {
-                Constants.PRODUCTS: {
-                    'product_id': product[Constants.PRODUCT_ID],
-                    'product_name': product[Constants.PRODUCT_NAME],
-                    'product_price': product[Constants.PRODUCT_PRICE],
-                    'product_img': product[Constants.PRODUCT_IMG]
-                }
+                Constants.PRODUCTS: ProductDetail(
+                    product_id=product[Constants.PRODUCT_ID],
+                    product_name=product[Constants.PRODUCT_NAME],
+                    product_price=product[Constants.PRODUCT_PRICE],
+                    product_img=product[Constants.PRODUCT_IMG]
+                ).dict()
             }}
         )
         flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
     else:
-        favorite_data = {
-            'username': username,
-            'products':[{
-                'product_id': product[Constants.PRODUCT_ID],
-                'product_name': product[Constants.PRODUCT_NAME],
-                'product_price': product[Constants.PRODUCT_PRICE],
-                'product_img': product[Constants.PRODUCT_IMG]
-            }]
-        }
+        data = ProductDetail(
+            product_id=product[Constants.PRODUCT_ID],
+            product_name=product[Constants.PRODUCT_NAME],
+            product_price=product[Constants.PRODUCT_PRICE],
+            product_img=product[Constants.PRODUCT_IMG]
+        ).dict()
+
+        favorite_data = Favorite(
+            username=username,
+            products=[data]
+        ).dict()
+        
         result = mongo.db.favorites.insert_one(favorite_data)
         favorite_data[Constants.ID] = str(result.inserted_id)
         flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
