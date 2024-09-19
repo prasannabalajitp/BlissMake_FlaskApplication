@@ -173,9 +173,12 @@ def get_cart(username):
 def delete_from_cart(product_id, quantity, username):
     mongo.db.usercart.update_one(
         {Constants.USERNAME: username},
-        {Constants.PULL: {Constants.PRODUCTS: {Constants.PRODUCT_ID: product_id, Constants.QUANTITY: quantity}}}
+        {Constants.PULL: {Constants.PRODUCTS: {
+                Constants.PRODUCT_ID: product_id, 
+                Constants.QUANTITY: int(quantity)
+            }}}
     )
-    
+
     return redirect(url_for(
         Constants.BLISSMAKE_GETCART, 
         username=username

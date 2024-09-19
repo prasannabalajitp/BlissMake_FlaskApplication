@@ -18,7 +18,9 @@ mongo = PyMongo(app, uri=mongo_uri)
 
 # Import and register the blueprint
 from blissmake import blissmake
+from admin import admin
 app.register_blueprint(blissmake)
+app.register_blueprint(admin)
 
 if __name__ == Constants.MAIN:
     app.run(debug=True)
