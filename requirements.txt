@@ -5,3 +5,4 @@ werkzeug==2.2.3
 pyqrcode==1.2.1
 pymongo==3.12.1
 pydantic==1.10.12
+pypng==0.20220715.0
