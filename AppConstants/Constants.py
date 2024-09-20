@@ -9,6 +9,10 @@ class Constants:
     BLISSMAKE = 'blissmake'
     ROOT_URL = '/blissmake'
 
+    #admin.py
+    ADMIN = 'admin'
+    ADMIN_ROOT_URL = '/admin/blissmake'
+
     GET = 'GET'
     POST = 'POST'
     MESSAGE = "message"
@@ -20,6 +24,7 @@ class Constants:
     #urls
     ROOT = '/'
     LOGIN = '/login'
+    LOGOUT_ADM = '/logout'
     LOGOUT = '/logout/<username>'
     REGISTER = '/register'
     PROFILE = '/profile'
@@ -37,6 +42,10 @@ class Constants:
     ADD_TO_WISHLIST = '/addToWishlist/<username>/<product_id>'
     GET_FAV = '/getfavorite/<username>'
     REMOVE_FAV = '/remove_favorite/<username>/<product_id>'
+    ADMIN_DASHBOARD = '/admindashboard'
+    ADD_PRODUCT = '/add_product'
+    EDIT_PRODUCT = '/edit_product/<product_id>'
+    DEL_PRODCUT = '/delete_product/<product_id>'
 
     #HTML
     INDEX_HTML = 'index.html'
@@ -49,6 +58,10 @@ class Constants:
     PAYMENT_HTML = 'payment.html'
     QR_PAYMENT_HTML = 'payment_qr.html'
     FAV_HTML = 'favorites.html'
+    ADMIN_LOGIN_HTML = 'admin_login.html'
+    ADMIN_DASHBOARD_HTML = 'admin_dashboard.html'
+    ADMIN_EDIT_HTML = 'admin_edit_product.html'
+    
 
 
     #Route HTML
@@ -58,6 +71,7 @@ class Constants:
     BLISSMAKE_GETCART = 'blissmake.get_cart'
     BLISSMAKE_PROD_DETAIL = 'blissmake.product_detail'
     BLISSMAKE_GET_FAV = 'blissmake.get_favorite'
+    ADMIN_INDEX = 'admin.admin_index'
 
     USERNAME = 'username'
     EMAIL = 'email'
@@ -76,6 +90,10 @@ class Constants:
     REM_FRM_WISHLIST = 'Removed From Wishlist'
     PROD_NOT_WISHLIST = 'Product Not in Wishlist'
     NO_FAV_FOUND = 'No Favorites Found'
+    INVALID_ADM_PWD = "Invalid Admin/Admin Password. Please try again..."
+    PROD_ADDED = 'Product added successfully!'
+    PROD_UPDATED = 'Product updated successfully!'
+    PROD_DEL = 'Product deleted successfully!'
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
