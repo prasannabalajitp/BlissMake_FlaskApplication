@@ -27,7 +27,7 @@ class Constants:
     LOGOUT_ADM = '/logout'
     LOGOUT = '/logout/<username>'
     REGISTER = '/register'
-    PROFILE = '/profile'
+    PROFILE = '/profile/<username>'
     HOME = '/home/<username>'
     CHECKOUT = '/checkout/<username>'
     MAIN_HOME_PAGE = '/home'

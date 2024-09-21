@@ -61,7 +61,11 @@ def register():
             })
 
         hashed_password = generate_password_hash(password, method=Constants.PASSWORD_HASH_METHOD)
-        mongo.db.users.insert_one({Constants.USERNAME: username, Constants.EMAIL: email, Constants.PASSWORD: hashed_password})
+        mongo.db.users.insert_one({
+            Constants.USERNAME: username, 
+            Constants.EMAIL: email, 
+            Constants.PASSWORD: hashed_password
+        })
         products = mongo.db.products.find({})
         product_list = list(products)
         return render_template(
@@ -75,11 +79,57 @@ def register():
     )
 
 @blissmake.route(Constants.PROFILE)
-def profile():
+def profile(username):
     if Constants.USER not in session:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
 
-    return f'Hello, {session["user"]}!'
+    user = mongo.db.users.find_one({'username': username})
+    print(user["username"])
+    print(user["email"])
+    return render_template('profile.html', username=user["username"], email=user["email"])
+
+
+@blissmake.route('/updateprofile/<username>', methods=[Constants.GET, Constants.POST])
+def update_profile(username):
+    if request.method == Constants.POST:
+        new_address = request.form['address']
+        phone = request.form['phone']
+        new_password = request.form['password']
+        confirm_password = request.form['confirm_password']
+
+        user = mongo.db.users.find_one({"username": username})
+        if not user:
+            flash("User not found", "error")
+            return redirect(url_for('profile', username=username))
+        
+        update_data = {
+            "address": new_address,
+            "phone": phone
+        }
+        if new_password and new_password == confirm_password:
+            hashed_password = generate_password_hash(new_password)
+            update_data["password"] = hashed_password
+        elif new_password != confirm_password:
+            flash("Passwords do not match!", "error")
+            return redirect(url_for('profile', username=username))
+        
+        mongo.db.users.update_one({"username": username}, {"$set": update_data})
+
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for('blissmake.profile', username=username))
+    
+    user = mongo.db.users.find_one({"username": username})
+
+    if not user:
+        flash("User not found", "error")
+        return redirect(url_for('profile', username=username))
+    user_data = {
+        'username': user['username'],
+        'email': user['email'],
+        'address': user.get('address', ''),
+        'phone': user.get('phone', ''),
+    }
+    return render_template('profile.html', **user_data)
 
 @blissmake.route(Constants.HOME, methods=[Constants.POST, Constants.GET])
 def home(username):
