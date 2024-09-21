@@ -59,6 +59,7 @@
             align-items: center;
             gap: 0.5rem;
             padding-right: 2rem;
+            position: relative;
         }
 
         .user-actions .username{
@@ -71,7 +72,7 @@
             gap: 1rem;
             padding-right: 2rem;
         }
-        .user-actions a {
+        .user-actions a, .profile-icon {
             color: #fff;
             text-decoration: none;
             font-size: 1.2rem;
@@ -80,7 +81,7 @@
             border-radius: 5px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
-        .user-actions a:hover {
+        .user-actions a:hover, .profile-icon:hover {
             background-color: #fff;
             color: #7f19ec;
         }
@@ -190,6 +191,34 @@
             border-radius: 5px;
             transition: background-color 0.3s ease, color 0.3s ease;
         }
+        .dropdown {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        .dropdown a {
+            display: block;
+            padding: 1rem;
+            color: #7f19ec;
+            text-decoration: none;
+            text-align: left;
+        }
+        .dropdown a:hover {
+            background-color: #f1f1f1;
+            color: #7f19ec;
+        }
+        .profile-icon {
+            position: relative;
+            cursor: pointer;
+        }
+        .user-actions:hover .dropdown {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -202,8 +231,13 @@
             <div class="icons">
                 <a href="{{ url_for('blissmake.get_cart', username=username ) }}"><i class="fas fa-shopping-cart"></i></a>
                 <a href="{{ url_for('blissmake.get_favorite', username=username )}}"><i class="fas fa-heart"></i></a>
-                <a href="#"><i class="fas fa-user"></i></a>
-                <a href="{{ url_for('blissmake.logout', username=username)}}"><i class="fas fa-sign-out-alt"></i></a>
+                <div class="profile-icon">
+                    <i class="fas fa-user"></i>
+                    <div class="dropdown">
+                        <a href="{{ url_for('blissmake.profile', username=username) }}">My Profile</a>
+                        <a href="{{ url_for('blissmake.logout', username=username)}}">Logout</a>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
