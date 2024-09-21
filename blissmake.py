@@ -6,6 +6,7 @@ from app import mongo
 from AppConstants.Constants import Constants
 from models.Product import ProductDetail, Product
 from models.Favorite import Favorite
+from models.User import User
 import pyqrcode, os
 
 load_dotenv()
@@ -78,29 +79,30 @@ def register():
         Constants.REGISTER_HTML
     )
 
-@blissmake.route(Constants.PROFILE)
+@blissmake.route(Constants.PROFILE_URL)
 def profile(username):
+    print(username)
     if Constants.USER not in session:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
 
-    user = mongo.db.users.find_one({'username': username})
-    print(user["username"])
-    print(user["email"])
-    return render_template('profile.html', username=user["username"], email=user["email"])
+    user = mongo.db.users.find_one({Constants.USERNAME: username})
+    print(user[Constants.USERNAME])
+    print(user[Constants.EMAIL])
+    return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL])
 
 
-@blissmake.route('/updateprofile/<username>', methods=[Constants.GET, Constants.POST])
+@blissmake.route(Constants.UPDATE_PROFILE, methods=[Constants.GET, Constants.POST])
 def update_profile(username):
     if request.method == Constants.POST:
-        new_address = request.form['address']
-        phone = request.form['phone']
-        new_password = request.form['password']
-        confirm_password = request.form['confirm_password']
+        new_address = request.form[Constants.ADDRESS]
+        phone = request.form[Constants.PHONE]
+        new_password = request.form[Constants.PASSWORD]
+        confirm_password = request.form[Constants.CNF_PWD]
 
-        user = mongo.db.users.find_one({"username": username})
+        user = mongo.db.users.find_one({Constants.USERNAME: username})
         if not user:
-            flash("User not found", "error")
-            return redirect(url_for('profile', username=username))
+            flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
+            return redirect(url_for(Constants.PROFILE, username=username))
         
         update_data = {
             "address": new_address,
@@ -108,28 +110,29 @@ def update_profile(username):
         }
         if new_password and new_password == confirm_password:
             hashed_password = generate_password_hash(new_password)
-            update_data["password"] = hashed_password
+            update_data[Constants.PASSWORD] = hashed_password
         elif new_password != confirm_password:
-            flash("Passwords do not match!", "error")
-            return redirect(url_for('profile', username=username))
+            flash(Constants.PWD_NOT_MATCH, Constants.ERROR)
+            return redirect(url_for(Constants.PROFILE, username=username))
         
-        mongo.db.users.update_one({"username": username}, {"$set": update_data})
+        mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: update_data})
 
-        flash("Profile updated successfully!", "success")
-        return redirect(url_for('blissmake.profile', username=username))
+        flash(Constants.PRF_UPDATED, Constants.SUCCESS)
+        return redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username))
     
-    user = mongo.db.users.find_one({"username": username})
+    user = mongo.db.users.find_one({Constants.USERNAME: username})
 
     if not user:
-        flash("User not found", "error")
-        return redirect(url_for('profile', username=username))
-    user_data = {
-        'username': user['username'],
-        'email': user['email'],
-        'address': user.get('address', ''),
-        'phone': user.get('phone', ''),
-    }
-    return render_template('profile.html', **user_data)
+        flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
+        return redirect(url_for(Constants.PROFILE, username=username))
+    
+    user_data = User(
+        username=user[Constants.USERNAME],
+        email=user[Constants.EMAIL],
+        address=user.get(Constants.ADDRESS, Constants.EMPTY),
+        phone=user.get(Constants.PHONE, Constants.EMPTY)).dict()
+
+    return render_template(Constants.PROFILE_HTML, **user_data)
 
 @blissmake.route(Constants.HOME, methods=[Constants.POST, Constants.GET])
 def home(username):

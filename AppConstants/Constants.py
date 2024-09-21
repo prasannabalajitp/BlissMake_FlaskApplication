@@ -27,7 +27,7 @@ class Constants:
     LOGOUT_ADM = '/logout'
     LOGOUT = '/logout/<username>'
     REGISTER = '/register'
-    PROFILE = '/profile/<username>'
+    PROFILE_URL = '/profile/<username>'
     HOME = '/home/<username>'
     CHECKOUT = '/checkout/<username>'
     MAIN_HOME_PAGE = '/home'
@@ -46,6 +46,7 @@ class Constants:
     ADD_PRODUCT = '/add_product'
     EDIT_PRODUCT = '/edit_product/<product_id>'
     DEL_PRODCUT = '/delete_product/<product_id>'
+    UPDATE_PROFILE = '/updateprofile/<username>'
 
     #HTML
     INDEX_HTML = 'index.html'
@@ -61,6 +62,7 @@ class Constants:
     ADMIN_LOGIN_HTML = 'admin_login.html'
     ADMIN_DASHBOARD_HTML = 'admin_dashboard.html'
     ADMIN_EDIT_HTML = 'admin_edit_product.html'
+    PROFILE_HTML = 'profile.html'
     
 
 
@@ -72,10 +74,16 @@ class Constants:
     BLISSMAKE_PROD_DETAIL = 'blissmake.product_detail'
     BLISSMAKE_GET_FAV = 'blissmake.get_favorite'
     ADMIN_INDEX = 'admin.admin_index'
+    BLISSMAKE_PROFILE = 'blissmake.profile'
 
+    EMPTY = ''
     USERNAME = 'username'
     EMAIL = 'email'
     PASSWORD = 'password'
+    ADDRESS = 'address'
+    PHONE = 'phone'
+    CNF_PWD = 'confirm_password'
+    PROFILE = 'profile'
     USER_EXISTS = "User Already Exists!"
     USER_NOT_EXISTS = 'User Not Exists'
     ADDED_TO_CART = 'Added to Cart Successfully'
@@ -94,6 +102,8 @@ class Constants:
     PROD_ADDED = 'Product added successfully!'
     PROD_UPDATED = 'Product updated successfully!'
     PROD_DEL = 'Product deleted successfully!'
+    PWD_NOT_MATCH = "Passwords do not match!"
+    PRF_UPDATED = "Profile updated successfully!"
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
