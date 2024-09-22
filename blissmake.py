@@ -1,14 +1,14 @@
 from flask import Blueprint, request, jsonify, redirect, url_for, session, render_template, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Message
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 from app import mongo, mail
 from AppConstants.Constants import Constants
 from models.Product import ProductDetail, Product
 from models.Favorite import Favorite
 from models.User import User
-import pyqrcode, os, random, string
+import pyqrcode, os, random, string, re, smtplib
 
 load_dotenv()
 
@@ -36,6 +36,10 @@ def calculate_total_price(cart_products):
         total_price += price * quantity
     return total_price
 
+def is_valid_email(email):
+    pattern = Constants.VALID_EMAIL
+    return re.match(pattern, email) is not None
+
 @blissmake.route(Constants.ROOT)
 def index():
     products = mongo.db.products.find({})
@@ -51,51 +55,91 @@ def login():
         Constants.LOGIN_HTML
     )
 
-@blissmake.route('/forgotpassword', methods=[Constants.GET, Constants.POST])
-def forgot_password():
-    print('Reached Forgot Password')
-    if request.method == Constants.POST:
-        email = request.form.get('email')
-        user = mongo.db.users.find_one({'email': email})
-        user_email = user["email"]
-        if user and email == user_email:
-            otp = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
-            msg = Message('Your OTP Code', sender=os.getenv('MAIL_USERNAME'), recipients=[email])
-            msg.cc = 'prasannabalajitp470@gmail.com'
-            msg.body = f"Your OTP is: {otp}"
-
-            mail.send(msg)
-            
-            mongo.db.otp.insert_one({"email": email, "otp": otp})
-
-            return redirect(url_for('blissmake.verify_otp', email=email))
-        flash('Email Not Found', 'danger')
-    return render_template('forgot_password.html')
-
-
-@blissmake.route('/verify_otp', methods=[Constants.GET, Constants.POST])
-def verify_otp():
-    email = request.args.get('email')
-    if request.method == Constants.POST:
-        user_otp = request.form.get('otp')
-        otp_record = mongo.db.flask_db.otp.find_one({"email": email, "otp": user_otp})
-        if otp_record:
-            return redirect(url_for('blissmake.reset_password', email=email))
-        flash('Invalid OTP. Please try again.', 'danger')
+@blissmake.route(Constants.GENERATE_OTP, methods=[Constants.GET, Constants.POST])
+def generate_otp():
+    email = request.form.get(Constants.EMAIL)
     
-    return render_template('verify_otp.html')
+    if not email or not is_valid_email(email):
+        flash(Constants.INVALID_EMAIL_ADDR, Constants.ERROR1)
+        return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
+    
+    otp = Constants.EMPTY.join(random.choices(string.ascii_letters + string.digits, k=6))
+    expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
 
-@blissmake.route('/reset_password/<email>', methods=[Constants.GET, Constants.POST])
+    existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
+    if existing_entry:
+        mongo.db.otp.update_one(
+            {Constants.EMAIL: email}, 
+            {Constants.SET: {
+                Constants.OTP: otp, 
+                Constants.EXP_TIME: expiration_time
+                }}, 
+                upsert=True
+        )
+    else:
+        mongo.db.otp.insert_one({
+            Constants.EMAIL: email,
+            Constants.OTP: otp,
+            Constants.EXP_TIME: expiration_time
+        })
+
+    try:
+        with smtplib.SMTP(os.getenv(Constants.MAIL_SERVER), 587) as server:
+            server.starttls()
+            server.login(os.getenv(Constants.MAIL_USERNAME), os.getenv(Constants.MAIL_PWD))
+            subject = Constants.SUB
+            body = f"Your OTP is: {otp}"
+            msg = f"Subject: {subject}\n\n{body}"
+
+            server.sendmail(os.getenv(Constants.MAIL_USERNAME), email, msg)
+            flash(Constants.OTP_SENT, Constants.SUCCESS)
+    except smtplib.SMTPException as e:
+        flash(f"Error sending email: {str(e)}", Constants.ERROR1)
+    return render_template(Constants.VERIFY_OTP_HTML, email=email)
+
+
+@blissmake.route(Constants.FORGOT_PWD, methods=[Constants.POST, Constants.GET])
+def forgot_password():
+    return render_template(Constants.FORGOT_PWD_HTML)
+
+
+from datetime import datetime, timezone
+
+@blissmake.route(Constants.VERIFY_OTP, methods=[Constants.GET, Constants.POST])
+def verify_otp():
+    email = request.form.get(Constants.EMAIL)
+    inp_otp = request.form.get(Constants.OTP)
+    record = mongo.db.otp.find_one({Constants.EMAIL: email})
+    if record:
+        expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
+
+        if record[Constants.OTP] == inp_otp:
+            flash(Constants.OTP_VERIFIED, Constants.SUCCESS)
+            return render_template(Constants.RESET_PWD_HTML, email=email)
+        else:
+            flash(Constants.INVALID_OTP, Constants.ERROR1)
+
+    email = request.args.get(Constants.EMAIL)
+    return render_template(Constants.VERIFY_OTP_HTML, email=email)
+
+
+@blissmake.route(Constants.RESET_PWD, methods=[Constants.GET, Constants.POST])
 def reset_password(email):
     if request.method == Constants.POST:
-        new_password = request.form.get('password')
-        hashed_password = generate_password_hash(new_password)  # Hash the password
-        mongo.db.users.update_one({"email": email}, {"$set": {"password": hashed_password}})
-        mongo.db.flask_db.otp.delete_many({"email": email})  # Remove OTP after use
-        flash('Your password has been updated!', 'success')
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
-
-    return render_template('reset_password.html', email=email)
+        new_password = request.form.get(Constants.NEW_PWD)
+        if email and new_password:
+            hashed_password = generate_password_hash(new_password)  # Hash the password
+            result = mongo.db.users.update_one({Constants.EMAIL: email}, {Constants.SET: {Constants.PASSWORD: hashed_password}})
+            if result.modified_count > 0:
+                mongo.db.otp.delete_many({Constants.EMAIL: email})  # Remove OTP after use
+                print(mongo.db.users.find_one({Constants.EMAIL: email}))
+                flash(Constants.PWD_UPDATED, Constants.SUCCESS)
+                return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+            else:
+                flash(Constants.ERR_UPDATING_PWD, Constants.ERROR)
+        else:
+            flash(Constants.EMAIL_PWD_REQ, Constants.ERROR)
+    return render_template(Constants.LOGIN_HTML)
 
 @blissmake.route(Constants.REGISTER, methods=[Constants.GET, Constants.POST])
 def register():

@@ -3,6 +3,9 @@ class Constants:
 
     SECRET_KEY = 'SECRET_KEY'
     MONGO_URI = 'MONGO_URI'
+    MAIL_SERVER = 'MAIL_SERVER'
+    MAIL_USERNAME = 'MAIL_USERNAME'
+    MAIL_PWD = 'MAIL_PASSWORD'
     MAIN = '__main__'
 
     #blissmake.py
@@ -47,6 +50,10 @@ class Constants:
     EDIT_PRODUCT = '/edit_product/<product_id>'
     DEL_PRODCUT = '/delete_product/<product_id>'
     UPDATE_PROFILE = '/updateprofile/<username>'
+    GENERATE_OTP = '/blissmake/generate_otp'
+    FORGOT_PWD = '/forgotpassword'
+    VERIFY_OTP = '/blissmake/verify_otp'
+    RESET_PWD = '/reset_password/<email>'
 
     #HTML
     INDEX_HTML = 'index.html'
@@ -63,6 +70,9 @@ class Constants:
     ADMIN_DASHBOARD_HTML = 'admin_dashboard.html'
     ADMIN_EDIT_HTML = 'admin_edit_product.html'
     PROFILE_HTML = 'profile.html'
+    VERIFY_OTP_HTML = 'verify_otp.html'
+    FORGOT_PWD_HTML = 'forgot_password.html'
+    RESET_PWD_HTML = 'reset_password.html'
     
 
 
@@ -75,15 +85,20 @@ class Constants:
     BLISSMAKE_GET_FAV = 'blissmake.get_favorite'
     ADMIN_INDEX = 'admin.admin_index'
     BLISSMAKE_PROFILE = 'blissmake.profile'
+    BLISSMAKE_FORGOT_PWD = 'blissmake.forgot_password'
 
     EMPTY = ''
     USERNAME = 'username'
     EMAIL = 'email'
     PASSWORD = 'password'
+    NEW_PWD = 'new_password'
     ADDRESS = 'address'
     PHONE = 'phone'
     CNF_PWD = 'confirm_password'
     PROFILE = 'profile'
+    OTP = 'otp'
+    EXP_TIME = "expiration_time"
+    SUB = "Your OTP Code"
     USER_EXISTS = "User Already Exists!"
     USER_NOT_EXISTS = 'User Not Exists'
     ADDED_TO_CART = 'Added to Cart Successfully'
@@ -104,6 +119,11 @@ class Constants:
     PROD_DEL = 'Product deleted successfully!'
     PWD_NOT_MATCH = "Passwords do not match!"
     PRF_UPDATED = "Profile updated successfully!"
+    OTP_SENT = "OTP sent successfully!"
+    OTP_VERIFIED = "OTP verified successfully"
+    PWD_UPDATED = 'Your password has been updated!'
+    ERR_UPDATING_PWD = 'Error updating password. Please try again'
+    EMAIL_PWD_REQ = 'Email and new password are required.'
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
@@ -111,6 +131,8 @@ class Constants:
     QUANTITY = 'quantity'
     PRODUCT_PRICE = 'product_price'
     INVALID_PASSWORD = 'Invalid Username/Password'
+    INVALID_EMAIL_ADDR = "Invalid email address."
+    INVALID_OTP = "Invalid OTP."
     PRODUCT_ID = 'product_id'
     PRODUCT_ID_1 = 'product id'
     PRODUCT_NAME = "product_name"
@@ -130,6 +152,7 @@ class Constants:
     PAYEE_NAME = 'payee_name'
     TXN_NOTE = "Payment for QR"
     STRF_TIME = '%Y%m%dT%H%M%SZ'
+    VALID_EMAIL = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
 
     #AnalyticClient.py
     INTERCEPTION_KEY = "interception"
