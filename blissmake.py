@@ -112,6 +112,11 @@ def verify_otp():
     record = mongo.db.otp.find_one({Constants.EMAIL: email})
     if record:
         expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
+        current_time = datetime.now(timezone.utc)
+
+        if current_time > expiration_time:
+            flash(Constants.OTP_EXP, Constants.ERROR)
+            return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
 
         if record[Constants.OTP] == inp_otp:
             flash(Constants.OTP_VERIFIED, Constants.SUCCESS)

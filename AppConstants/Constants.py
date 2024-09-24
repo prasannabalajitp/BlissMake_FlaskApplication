@@ -127,6 +127,7 @@ class Constants:
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
+    OTP_EXP = "OTP Expired"
     PRODUCTS = 'products'
     QUANTITY = 'quantity'
     PRODUCT_PRICE = 'product_price'
