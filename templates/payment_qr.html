@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment QR Code - BlissMake Creations</title>
+    <title>Payment - BlissMake Creations</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -80,25 +80,85 @@
             background-color: #fff;
             color: #7f19ec;
         }
-        main {
-            margin-top: 150px;
+        .payment-detail {
+            background: rgba(255, 255, 255, 0.1);
             padding: 20px;
+            padding-top: 70px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            text-align: left;
+            max-width: 800px;
+            width: 100%;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+            margin-top: 100px;
+        }
+        .payment-detail h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #7f19ec;
             text-align: center;
         }
-        h1 {
-            font-size: 2.5rem;
+        .cart-items-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .cart-item-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.2);
+            width: 490px;
+            display: flex;
+            align-items: center;
+            text-align: left;
+        }
+        .cart-item-card img {
+            width: 150px;
+            height: 180px;
+            object-fit: cover;
+            margin-right: 20px;
+            margin-bottom: 0px;
+        }
+        .item-details {
+            flex-grow: 1;
+            text-align: left;
+        }
+        .total {
+            font-size: 1.4em;
+            margin-top: 20px;
+            text-align: center;
+            color: #58595a;
+        }
+        .proceed-btn {
+            display: block;
+            width: fit-content;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            background-color: #7f19ec;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .proceed-btn:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            background-color: #fff;
+            border-color: #000;
             color: #7f19ec;
-            margin-bottom: 1rem;
         }
-        p {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-        }
-        img {
-            width: 300px;
-            height: 300px;
-            margin-top: 1rem;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .qr-section img {
+            width: 200;
+            height: 200px;
+            margin-top: 10px;
+            border: 2px solid #ccc; /* Added grey border */
             border-radius: 15px;
         }
         footer {
@@ -130,10 +190,25 @@
     </header>
 
     <main>
-        <h1>Payment for {{ username }}</h1>
-        <p>Total Amount: Rs. {{ total_price }}</p>
-        <p>Please scan the QR code below to proceed with the payment:</p>
-        <img src="{{ url_for('static', filename=qr_image.split('static/')[-1]) }}" alt="Payment QR Code">
+        <br><br>
+        <section class="payment-detail">
+            <h2>Payment Summary</h2>
+            <div class="cart-items-container">
+                {% for item in cart_products %}
+                <div class="cart-item-card">
+                    <img src="{{ url_for('static', filename='img/'+item['product_img']) }}" alt="{{ item['product_name'] }}">
+                    <div class="item-details">
+                        <h3>{{ item['product_name'] }}</h3>
+                        <h3>Rs. {{ item['product_price'] }}</h3>
+                        <p>Quantity: {{ item['quantity'] }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="total">Total Price : Rs. {{ total_price }}</div>
+            <h2>Scan QR Code to Proceed</h2>
+            <img src="{{ url_for('static', filename=qr_image.split('static/')[-1]) }}" alt="Payment QR Code">
+        </section>
     </main>
 
     <footer>

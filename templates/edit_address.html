@@ -3,11 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart - BlissMake Creations</title>
+    <title>Edit Address - BlissMake Creations</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
+        body {
+            background-color: #fff;
+            color: #000;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            min-height: 100vh;
+        }
+        header {
+            background: #7f19ec;
+            color: #fff;
+            padding: 1rem 2rem;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .logo-img {
+            height: 70px;
+            width: 70px;
+        }
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            color: #fff;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+            margin-top: 100px;
+            background-color: #fdfdfd;
+            padding: 6rem;
+            padding-top: 2rem;
+            font-size: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(5, 4, 4, 0.1);
+        }
+        h2 {
+            color: #7f19ec;
+            margin-bottom: 1rem;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            font-size: large;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+        input[readonly] {
+            background-color: #f9f9f9;
+        }
+        button {
+            padding: 0.8rem 1.5rem;
+            background-color: #7f19ec;
+            color: #fff;
+            font-size: large;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #6a13c0;
+        }
+        footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #333;
+            color: #fff;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .username{
+            font-size: 1.2rem;
+            padding-right: 4rem;
+        }
+        .user-actions .icons {
+            display: flex;
+            gap: 1rem;
+            padding-right: 2rem;
+        }
+        .user-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            padding-right: 2rem;
+        }
+        .user-actions a:hover {
+            background-color: #fff;
+            color: #7f19ec;
+        }
         body {
             /* background: linear-gradient(to right, #94cbd1, #fc84ee); */
             background-color: #fff;
@@ -210,6 +321,15 @@
             color: red;
             margin-bottom: 10px;
         }
+        input[type="text"]{
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #000;
+            border-radius: 8px;
+            background: #f9f9f9;
+            font-size: 1rem;
+        }
 
         footer {
             text-align: center;
@@ -232,57 +352,24 @@
             <div class="username">Welcome, {{ username }}</div>
             <div class="icons">
                 <a href="{{ url_for('blissmake.get_cart', username=username) }}"><i class="fas fa-shopping-cart"></i></a>
-                <a href="{{ url_for('blissmake.get_favorite', username=username )}}"><i class="fas fa-heart"></i></a>
+                <a href="{{ url_for('blissmake.get_favorite', username=username) }}"><i class="fas fa-heart"></i></a>
                 <a href="#"><i class="fas fa-user"></i></a>
-                <a href="{{ url_for('blissmake.logout', username=username)}}"><i class="fas fa-sign-out-alt"></i></a>
+                <a href="{{ url_for('blissmake.logout', username=username) }}"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>
     </header>
+    <br><br><br>
+    <div class="container">
+        <h2>Edit Delivery Address</h2>
+        <form method="POST" action="{{ url_for('blissmake.edit_address', username=username) }}">
+            <label for="email">Email ID</label>
+            <input type="email" id="email" name="email" value="{{ email }}" readonly>
 
-    <main>
-        <br><br>
-        <section class="cart-detail">
-            {% if message %}
-            <p class="error-message">{{ message }}</p>
-            {% elif cart_products %}
-                <h2>Your Cart Items</h2>
-                <div class="cart-items-container">
-                    {% for item in cart_products %}
-                    <div class="cart-item-card">
-                        <img src="{{ url_for('static', filename='img/'+item['product_img']) }}" alt="{{ item['product_name'] }}">
-                        <div class="item-details">
-                            <h3>{{ item['product_name'] }}</h3>
-                            <h3>Rs. {{ item['product_price'] }} /-</h3>
-                            <p style="display: none;">Product ID: {{ item['product_id'] }}</p>
-                            <div class="quantity-control">
-                                <form action="{{ url_for('blissmake.update_quantity', product_id=item['product_id'], action='decrease', username=username) }}" method="post" style="display: inline;">
-                                    <button type="submit" class="quantity-btn">-</button>
-                                </form>
-                                <span>{{ item['quantity'] }}</span>
-                                <form action="{{ url_for('blissmake.update_quantity', product_id=item['product_id'], action='increase', username=username) }}" method="post" style="display: inline;">
-                                    <button type="submit" class="quantity-btn">+</button>
-                                </form>
-                            </div>
-                        </div>
-                        <form action="{{ url_for('blissmake.delete_from_cart', product_id=item['product_id'], quantity=item['quantity'], username=username) }}" method="post">
-                            <button type="submit" class="delete-icon">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="total">Total Items: {{ cart_products|length }}</div>
-                <div class="total">Total Price : {{ total_price }}</div>
-                <a href="{{ url_for('blissmake.home', username=username) }}" class="back-link">Continue Shopping</a>
-                <!-- <a href="{{ url_for('blissmake.payment', username=username) }}" class="proceed-btn">Proceed to Buy</a> -->
-                 <a href="{{ url_for('blissmake.edit_address_page', username=username)}}" class="proceed-btn">Proceed to Buy</a>
-            {% else %}
-                <div class="alert alert-error">Your cart is empty!</div>
-                <a href="{{ url_for('blissmake.home', username=username) }}" class="back-link">Continue Shopping</a>
-            {% endif %}
-        </section>
-    </main>
+            <label for="address">Delivery Address</label>
+            <textarea id="address" name="address" rows="4" required>{{ address }}</textarea>
+            <button type="submit">Update Address</button>
+        </form>
+    </div>
 
     <footer>
         &copy; 2024 BlissMake Creations. All rights reserved.

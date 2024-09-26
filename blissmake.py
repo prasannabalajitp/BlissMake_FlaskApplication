@@ -427,6 +427,22 @@ def payment(username):
             total_price=total_price
         )
 
+@blissmake.route('/editaddress/<username>', methods=[Constants.GET, Constants.POST])
+def edit_address_page(username):
+    user_data = mongo.db.users.find_one({'username': username})
+    if user_data:
+        address = user_data.get('address', "")
+        email = user_data.get('email', "")
+    return render_template('edit_address.html', username=username, address=address, email=email)
+
+@blissmake.route('/edit_address/<username>', methods=[Constants.GET, Constants.POST])
+def edit_address(username):
+    if request.method == Constants.POST:
+        new_address = request.form['address']
+        mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: {Constants.ADDRESS: new_address}})
+        flash('Address Updated Successfully', 'success')
+        return redirect(url_for('blissmake.payment', username=username))
+
 @blissmake.route(Constants.PAYMENT_QR, methods=[Constants.POST])
 def payment_qr(username):
     cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
