@@ -6,13 +6,13 @@
     <title>BlissMake Creations - Home</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            /* background: linear-gradient(to right, #e0c3fc, #8ec5fc); */
-            background-color: #fff;
-            color: #fff;
-            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to right, #f3f4f6, #e2e8f0);
+            color: #333;
+            font-family: 'Poppins', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
@@ -35,7 +35,6 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-bottom: 2px solid #7f19ec;
         }
         .logo-img {
             height: 60px;
@@ -46,76 +45,57 @@
             display: flex;
             justify-content: center;
             padding-left: 120px;
-            text-align: center;
-            color:#fff;
+            color: #fff;
             text-shadow: #000;
-            border-color: #58595a;
+            text-align: center;
             align-items: center;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: bold;
         }
         .user-actions {
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Stack username and icons */
             align-items: center;
-            gap: 0.5rem;
-            padding-right: 2rem;
-            position: relative;
+            padding-right: 3rem;
         }
-
-        .user-actions .username{
+        .user-actions .username {
             font-family: 'Poppins';
             font-size: 1.2rem;
-            padding-right: 2rem;
+            margin-bottom: 0.5rem; /* Space between username and icons */
         }
-
-        .user-actions .icons{
+        .user-actions .icons {
             display: flex;
-            gap: 1rem;
-            padding-right: 2rem;
+            gap: 1rem; /* Adjust the gap as needed */
         }
-        .user-actions .icons i {
-            font-size: 1rem; /* Adjust the size here */
-        }
-        .user-actions a, .profile-icon {
+        .user-actions .icons a {
             color: #fff;
             text-decoration: none;
-            font-size: 1.2rem;
-            padding: 0.5rem 0.5rem;
-            /* border: 0.5px solid #fff;
-            border-radius: 5px; */
-            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
         }
-        .user-actions a:hover, .profile-icon:hover {
-            background-color: #fff;
-            color: #7f19ec;
-            border: 0.5px solid #fff;
-            border-radius: 5px;
-        }
-        .profile-icon:hover .dropdown {
-            display: block;
+        .user-actions .icons a:hover {
+            color: #ff5b77;
         }
         .hero {
-            padding-top: 200px;
             color: #fff;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 3rem;
-            width: 100%;
-            height: 20%;
             text-align: center;
+            padding: 2rem;
+            width: 95%;
+            height: 50px;
             background: #2d1842;
             border-radius: 10px;
             margin-top: 100px;
         }
         .hero h1 {
-            font-size: 2.5rem;
+            font-size: 2rem;
             margin: 0;
             font-weight: bold;
         }
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1rem;
             margin: 1rem 0;
         }
         .container {
@@ -160,7 +140,8 @@
         }
         .product-card img {
             max-width: 100%;
-            height: auto;
+            width: 500px;
+            height: 300px;
             border-radius: 10px;
             margin-bottom: 10px;
         }
@@ -182,6 +163,7 @@
         }
         .product-card a:hover {
             color: #d54f7e;
+            font-weight: bold;
         }
         footer {
             background: #222;
@@ -193,47 +175,9 @@
             bottom: 0;
             box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
         }
-        .header-icons {
-            color: #fff;
-            text-decoration: none;
-            font-size: 0.8rem;  /* Reduced font size */
-            padding: 0.3rem 0.8rem;  /* Adjust padding if necessary */
-            border: 1px solid #fff;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: #fff;
-            border-radius: 5px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-        }
-        .dropdown a {
-            display: block;
-            padding: 1rem;
-            color: #7f19ec;
-            text-decoration: none;
-            text-align: left;
-        }
-        .dropdown a:hover {
-            background-color: #f1f1f1;
-            color: #7f19ec;
-        }
-        .profile-icon {
-            position: relative;
-            cursor: pointer;
-        }
-        .user-actions:hover .dropdown {
-            display: block;
-        }
     </style>
 </head>
 <body>
-    <br><br>
     <header>
         <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
         <div class="header-center">BlissMake Creations</div>
@@ -242,13 +186,6 @@
             <div class="icons">
                 <a href="{{ url_for('blissmake.get_cart', username=username ) }}"><i class="fas fa-shopping-cart"></i></a>
                 <a href="{{ url_for('blissmake.get_favorite', username=username )}}"><i class="fas fa-heart"></i></a>
-                <!-- <div class="profile-icon">
-                    <i class="fas fa-user"></i>
-                    <div class="dropdown">
-                        <a href="{{ url_for('blissmake.profile', username=username) }}"><i class="fas fa-user-edit"></i></a>
-                        <a href="{{ url_for('blissmake.logout', username=username)}}">  <i class="fas fa-sign-out-alt"></i></a>
-                    </div>
-                </div> -->
                 <a href="{{ url_for('blissmake.profile', username=username) }}"><i class="fas fa-user-edit"></i></a>
                 <a href="{{ url_for('blissmake.logout', username=username) }}"><i class="fas fa-sign-out-alt"></i></a>
             </div>
@@ -274,6 +211,7 @@
                 {% endfor %}
             </div>
         </section>
+        
         <section class="section">
             <h2 style="color: #7f19ec;">Our Collections</h2>
             <div class="product-list">
@@ -282,7 +220,7 @@
                 <img class="product-card" src="{{ url_for('static', filename='img/WD5.png') }}" alt="Collection 3">
             </div>
         </section>
-    </main><br>
+    </main>
 
     <footer>
         <p>&copy; 2024 BlissMake Creations. All rights reserved.</p>

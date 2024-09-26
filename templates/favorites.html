@@ -9,8 +9,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
-            background-color: #fff; 
-            color: #fff;
+            background: linear-gradient(to right, #f3f4f6, #e2e8f0);
+            color: #333;
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
@@ -21,7 +21,7 @@
             min-height: 100vh;
         }
         header {
-            background: #7f19ec; 
+            background: #7f19ec;
             color: #fff;
             padding: 1rem 2rem;
             width: 100%;
@@ -52,33 +52,50 @@
         }
         .user-actions {
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Stack username and icons */
             align-items: center;
-            gap: 0.5rem;
             padding-right: 2rem;
         }
         .user-actions .username {
             font-size: 1.2rem;
-            padding-right: 2rem;
+            margin-bottom: 0.5rem; /* Space between username and icons */
         }
         .user-actions .icons {
             display: flex;
             gap: 1rem;
-            padding-right: 2rem;
         }
         .user-actions a {
             color: #fff;
             text-decoration: none;
-            font-size: 1.2rem;
-            padding: 0.5rem 1rem;
-            border: 1px solid #fff;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
         }
         .user-actions a:hover {
-            background-color: #fff;
-            color: #7f19ec;
+            color: #ff5b77;
         }
+        .hero {
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            width: 50%;
+            height: 5px;
+            background: #2d1842;
+            border-radius: 10px;
+            margin-top: -35px;
+            margin-bottom: 25px;
+        }
+        /* .hero h1 {
+            font-size: 2rem;
+            margin: 0;
+            font-weight: bold;
+        }
+        .hero p {
+            font-size: 1rem;
+            margin: 1rem 0;
+        } */
         main {
             flex: 1;
             width: 90%;
@@ -114,9 +131,10 @@
         }
         .favorite-item img {
             max-width: 100%;
-            height: auto;
+            width: 500px;
+            height: 300px;
             border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .favorite-item h3 {
             font-size: 1.5rem;
@@ -176,7 +194,6 @@
             flex-direction: column;
             align-items: center;
         }
-
         .flash-message {
             width: 100%;
             padding: 10px;
@@ -186,23 +203,18 @@
             font-size: 1rem;
             color: #fff;
         }
-
         .flash-message.success {
             background-color: #4caf50; 
         }
-
         .flash-message.error {
             background-color: #f44336;
         }
-
         .flash-message.info {
             background-color: #2196f3;
         }
-
         .flash-message.warning {
-            background-color: #ff9800; /* Orange */
+            background-color: #ff9800; 
         }
-
         footer {
             background: #222;
             color: #fff;
@@ -224,15 +236,17 @@
         <div class="user-actions">
             <div class="username">Welcome, {{ username }}</div>
             <div class="icons">
-                <a href="{{ url_for('blissmake.get_cart', username=username ) }}"><i class="fas fa-shopping-cart"></i></a>
-                <a href="{{ url_for('blissmake.get_favorite', username=username )}}"><i class="fas fa-heart"></i></a>
-                <a href="#"><i class="fas fa-user"></i></a>
-                <a href="{{ url_for('blissmake.logout', username=username)}}"><i class="fas fa-sign-out-alt"></i></a>
+                <a href="{{ url_for('blissmake.get_cart', username=username) }}"><i class="fas fa-shopping-cart"></i></a>
+                <a href="{{ url_for('blissmake.get_favorite', username=username) }}"><i class="fas fa-heart"></i></a>
+                <a href="{{ url_for('blissmake.profile', username=username) }}"><i class="fas fa-user"></i></a>
+                <a href="{{ url_for('blissmake.logout', username=username) }}"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>
     </header>
     <main>
-        <h2>{{ username }}'s Favorites</h2>
+        <section class="hero">
+            <h2>{{ username }}'s Favorites</h2>
+        </section>
         {% if favorites %}
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}

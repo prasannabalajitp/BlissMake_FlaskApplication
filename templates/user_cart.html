@@ -1,291 +1,289 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart - BlissMake Creations</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <style>
-        body {
-            /* background: linear-gradient(to right, #94cbd1, #fc84ee); */
-            background-color: #fff;
-            color: #000;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-height: 100vh;
-        }
-        header {
-            background: #7f19ec;
-            color: #fff;
-            padding: 1rem 2rem;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-bottom: 2px solid #7f19ec;
-        }
-        .logo-img {
-            height: 70px;
-            width: 70px;
-        }
-        .header-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            padding-left: 120px;
-            color: #fff;
-            text-shadow: #000;
-            border-color: #58595a;
-            text-align: center;
-            align-items: center;
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-        .user-actions {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            padding-right: 2rem;
-        }
-        .user-actions .username {
-            font-size: 1.2rem;
-            padding-right: 2rem;
-        }
-        .user-actions .icons {
-            display: flex;
-            gap: 1rem;
-            padding-right: 2rem;
-        }
-        .user-actions a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.2rem;
-            padding: 0.5rem 1rem;
-            border: 1px solid #fff;
-            border-radius: 5px;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .user-actions a:hover {
-            background-color: #fff;
-            color: #7f19ec;
-        }
-        .cart-detail {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            padding-top: 70px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-            text-align: left;
-            box-shadow: #333;
-            text-shadow: #000;
-            max-width: 800px;
-            width: 100%;
-            box-sizing: border-box;
-            backdrop-filter: blur(10px);
-            margin-top: 100px;
-        }
-        .cart-detail h2 {
-            font-size: 2em;
-            margin-bottom: 10px;
-            color: #7f19ec;
-            border-color: #373737;
-            text-align: center;
-        }
-        .cart-items-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
-        .cart-item-card {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.2);
-            width: 350px;
-            display: flex;
-            align-items: center;
-            text-align: left;
-        }
-        .cart-item-card img {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            margin-right: 20px;
-            margin-bottom: 0px;
-        }
-        .item-details {
-            flex-grow: 1;
-            text-align: left;
-        }
-        .quantity-control {
-            display: flex;
-            justify-content: start;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .quantity-btn {
-            background-color: #7f19ec; /* Matches the header background */
-            border: 1px solid #c45bfc; /* Darker border color */
-            color: #fff; /* Text color to be white for contrast */
-            font-size: 1.2rem;
-            padding: 0.3rem 0.6rem; /* Adjust padding for a more button-like appearance */
-            cursor: pointer;
-            border-radius: 5px; /* Rounded corners */
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        .quantity-btn:hover {
-            background-color: #357abd; /* Darker blue on hover */
-            color: #fff; /* Ensure text remains white */
-        }
-        .delete-icon {
-            cursor: pointer;
-            color: #ff1cb3;
-            font-size: 1.2em;
-            transition: color 0.3s ease;
-            border: none;
-            background: none;
-        }
-        .delete-icon:hover {
-            color: #b44177;
-        }
-        .total {
-            font-size: 1.4em;
-            margin-top: 20px;
-            text-align: center;
-            color: #58595a;
-        }
-        .back-link {
-            display: block;
-            margin-top: 20px;
-            text-align: center;
-            color: #383838;
-            text-decoration: none;
-            font-size: 1.2em;
-            transition: color 0.3s ease;
-        }
-        .back-link:hover {
-            color: #7498f4;
-            border-color: #383838;
-        }
-        .proceed-btn {
-            display: block;
-            width: fit-content;
-            margin: 20px auto;
-            padding: 10px 20px;
-            font-size: 1.2em;
-            font-weight: bold;
-            text-align: center;
-            text-decoration: none;
-            background-color: #7f19ec;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        .proceed-btn:hover {
-            /* background-color: #357abd; */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            background-color: #fff;
-            border-color: #000;
-            color: #7f19ec;
-        }
-        
-        .error-message {
-            color: red;
-            margin-bottom: 10px;
-        }
-
-        footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #333;
-            color: #fff;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-    </style>
-</head>
-<body>
-    <header>
-        <a href="{{ url_for('blissmake.home', username=username) }}">
-            <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
-        </a>
-        <div class="header-center">BlissMake Creations</div>
-        <div class="user-actions">
-            <div class="username">Welcome, {{ username }}</div>
-            <div class="icons">
-                <a href="{{ url_for('blissmake.get_cart', username=username) }}"><i class="fas fa-shopping-cart"></i></a>
-                <a href="{{ url_for('blissmake.get_favorite', username=username )}}"><i class="fas fa-heart"></i></a>
-                <a href="#"><i class="fas fa-user"></i></a>
-                <a href="{{ url_for('blissmake.logout', username=username)}}"><i class="fas fa-sign-out-alt"></i></a>
-            </div>
-        </div>
-    </header>
-
-    <main>
-        <br><br>
-        <section class="cart-detail">
-            {% if message %}
-            <p class="error-message">{{ message }}</p>
-            {% elif cart_products %}
-                <h2>Your Cart Items</h2>
-                <div class="cart-items-container">
-                    {% for item in cart_products %}
-                    <div class="cart-item-card">
-                        <img src="{{ url_for('static', filename='img/'+item['product_img']) }}" alt="{{ item['product_name'] }}">
-                        <div class="item-details">
-                            <h3>{{ item['product_name'] }}</h3>
-                            <h3>Rs. {{ item['product_price'] }} /-</h3>
-                            <p style="display: none;">Product ID: {{ item['product_id'] }}</p>
-                            <div class="quantity-control">
-                                <form action="{{ url_for('blissmake.update_quantity', product_id=item['product_id'], action='decrease', username=username) }}" method="post" style="display: inline;">
-                                    <button type="submit" class="quantity-btn">-</button>
-                                </form>
-                                <span>{{ item['quantity'] }}</span>
-                                <form action="{{ url_for('blissmake.update_quantity', product_id=item['product_id'], action='increase', username=username) }}" method="post" style="display: inline;">
-                                    <button type="submit" class="quantity-btn">+</button>
-                                </form>
-                            </div>
-                        </div>
-                        <form action="{{ url_for('blissmake.delete_from_cart', product_id=item['product_id'], quantity=item['quantity'], username=username) }}" method="post">
-                            <button type="submit" class="delete-icon">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </form>
-                    </div>
-                    {% endfor %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Shopping Cart - BlissMake Creations</title>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+        <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+        <style>
+            body {
+                background: linear-gradient(to right, #f3f4f6, #e2e8f0);
+                color: #333;
+                font-family: 'Poppins', sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                min-height: 100vh;
+            }
+            header {
+                background: #7f19ec;
+                color: #fff;
+                padding: 1rem 2rem;
+                width: 100%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 50px;
+                z-index: 1000;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .logo-img {
+                height: 60px;
+                width: 60px;
+            }
+            .header-center {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+                padding-left: 120px;
+                color: #fff;
+                text-shadow: #000;
+                text-align: center;
+                align-items: center;
+                font-size: 1.5rem;
+                font-weight: bold;
+            }
+            .user-actions {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+                padding-right: 2rem;
+                transition: all 0.3s ease;
+            }
+            .user-actions .username {
+                font-family: 'Poppins';
+                font-size: 1.2rem;
+                padding-right: 2rem;
+            }
+            .user-actions .icons {
+                display: flex;
+                gap: 1rem;
+                padding-right: 2rem;
+            }
+            .user-actions .icons a {
+                color: #fff;
+                text-decoration: none;
+                font-size: 1.5rem;
+                transition: color 0.3s ease;
+            }
+            .user-actions .icons a:hover {
+                color: #ff5b77;
+            }
+            .cart-detail {
+                background: rgba(255, 255, 255, 0.9);
+                padding: 20px;
+                padding-top: 70px;
+                border-radius: 15px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+                max-width: 800px;
+                width: 90%;
+                box-sizing: border-box;
+                backdrop-filter: blur(10px);
+                margin-top: 100px;
+                margin-left: 60px;
+                animation: fadeIn 0.5s ease;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            .cart-detail h2 {
+                font-size: 2em;
+                margin-bottom: 20px;
+                color: #7f19ec;
+                text-align: center;
+            }
+            .cart-items-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                justify-content: center;
+            }
+            .cart-item-card {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 20px;
+                border-radius: 15px;
+                box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.2);
+                width: 350px;
+                display: flex;
+                align-items: center;
+                text-align: left;
+                transition: transform 0.3s;
+            }
+            .cart-item-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.3);
+            }
+            .cart-item-card img {
+                width: 120px;
+                height: 150px;
+                object-fit: cover;
+                margin-right: 20px;
+            }
+            .item-details {
+                flex-grow: 1;
+                text-align: left;
+            }
+            .quantity-control {
+                display: flex;
+                justify-content: start;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+            .quantity-btn {
+                background-color: #7f19ec;
+                border: none;
+                color: #fff;
+                font-size: 1.5rem;
+                padding: 0.5rem 0.8rem;
+                cursor: pointer;
+                border-radius: 5px;
+                transition: background-color 0.3s ease;
+            }
+            .quantity-btn:hover {
+                background-color: #5f16b6;
+            }
+            .delete-icon {
+                cursor: pointer;
+                color: #ff1cb3;
+                font-size: 1.5em;
+                transition: color 0.3s ease;
+                border: none;
+                background: none;
+            }
+            .delete-icon:hover {
+                color: #b44177;
+            }
+            .total {
+                font-size: 1.4em;
+                margin-top: 20px;
+                text-align: center;
+                color: #58595a;
+                font-weight: bold;
+            }
+            .back-link {
+                display: block;
+                margin-top: 20px;
+                color: #383838;    /*  #383838 */
+                text-decoration: none;
+                font-weight: lighter;
+                font-size: 1.2em;
+                transition: color 0.3s ease;
+            }
+            .back-link:hover {
+                color: #7f19ec;
+                font-weight: bold;
+                border: #5f16b6;
+            }
+            .proceed-btn {
+                display: block;
+                width: fit-content;
+                margin: 20px auto;
+                padding: 10px 20px;
+                font-size: 1.2em;
+                font-weight: bold;
+                text-align: center;
+                text-decoration: none;
+                background-color: #7f19ec;
+                color: #fff;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            }
+            .proceed-btn:hover {
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                background-color: #fff;
+                color: #7f19ec;
+            }
+            .error-message {
+                color: red;
+                margin-bottom: 10px;
+            }
+            footer {
+                text-align: center;
+                padding: 10px;
+                background-color: #333;
+                color: #fff;
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <a href="{{ url_for('blissmake.home', username=username) }}">
+                <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+            </a>
+            <div class="header-center">BlissMake Creations</div>
+            <div class="user-actions">
+                <div class="username">Welcome, {{ username }}</div>
+                <div class="icons">
+                    <a href="{{ url_for('blissmake.get_cart', username=username) }}"><i class="fas fa-shopping-cart"></i></a>
+                    <a href="{{ url_for('blissmake.get_favorite', username=username) }}"><i class="fas fa-heart"></i></a>
+                    <a href="{{ url_for('blissmake.profile', username=username) }}"><i class="fas fa-user"></i></a>
+                    <a href="{{ url_for('blissmake.logout', username=username) }}"><i class="fas fa-sign-out-alt"></i></a>
                 </div>
-                <div class="total">Total Items: {{ cart_products|length }}</div>
-                <div class="total">Total Price : {{ total_price }}</div>
-                <a href="{{ url_for('blissmake.home', username=username) }}" class="back-link">Continue Shopping</a>
-                <!-- <a href="{{ url_for('blissmake.payment', username=username) }}" class="proceed-btn">Proceed to Buy</a> -->
-                 <a href="{{ url_for('blissmake.edit_address_page', username=username)}}" class="proceed-btn">Proceed to Buy</a>
-            {% else %}
-                <div class="alert alert-error">Your cart is empty!</div>
-                <a href="{{ url_for('blissmake.home', username=username) }}" class="back-link">Continue Shopping</a>
-            {% endif %}
-        </section>
-    </main>
+            </div>
+        </header>
 
-    <footer>
-        &copy; 2024 BlissMake Creations. All rights reserved.
-    </footer>
-</body>
-</html>
+        <main>
+            <section class="cart-detail">
+                {% if message %}
+                <p class="error-message">{{ message }}</p>
+                {% elif cart_products %}
+                    <h2>Your Cart Items</h2>
+                    <div class="cart-items-container">
+                        {% for item in cart_products %}
+                        <div class="cart-item-card">
+                            <img src="{{ url_for('static', filename='img/'+item['product_img']) }}" alt="{{ item['product_name'] }}">
+                            <div class="item-details">
+                                <h3>{{ item['product_name'] }}</h3>
+                                <h3>Rs. {{ item['product_price'] }} /-</h3>
+                                <p style="display: none;">Product ID: {{ item['product_id'] }}</p>
+                                <div class="quantity-control">
+                                    <form action="{{ url_for('blissmake.update_quantity', product_id=item['product_id'], action='decrease', username=username) }}" method="post" style="display: inline;">
+                                        <button type="submit" class="quantity-btn">-</button>
+                                    </form>
+                                    <span>{{ item['quantity'] }}</span>
+                                    <form action="{{ url_for('blissmake.update_quantity', product_id=item['product_id'], action='increase', username=username) }}" method="post" style="display: inline;">
+                                        <button type="submit" class="quantity-btn">+</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <form action="{{ url_for('blissmake.delete_from_cart', product_id=item['product_id'], quantity=item['quantity'], username=username) }}" method="post">
+                                <button type="submit" class="delete-icon">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="total">Total Items: {{ cart_products|length }}</div>
+                    <div class="total">Total Price : {{ total_price }}</div>
+                    <a href="{{ url_for('blissmake.home', username=username) }}" class="back-link">Continue Shopping</a>
+                    <a href="{{ url_for('blissmake.edit_address_page', username=username) }}" class="proceed-btn">Proceed to Buy</a>
+                {% else %}
+                    <div class="alert alert-error">Your cart is empty!</div>
+                    <a href="{{ url_for('blissmake.home', username=username) }}" class="back-link">Continue Shopping</a>
+                {% endif %}
+            </section>
+        </main>
+
+        <footer>
+            &copy; 2024 BlissMake Creations. All rights reserved.
+        </footer>
+    </body>
+    </html>
