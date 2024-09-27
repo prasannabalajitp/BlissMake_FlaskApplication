@@ -4,230 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ username }}'s Favorites - BlissMake Creations</title>
+    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            background: linear-gradient(to right, #f3f4f6, #e2e8f0);
-            color: #333;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-height: 100vh;
-        }
-        header {
-            background: #7f19ec;
-            color: #fff;
-            padding: 1rem 2rem;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-bottom: 2px solid #7f19ec;
-        }
-        .logo-img {
-            height: 70px;
-            width: 70px;
-        }
-        .header-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            padding-left: 120px;
-            text-align: center;
-            color: #fff;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
-            font-size: 1.8rem;
-            font-weight: bold;
-        }
-        .user-actions {
-            display: flex;
-            flex-direction: column; /* Stack username and icons */
-            align-items: center;
-            padding-right: 2rem;
-        }
-        .user-actions .username {
-            font-size: 1.2rem;
-            margin-bottom: 0.5rem; /* Space between username and icons */
-        }
-        .user-actions .icons {
-            display: flex;
-            gap: 1rem;
-        }
-        .user-actions a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.5rem;
-            transition: color 0.3s ease;
-        }
-        .user-actions a:hover {
-            color: #ff5b77;
-        }
-        .hero {
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            text-align: center;
-            padding: 2rem;
-            width: 50%;
-            height: 5px;
-            background: #2d1842;
-            border-radius: 10px;
-            margin-top: -35px;
-            margin-bottom: 25px;
-        }
-        /* .hero h1 {
-            font-size: 2rem;
-            margin: 0;
-            font-weight: bold;
-        }
-        .hero p {
-            font-size: 1rem;
-            margin: 1rem 0;
-        } */
-        main {
-            flex: 1;
-            width: 90%;
-            max-width: 1200px;
-            padding: 20px;
-            box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-top: 150px;
-        }
-        .favorites-list {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .favorite-item {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            backdrop-filter: blur(15px);
-            flex: 1 1 250px;
-            max-width: 300px;
-        }
-        .favorite-item img {
-            max-width: 100%;
-            width: 500px;
-            height: 300px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-        }
-        .favorite-item h3 {
-            font-size: 1.5rem;
-            color: #7f19ec;
-            margin-bottom: 10px;
-        }
-        .favorite-item p {
-            font-size: 1.2rem;
-            color: #fff;
-            margin-bottom: 10px;
-        }
-        .favorite-item .price {
-            font-size: 1.4rem;
-            color: #ff5b77;
-            margin-bottom: 15px;
-        }
-        .favorite-item .actions {
-            display: flex;
-            gap: 10px;
-        }
-        .favorite-item .actions button, 
-        .favorite-item .actions a {
-            background-color: #ff5b77;
-            color: #2b2b2b;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-        }
-        .favorite-item .actions button:hover,
-        .favorite-item .actions a:hover {
-            background-color: #7f19ec;
-            color: #fff;
-        }
-        .favorite-item .actions .remove-favorite {
-            background-color: #e63946;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .favorite-item .actions .remove-favorite:hover {
-            background-color: #cc2b36;
-        }
-        .flash-messages {
-            width: 100%;
-            max-width: 600px;
-            margin: 10px auto;
-            padding: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            background: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .flash-message {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 5px;
-            text-align: center;
-            font-size: 1rem;
-            color: #fff;
-        }
-        .flash-message.success {
-            background-color: #4caf50; 
-        }
-        .flash-message.error {
-            background-color: #f44336;
-        }
-        .flash-message.info {
-            background-color: #2196f3;
-        }
-        .flash-message.warning {
-            background-color: #ff9800; 
-        }
-        footer {
-            background: #222;
-            color: #fff;
-            text-align: center;
-            height: 40px;
-            padding: 0.5rem;
-            width: 100%;
-            position: relative;
-            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
     </style>
 </head>
 <body>
@@ -246,8 +27,8 @@
             </div>
         </div>
     </header>
-    <main>
-        <section class="hero">
+    <main class="fav-main">
+        <section class="fav-hero">
             <h2>{{ username }}'s Favorites</h2>
         </section>
         {% if favorites %}
@@ -263,7 +44,7 @@
         <div class="favorites-list">
             {% for product in favorites['products'] %}
             <div class="favorite-item">
-                <img src="{{ url_for('static', filename='img/' + product['product_img']) }}" alt="{{ product['product_name'] }}">
+                <img src="{{ url_for('static', filename='img/' + product['product_img']) }}" alt="{{ product['product_name'] }}" class="fav-img">
                 <h3>{{ product['product_name'] }}</h3>
                 <p class="price">Price: Rs. {{ product['product_price'] }}</p>
                 <div class="actions">
@@ -284,6 +65,11 @@
 
     <footer>
         <p>&copy; 2024 BlissMake Creations. All rights reserved.</p>
+        <div>
+            <a href="https://www.instagram.com/your_instagram_handle" target="_blank">
+                <i class="fab fa-instagram"></i> Follow us on Instagram
+            </a>
+        </div>
     </footer>
 </body>
 </html>

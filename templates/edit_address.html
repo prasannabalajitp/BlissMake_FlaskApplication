@@ -9,50 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            background: linear-gradient(to right, #f3f4f6, #e2e8f0);
-            color: #333;
-            font-family: 'Poppins', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-height: 100vh;
-        }
-        header {
-            background: #7f19ec;
-            color: #fff;
-            padding: 1rem 2rem;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 50px;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .logo-img {
-            height: 60px;
-            width: 60px;
-        }
-        .header-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            padding-left: 120px;
-            color: #fff;
-            text-shadow: #000;
-            text-align: center;
-            align-items: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        .container {
+        .addr-container {
             text-align: center;
             max-width: 600px;
             margin-top: 50px;
@@ -191,7 +148,7 @@
             border-color: #373737;
             text-align: center;
         }
-        .cart-items-container {
+        .cart-items-addr-container {
             display: flex;
             flex-wrap: wrap;
             gap: 20px;
@@ -339,7 +296,7 @@
         </div>
     </header>
     <br><br><br>
-    <div class="container">
+    <div class="addr-container">
         <h2>Edit Delivery Address</h2>
         <form method="POST" action="{{ url_for('blissmake.edit_address', username=username) }}">
             <label for="email">Email ID</label>
@@ -352,7 +309,12 @@
     </div>
 
     <footer>
-        &copy; 2024 BlissMake Creations. All rights reserved.
+        <p>&copy; 2024 BlissMake Creations. All rights reserved.</p>
+        <div>
+            <a href="https://www.instagram.com/your_instagram_handle" target="_blank">
+                <i class="fab fa-instagram"></i> Follow us on Instagram
+            </a>
+        </div>
     </footer>
 </body>
 </html>

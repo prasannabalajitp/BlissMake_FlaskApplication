@@ -6,76 +6,59 @@
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Login - BlissMake Creations</title>
-    <style> 
+    <style>
         body {
-            background: linear-gradient(to right, #e0c3fc, #8ec5fc);
-            color: #fff;
+            background: linear-gradient(to right, #f3f4f6, #e2e8f0);
+            color: #333;
             font-family: 'Arial', sans-serif;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden; /* Prevents scrolling */
-            position: relative;
+            min-height: 100vh;
         }
-        /* header{
-            position: absolute;
-            top:20px;
-            left: 20px;
-            right: 20px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            background: black;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
-        }*/
-        header{
-            background: #4a90e2;
+        header {
+            background: #7f19ec;
             color: #fff;
+            padding: 1rem 2rem;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 50px;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .header-center{
+        .logo-img {
+            height: 60px;
+            width: 60px;
+        }
+        .header-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding-left: 120px;
+            color: #fff;
+            text-shadow: #000;
             text-align: center;
-            margin-top: 20px;
-        }
-        .header-center h1{
-            color: #000;
-            margin: 0;
-            font-size: 2rem;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
         }
         .container {
+            width: 350px;
+            margin-top: 100px;
             background: rgba(255, 255, 255, 0.9);
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            max-width: 400px;
-            width: 90%;
-            box-sizing: border-box;
-            backdrop-filter: blur(10px);
             text-align: center;
-            color: #333; /* Darker text color for better readability */
-        }
-        .header {
-            color: #4a90e2;
-            margin-bottom: 1rem;
-            font-size: 2rem; /* Larger font size for the heading */
-        }
-        .logo img {
-            max-width: 120px;
-            height: auto;
-            position: absolute;
-            margin-top: 10px;
-            left: 20px;
-        }
-        .logo-img{
-            height: 70px;
-            width: 70px;
+            color: #333;
+            margin-bottom: 100px;
         }
         label {
             display: block;
@@ -93,7 +76,7 @@
             font-size: 1rem;
         }
         input[type="submit"] {
-            background-color: #4a90e2;
+            background-color: #7f19ec;
             color: white;
             padding: 12px;
             border: none;
@@ -104,7 +87,7 @@
             transition: background-color 0.3s ease;
         }
         input[type="submit"]:hover {
-            background-color: #357ABD;
+            background-color: #6a13c0;
         }
         .link {
             display: block;
@@ -122,9 +105,32 @@
             color: red;
             margin-bottom: 10px;
         }
+        footer {
+            background: #222;
+            color: #fff;
+            text-align: center;
+            height: 40px;
+            padding: 0.5rem;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
     </style>
 </head>
 <body>
+    <header>
+        <div class="logo">
+            <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        </div>
+        <div class="header-center">BlissMake Creations - Login</div>
+        <!-- <div class="user-actions">
+            <div class="username">Welcome, Guest</div>
+        </div> -->
+    </header>
+
     <div class="container">
         <h1>Login</h1>
         {% if request.args.get('error') %}
@@ -138,7 +144,16 @@
             <input type="submit" value="Login">
         </form>
         <a class="link" href="{{ url_for('blissmake.register') }}">New User? Register Here</a>
-        <a class="link" href="{{ url_for('blissmake.forgot_password' )}}">Forgot Password</a>
+        <a class="link" href="{{ url_for('blissmake.forgot_password') }}">Forgot Password</a>
     </div>
+
+    <footer>
+        <p>&copy; 2024 BlissMake Creations. All rights reserved.</p>
+        <div>
+            <a href="https://www.instagram.com/your_instagram_handle" target="_blank">
+                <i class="fab fa-instagram"></i> Follow us on Instagram
+            </a>
+        </div>
+    </footer>
 </body>
 </html>

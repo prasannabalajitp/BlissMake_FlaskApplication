@@ -15,7 +15,7 @@ header {
     color: #fff;
     padding: 1rem 2rem;
     width: 100%;
-    position: fixed;
+    position: relative;
     top: 0;
     left: 0;
     height: 50px;
@@ -31,6 +31,7 @@ main{
 .logo-img {
     height: 60px;
     width: 60px;
+    padding-left: 20px;
 }
 .header-center {
     flex: 1;
@@ -50,7 +51,7 @@ main{
     align-items: center;
     padding-right: 3rem;
 }
-.user-actions .username {
+ .username {
     font-family: 'Poppins';
     font-size: 1.2rem;
     margin-bottom: 0.5rem; /* Space between username and icons */
@@ -79,7 +80,7 @@ main{
     height: 50px;
     background: #2d1842;
     border-radius: 10px;
-    margin-top: 100px;
+    margin-top: 50px;
 }
 .hero h1 {
     font-size: 2rem;
@@ -100,6 +101,20 @@ main{
     box-sizing: border-box;
     backdrop-filter: blur(15px);
     margin-top: 20px;
+}
+.container .product-list .product-card img{
+    width: 300px;
+    height: 300px;
+}
+
+.section-featured-products .product-list .product-card img{
+    width: 300px;
+    height: 300px;
+}
+
+.fav-img{
+    width: 300px;
+    height: 300px;
 }
 .featured-products h2 {
     margin-bottom: 20px;
@@ -160,15 +175,29 @@ main{
 footer {
     background: #222;
     color: #fff;
-    text-align: center; /* Center the text */
-    height: 40px; /* Reduced height */
-    padding: 0.5rem; /* Adjusted padding for a smaller footer */
+    text-align: center;
+    height: 40px;
+    padding: 0.5rem;
     width: 100%;
     position: relative;
     box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
     display: flex; /* Use flexbox for better alignment */
     align-items: center; /* Vertically center items */
     justify-content: center; /* Horizontally center items */
+}
+
+footer p {
+    margin: 0;
+}
+
+footer div{
+    display: inline-block; 
+    margin-left: 10px;
+}
+
+footer a{
+    color: white;
+    text-decoration: none;
 }
 
 .section {
@@ -188,4 +217,184 @@ footer {
     margin-bottom: 1rem;
     font-weight: bold;
     color: #7f19ec;
+}
+
+.addr-container {
+    text-align: center;
+    max-width: 600px;
+    margin-top: 50px;
+    margin-bottom: 80px;
+    background-color: #fdfdfd;
+    padding: 6rem;
+    padding-top: 2rem;
+    font-size: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(5, 4, 4, 0.1);
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+input, textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    font-size: large;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+input[readonly] {
+    background-color: #f9f9f9;
+}
+button {
+    padding: 0.8rem 1.5rem;
+    background-color: #7f19ec;
+    color: #fff;
+    font-size: large;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+button:hover {
+    background-color: #6a13c0;
+}
+
+.fav-hero {
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    width: 50%;
+    height: 5px;
+    background: #2d1842;
+    border-radius: 10px;
+    margin-top: -120px;
+    margin-bottom: 50px;
+}
+
+.fav-main {
+    flex: 1;
+    width: 90%;
+    max-width: 1200px;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 150px;
+}
+
+.favorites-list {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.favorite-item {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    backdrop-filter: blur(15px);
+    flex: 1 1 250px;
+    max-width: 300px;
+}
+.favorite-item img {
+    max-width: 100%;
+    width: 500px;
+    height: 300px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+.favorite-item h3 {
+    font-size: 1.5rem;
+    color: #7f19ec;
+    margin-bottom: 10px;
+}
+.favorite-item p {
+    font-size: 1.2rem;
+    color: #fff;
+    margin-bottom: 10px;
+}
+.favorite-item .price {
+    font-size: 1.4rem;
+    color: #ff5b77;
+    margin-bottom: 15px;
+}
+.favorite-item .actions {
+    display: flex;
+    gap: 10px;
+}
+.favorite-item .actions button, 
+.favorite-item .actions a {
+    background-color: #ff5b77;
+    color: #2b2b2b;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+.favorite-item .actions button:hover,
+.favorite-item .actions a:hover {
+    background-color: #7f19ec;
+    color: #fff;
+}
+.favorite-item .actions .remove-favorite {
+    background-color: #e63946;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.favorite-item .actions .remove-favorite:hover {
+    background-color: #cc2b36;
+}
+
+.flash-messages {
+    width: 100%;
+    max-width: 600px;
+    margin: 10px auto;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.flash-message {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 1rem;
+    color: #fff;
+}
+.flash-message.success {
+    background-color: #4caf50; 
+}
+.flash-message.error {
+    background-color: #f44336;
+}
+.flash-message.info {
+    background-color: #2196f3;
+}
+.flash-message.warning {
+    background-color: #ff9800; 
 }

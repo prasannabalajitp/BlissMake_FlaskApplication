@@ -30,7 +30,7 @@
             <p>Explore our exquisite collection of handmade crafts, designed with passion and creativity.</p>
         </section>
         
-        <section class="section featured-products">
+        <section class="section-featured-products">
             <h2>Featured Products</h2>
             <div class="product-list">
                 {% for product in products %}
@@ -45,11 +45,11 @@
         </section>
         
         <section class="section">
-            <h2 style="color: #7f19ec;">Our Collections</h2>
+            <h2>Our Collections</h2>
             <div class="product-list">
-                <img class="product-card" src="{{ url_for('static', filename='img/WD3.png') }}" alt="Collection 1">
-                <img class="product-card" src="{{ url_for('static', filename='img/WD4.png') }}" alt="Collection 2">
-                <img class="product-card" src="{{ url_for('static', filename='img/WD5.png') }}" alt="Collection 3">
+                <img class="product-list-collections" src="{{ url_for('static', filename='img/WD3.png') }}" alt="Collection 1">
+                <img class="product-list-collections" src="{{ url_for('static', filename='img/WD4.png') }}" alt="Collection 2">
+                <img class="product-list-collections" src="{{ url_for('static', filename='img/WD5.png') }}" alt="Collection 3">
             </div>
         </section>
     </main>
