@@ -180,6 +180,8 @@ def register():
 @blissmake.route(Constants.PROFILE_URL)
 def profile(username):
     print(username)
+    if username == Constants.GUEST:
+        return render_template(Constants.LOGIN_HTML)
     if Constants.USER not in session:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
 
@@ -307,6 +309,8 @@ def product_detail(product_id, username):
 
 @blissmake.route(Constants.GET_CART, methods=[Constants.GET])
 def get_cart(username):
+    if username == Constants.GUEST:
+        return render_template(Constants.LOGIN_HTML)
     cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
     cart_products = cart[Constants.PRODUCTS] if cart else []
     total_price = calculate_total_price(cart_products)
@@ -368,7 +372,7 @@ def add_to_cart(product_id, username):
             }
             mongo.db.usercart.insert_one(data)
         
-        flash(Constants.ADDED_TO_CART)
+        flash(Constants.ADDED_TO_CART, Constants.SUCCESS)
         return redirect(url_for(
                 Constants.BLISSMAKE_PROD_DETAIL, 
                 product_id=product_id, 
@@ -523,6 +527,8 @@ def add_to_wishlist(username, product_id):
 
 @blissmake.route(Constants.GET_FAV)
 def get_favorite(username):
+    if username == Constants.GUEST:
+        return render_template(Constants.LOGIN_HTML)
     favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
     if not favorites:
         return render_template(Constants.FAV_HTML, username=username, message=Constants.FAV_NOT_EXISTS)
