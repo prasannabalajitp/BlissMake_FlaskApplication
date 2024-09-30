@@ -33,7 +33,7 @@
                 <div class="admin-product-list">
                     {% for product in products %}
                         <div class="admin-product-card">
-                            <img src="{{ url_for('static', filename='img/'+product['product_img']) }}" alt="{{ product['product_name']}}">
+                            <img src="{{ url_for('static', filename='img/'+product['product_img']) }}" alt="{{ product['product_name']}}" style="width: 200px; height: 200px;">
                             <h3>{{ product['product_name'] }}</h3>
                             <p class="price">Rs. {{ product['product_price'] }}</p>
                             <div class="admin-actions">

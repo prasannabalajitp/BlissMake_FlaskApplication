@@ -4,122 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Edit Product</title>
-    <style>
-        body {
-            background-color: #fff;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-height: 100vh;
-        }
-
-        header {
-            background: #7f19ec;
-            color: #fff;
-            padding: 1rem 2rem;
-            width: 100%;
-            text-align: center;
-            position: fixed;
-            top: 0;
-        }
-
-        main {
-            padding-top: 100px;
-        }
-
-        .dashboard-container {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-            margin-top: 50px;
-        }
-
-        h1, h3 {
-            color: #7f19ec;
-        }
-
-        /* Form styles */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        input {
-            padding: 10px;
-            width: 100%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-
-        button {
-            padding: 10px;
-            background-color: #7f19ec;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #5a13b1;
-        }
-
-        /* Back link */
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            text-decoration: none;
-            color: #7f19ec;
-            font-size: 1rem;
-        }
-
-        a:hover {
-            color: #5a13b1;
-        }
-
-        /* Logout button */
-        .logout-btn {
-            background-color: #ff5b77;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 20px;
-        }
-
-        .logout-btn:hover {
-            background-color: #d54f7e;
-        }
-    </style>
 </head>
 <body>
     <header>
         <h1>Edit Product</h1>
     </header>
-    <main>
-        <div class="dashboard-container">
+    <main class="admin-main">
+        <div class="admin-dashboard-container">
             <h3>Edit Product Details</h3>
-            <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.product_id) }}">
-                <input type="text" name="product_name" value="{{ product.product_name }}" >
-                <input type="number" name="product_price" value="{{ product.product_price }}" >
-                <input type="file" name="product_img" value="{{ product.product_img }}" >
-                <button type="submit">Update Product</button>
+            <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.product_id) }}" class="admin-form">
+                <input type="text" name="product_name" value="{{ product.product_name }}" class="admin-input-form">
+                <input type="number" name="product_price" value="{{ product.product_price }}" class="admin-input-form">
+                <input type="file" name="product_img" value="{{ product.product_img }}" class="admin-input-form">
+                <button type="submit" class="admin-button">Update Product</button>
             </form>
-            <a href="{{ url_for('admin.admin_login') }}">Go Back</a>
+            <a href="{{ url_for('admin.admin_login') }}" class="admin-link">Go Back</a>
         </div>
     </main>
 </body>

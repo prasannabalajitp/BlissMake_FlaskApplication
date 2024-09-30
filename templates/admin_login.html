@@ -4,133 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <title>Admin Login - BlissMake Creations</title>
-    <style>
-        body {
-            background-color: #fff;
-            color: #000;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-height: 100vh;
-        }
-
-        header {
-            background: #7f19ec;
-            color: #fff;
-            padding: 1rem 2rem;
-            width: 100%;
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-bottom: 2px solid #3c78d8;
-        }
-
-        .logo img {
-            height: 70px;
-            width: 70px;
-        }
-
-        .header-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            text-align: center;
-            color: #fff;
-            align-items: center;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        .login-container {
-            background-color: #f8f8f8;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-            margin-top: 150px; /* Adjust according to header height */
-            max-width: 400px;
-            width: 100%;
-        }
-
-        h2 {
-            color: #7f19ec;
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-        }
-
-        form {
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        input {
-            padding: 0.8rem;
-            font-size: 1rem;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 100%;
-        }
-
-        button {
-            background-color: #7f19ec;
-            color: #fff;
-            padding: 0.8rem;
-            font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #5e14b1;
-        }
-
-        .logo-img {
-            height: 70px;
-            width: 70px;
-        }
-
-        footer {
-            background: #222;
-            color: #fff;
-            text-align: center;
-            padding: 1rem;
-            width: 100%;
-            position: absolute;
-            bottom: 0;
-            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
-        }
-    </style>
 </head>
 <body>
     <header>
-        <div class="logo">
+        <div class="logo-img">
             <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Creations Logo">
         </div>
-        <div class="header-center">
+        <div class="admin-header-center">
             <h1>Admin Login - BlissMake Creations</h1>
         </div>
     </header>
 
-    <div class="login-container">
-        <h2>Admin Login</h2>
-        <form method="POST" action="{{ url_for('admin.admin_login') }}">
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <button type="submit">Login</button>
+    <div class="admin-login-container">
+        <h2 class="admin-h2">Admin Login</h2>
+        <form method="POST" action="{{ url_for('admin.admin_login') }}" class="admin-form-container">
+            <input type="text" name="username" placeholder="Username" required class="admin-form-input">
+            <input type="password" name="password" placeholder="Password" required class="admin-form-input">
+            <button type="submit" class="admin-form-button">Login</button>
         </form>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
