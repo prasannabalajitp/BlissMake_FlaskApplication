@@ -33,6 +33,11 @@ main{
     width: 60px;
     padding-left: 20px;
 }
+.admin-logo-img{
+    height: 60px;
+    width: 60px;
+    margin-left: 20px;
+}
 .header-center {
     flex: 1;
     display: flex;
@@ -514,4 +519,166 @@ input[type="submit"]:hover {
 .message {
     margin: 10px 0;
     color: red; 
+}
+
+header.admin-header {
+    display: flex;
+    align-items: center;
+    background: #7f19ec;
+    color: #fff;
+    padding: 1rem 2rem;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.admin-header-content{
+    justify-content: center;
+    text-align: center;
+    padding-right: 500px;
+}
+
+.admin-logo-img {
+    margin-right: 20px;
+}
+
+.admin-main {
+    padding-top: 100px;
+    width: 100%;
+}
+.dashboard-container {
+    text-align: center;
+    background: #fff;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    max-width: 1200px;
+    width: 90%;
+    margin: 0 auto;
+}
+.admin-product-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+.admin-product-card {
+    background-color: #f8f8f8;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 200px;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.admin-product-card img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+}
+
+.admin-product-card:hover {
+    transform: translateY(-5px);
+}
+
+.admin-product-card h3 {
+    color: #7f19ec;
+    font-size: 1.1rem;
+    margin: 10px 0;
+}
+
+.admin-product-card p.price {
+    font-size: 1rem;
+    color: #333;
+}
+.admin-flash-messages {
+    color: green;
+    margin-bottom: 15px;
+}
+
+.admin-actions {
+    text-align: center;
+    padding-left: 50px;
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.edit-btn, .delete-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.delete-btn {
+    background-color: #ff5b77;
+    color: white;
+}
+
+.logout-btn {
+    background-color: #ff5b77;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.logout-btn:hover {
+    background-color: #d54f7e;
+}
+.add-product-form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-top: 30px;
+    max-width: 600px;
+    width: 90%;
+    text-align: left;
+    display: inline-block;
+}
+
+.add-product-form h3 {
+    margin-bottom: 20px;
+    color: #7f19ec;
+}
+
+.add-product-form form {
+    display: flex;
+    flex-direction: column;
+}
+
+.add-product-form input {
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.add-product-form button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #7f19ec;
+    color: white;
+    font-size: 1rem;
+    transition: background-color 0.3s;
+}
+
+.add-product-form button:hover {
+    background-color: #6a0baf;
 }

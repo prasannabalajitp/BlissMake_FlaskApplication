@@ -9,4 +9,4 @@ def login_required(f):
         if Constants.USER not in session:
             return redirect(url_for(Constants.BLISSMAKE_LOGIN))
         return f(*args, **kwargs)
-    return decorated_function
+    return decorated_function   
