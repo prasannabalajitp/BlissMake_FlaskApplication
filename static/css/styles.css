@@ -1072,3 +1072,130 @@ header.admin-header {
     border-radius: 5px;
     color: #fff;
 }
+.profile-container {
+    align-items: center;
+    max-width: 700px;
+    margin: 120px auto 0 auto;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+.profile-heading {
+    text-align: center;
+    color: #7f19ec;
+    margin-bottom: 2rem;
+}
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.profile-section label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+.profile-section input, .profile-section textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+.profile-section textarea {
+    resize: vertical;
+}
+.profile-section button {
+    padding: 0.8rem 1.5rem;
+    background-color: #7f19ec;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background-color 0.3s ease;
+}
+.profile-section button:hover {
+    background-color: #6a13c0;
+}
+#container {
+    align-items: center;
+    max-width: 750px;
+    margin: 120px auto 0 auto;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+    padding-right: 50px;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.user-cart-item-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    display: flex;
+    align-items: center;
+    text-align: left;
+    transition: transform 0.3s;
+}
+.user-cart-item-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 0px 32px rgba(0, 0, 0, 0.3);
+}
+.user-cart-item-card img {
+    width: 120px;
+    height: 150px;
+    object-fit: cover;
+    margin-right: 20px;
+}
+.quantity-control {
+    display: flex;
+    justify-content: start;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.quantity-btn {
+    background-color: #7f19ec;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    padding: 0.5rem 0.8rem;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+.quantity-btn:hover {
+    background-color: #5f16b6;
+}
+.delete-icon {
+    cursor: pointer;
+    color: #ff1cb3;
+    font-size: 1.5em;
+    transition: color 0.3s ease;
+    border: none;
+    background: none;
+}
+.delete-icon:hover {
+    color: #b44177;
+}
+.user-cart-back-link {
+    display: block;
+    margin-top: 20px;
+    margin-left: 284px;
+    color: #383838;    /*  #383838 */
+    text-decoration: none;
+    font-size: 1.2em;
+    transition: color 0.3s ease;
+}
+.user-cart-back-link:hover {
+    color: #7f19ec;
+    font-weight: bold;
+    border: #5f16b6;
+}

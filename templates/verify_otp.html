@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{{ url_for('static', filename='img/logo.png') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <title>Verify OTP - BlissMake Creations</title>
     <style>
         html, body {
@@ -38,7 +40,7 @@
         .logo img {
             height: 70px;
             width: 70px;
-        }
+        } 
         .header-center {
             color: #fff;
             font-size: 1.5rem;
@@ -47,7 +49,7 @@
             flex: 1;
         }
         .hero {
-            margin-top: 80px; /* Space below header */
+            margin-top: 80px; 
             padding: 3rem;
             color: #333;
             width: 100%;
@@ -77,7 +79,7 @@
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        button {
+        .verify-otp-btn {
             width: 100%;
             padding: 10px;
             background-color: #28a745;
@@ -87,7 +89,7 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
-        button:hover {
+        .verify-otp-btn:hover {
             background-color: #218838;
         }
         .message {
@@ -101,15 +103,8 @@
             color: green;
         }
         .error {
-            border-color: red;
+            border-color: none;
             color: red;
-        }
-        footer {
-            background: #222;
-            color: #fff;
-            text-align: center;
-            padding: 1rem;
-            width: 100%;
         }
     </style>
 </head>
@@ -127,7 +122,7 @@
         <form action="{{ url_for('blissmake.verify_otp') }}" method="post">
             <input type="text" name="email" value="{{ email }}" placeholder="Enter your email" required>
             <input type="text" name="otp" required placeholder="Enter your OTP">
-            <button type="submit">Verify OTP</button>
+            <button type="submit" class="verify-otp-btn">Verify OTP</button>
         </form>
         
         {% with messages = get_flashed_messages(with_categories=True) %}
