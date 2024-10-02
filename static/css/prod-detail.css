@@ -28,6 +28,7 @@ header {
 .logo-img {
     height: 60px;
     width: 60px;
+    padding-left: 20px;
 }
 .header-center {
     flex: 1;
@@ -220,9 +221,25 @@ footer {
     background: #222;
     color: #fff;
     text-align: center;
-    padding: 1rem;
+    height: 40px;
+    padding: 0.5rem;
     width: 100%;
     position: relative;
-    bottom: 0;
     box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.2);
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+}
+
+footer a{
+    text-decoration: none;
+    padding-left: 5px;
+    color: #fff;
+}
+
+footer a:hover{
+    text-decoration: none;
+    color: blue;
+    border-color: #fff;
+    text-shadow: #fff;
 }

@@ -10,7 +10,10 @@
     <title>Edit Product</title>
 </head>
 <body>
-    <header>
+    <header class="edit-prod-header">
+        <a href="{{ url_for('blissmake.home', username=username) }}"></a>
+            <img class="logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
+        </a>
         <h1>Edit Product</h1>
     </header>
     <main class="admin-main">

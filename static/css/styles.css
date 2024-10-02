@@ -206,8 +206,17 @@ footer div{
 }
 
 footer a{
-    color: white;
     text-decoration: none;
+    padding-left: 5px;
+    color: #fff;
+}
+
+footer a:hover{
+    text-decoration: none;
+    color: blue;
+    border-color: #fff;
+    border: white;
+    text-shadow: #fff;
 }
 
 .section {
@@ -552,7 +561,8 @@ header.admin-header {
 
 .admin-main {
     padding-top: 100px;
-    width: 100%;
+    /* width: 100%; */
+    /* padding-left: 750px; */
 }
 .admin-header-center {
     flex: 1;
@@ -1198,4 +1208,9 @@ header.admin-header {
     color: #7f19ec;
     font-weight: bold;
     border: #5f16b6;
+}
+.edit-prod-header{
+    margin-left: -950px;
+    width: 100%;
+    background: #7f19ec;
 }
