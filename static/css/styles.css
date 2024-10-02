@@ -1210,7 +1210,16 @@ header.admin-header {
     border: #5f16b6;
 }
 .edit-prod-header{
-    margin-left: -950px;
     width: 100%;
     background: #7f19ec;
+    text-align: center;
+}
+
+.edit-prod-header h2{
+    justify-content: center;
+}
+.edit-prod-header img{
+    height: 60px;
+    width: 60px;
+    padding-left: 20px;
 }
