@@ -2,7 +2,7 @@
 
 ### Prerequisites
 
-- **Python**: Version 3.6 or higher
+- **Python**: Version 3.9 or higher
 - **MongoDB**: Ensure MongoDB is installed and running
 - **Git**: For cloning the repository
 
@@ -11,7 +11,7 @@
 1. **Clone the Repository**:
 
     ```bash
-    git clone https://github.com/your-username/blissmake.git
+    git clone https://github.com/prasannabalajitp/BlissMake_FlaskApplication.git
     cd blissmake
     ```
 

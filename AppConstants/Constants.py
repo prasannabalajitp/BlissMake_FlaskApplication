@@ -149,8 +149,8 @@ class Constants:
     INCREASE = 'increase'
     DECREASE = 'decrease'
     SUCCESS = "success"
-    UPI_ID = 'upi_id'
-    PAYEE_NAME = 'payee_name'
+    UPI_ID = 'UPI_ID'
+    PAYEE_NAME = 'PAYEE_NAME'
     TXN_NOTE = "Payment for QR"
     STRF_TIME = '%Y%m%dT%H%M%SZ'
     VALID_EMAIL = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
