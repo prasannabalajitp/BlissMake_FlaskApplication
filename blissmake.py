@@ -155,9 +155,11 @@ def register():
 
         user_exists = mongo.db.users.find_one({Constants.USERNAME: username})
         if user_exists:
-            return jsonify({
-                Constants.MESSAGE: Constants.USER_EXISTS
-            })
+            # return jsonify({
+            #     Constants.MESSAGE: Constants.USER_EXISTS
+            # })
+            flash(Constants.USER_EXISTS, category=Constants.ERROR)
+            return render_template(Constants.REGISTER_HTML, messages=Constants.USER_EXISTS)
 
         hashed_password = generate_password_hash(password, method=Constants.PASSWORD_HASH_METHOD)
         mongo.db.users.insert_one({
