@@ -28,6 +28,15 @@
 
     <div class="container">
         <h2 class="profile-heading">User Profile</h2>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
         <form method="POST" action="{{ url_for('blissmake.update_profile', username=username) }}">
             <div class="profile-section">
                 <label for="username">Username</label>

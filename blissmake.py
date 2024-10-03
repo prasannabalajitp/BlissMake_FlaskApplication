@@ -186,8 +186,10 @@ def profile(username):
 
     user = mongo.db.users.find_one({Constants.USERNAME: username})
     if Constants.ADDRESS in user and user[Constants.ADDRESS]:
-        return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL], address=user[Constants.ADDRESS])
-    return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL], address=None)
+        if Constants.PHONE in user:
+            return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL], address=user[Constants.ADDRESS], phone=user[Constants.PHONE])
+        return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL], address=user[Constants.ADDRESS], phone=None)
+    return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL], address=None, phone=None)
 
 
 @blissmake.route(Constants.UPDATE_PROFILE, methods=[Constants.GET, Constants.POST])
@@ -235,6 +237,7 @@ def update_profile(username):
 
 @blissmake.route(Constants.HOME, methods=[Constants.POST, Constants.GET])
 def home(username):
+    print(f'USERNAME : {username}')
     products = mongo.db.products.find({})
     product_list = list(products)
     return render_template(
@@ -323,6 +326,7 @@ def get_cart(username):
     total_price = calculate_total_price(cart_products)
     if not cart_products:
         flash(Constants.CART_EMPTY, Constants.WARNING)
+        return render_template(Constants.USER_CART_HTML, username=username)
     
     return render_template(
         Constants.USER_CART_HTML, 

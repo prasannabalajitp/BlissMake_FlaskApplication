@@ -136,7 +136,7 @@ class Constants:
     PRODUCTS = 'products'
     QUANTITY = 'quantity'
     PRODUCT_PRICE = 'product_price'
-    INVALID_PASSWORD = 'Invalid Username/Password'
+    INVALID_PASSWORD = 'Invalid Password'
     INVALID_EMAIL_ADDR = "Invalid email address."
     INVALID_OTP = "Invalid OTP."
     PRODUCT_ID = 'product_id'

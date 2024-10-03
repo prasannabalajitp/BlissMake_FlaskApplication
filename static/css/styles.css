@@ -148,7 +148,7 @@ main{
     max-width: 300px;
     width: 100%;
     box-sizing: border-box;
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(75px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .product-card:hover {
@@ -181,6 +181,11 @@ main{
 .product-card a:hover {
     color: #d54f7e;
     font-weight: bold;
+}
+
+.alert-error{
+    text-align: center;
+    color: red;
 }
 footer {
     background: #222;
@@ -1198,7 +1203,7 @@ header.admin-header {
 .user-cart-back-link {
     display: block;
     margin-top: 20px;
-    margin-left: 284px;
+    margin-left: 15px;
     color: #383838;    /*  #383838 */
     text-decoration: none;
     font-size: 1.2em;
