@@ -552,7 +552,7 @@ header.admin-header {
 .admin-header-content{
     justify-content: center;
     text-align: center;
-    padding-right: 500px;
+    padding-right: 150px;
 }
 
 .admin-logo-img {
@@ -1218,6 +1218,13 @@ header.admin-header {
 .edit-prod-header h2{
     justify-content: center;
 }
+
+.edit-prod-header-h1{
+    /* margin-left: 50px; */
+    align-items: center;
+    padding-right: 40px;
+}
+
 .edit-prod-header img{
     height: 60px;
     width: 60px;

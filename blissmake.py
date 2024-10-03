@@ -179,16 +179,15 @@ def register():
 
 @blissmake.route(Constants.PROFILE_URL)
 def profile(username):
-    print(username)
     if username == Constants.GUEST:
         return render_template(Constants.LOGIN_HTML)
     if Constants.USER not in session:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
 
     user = mongo.db.users.find_one({Constants.USERNAME: username})
-    print(user[Constants.USERNAME])
-    print(user[Constants.EMAIL])
-    return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL])
+    if Constants.ADDRESS in user and user[Constants.ADDRESS]:
+        return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL], address=user[Constants.ADDRESS])
+    return render_template(Constants.PROFILE_HTML, username=user[Constants.USERNAME], email=user[Constants.EMAIL], address=None)
 
 
 @blissmake.route(Constants.UPDATE_PROFILE, methods=[Constants.GET, Constants.POST])
@@ -271,6 +270,14 @@ def authenticate_user():
         username = request.form.get(Constants.USERNAME)
         password = request.form.get(Constants.PASSWORD)
         
+        if Constants.ADMIN in username:
+            admin_data = mongo.db.admin_credentials.find_one({Constants.USERNAME : username})
+            admin_password = admin_data[Constants.PASSWORD]
+            if admin_password == password:
+                products = mongo.db.products.find({})
+                product_list = list(products)
+                return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list, username=username, password=password)
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.USERNAME_PWD_WRNG))
         user = mongo.db.users.find_one({Constants.USERNAME: username})
         if user:
             if check_password_hash(user[Constants.PASSWORD], password):
@@ -431,21 +438,21 @@ def payment(username):
             total_price=total_price
         )
 
-@blissmake.route('/editaddress/<username>', methods=[Constants.GET, Constants.POST])
+@blissmake.route(Constants.EDIT_ADDR, methods=[Constants.GET, Constants.POST])
 def edit_address_page(username):
-    user_data = mongo.db.users.find_one({'username': username})
+    user_data = mongo.db.users.find_one({Constants.USERNAME: username})
     if user_data:
-        address = user_data.get('address', "")
-        email = user_data.get('email', "")
-    return render_template('edit_address.html', username=username, address=address, email=email)
+        address = user_data.get(Constants.ADDRESS, Constants.EMPTY)
+        email = user_data.get(Constants.EMAIL, Constants.EMPTY)
+    return render_template(Constants.EDIT_ADDR_HTML, username=username, address=address, email=email)
 
-@blissmake.route('/edit_address/<username>', methods=[Constants.GET, Constants.POST])
+@blissmake.route(Constants.EDIT_ADDRESS, methods=[Constants.GET, Constants.POST])
 def edit_address(username):
     if request.method == Constants.POST:
-        new_address = request.form['address']
+        new_address = request.form[Constants.ADDRESS]
         mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: {Constants.ADDRESS: new_address}})
-        flash('Address Updated Successfully', 'success')
-        return redirect(url_for('blissmake.payment', username=username))
+        flash(Constants.ADDR_UPDATED, Constants.SUCCESS)
+        return redirect(url_for(Constants.BLISSMAKE_PAYMENT, username=username))
 
 @blissmake.route(Constants.PAYMENT_QR, methods=[Constants.POST])
 def payment_qr(username):

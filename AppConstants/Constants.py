@@ -54,6 +54,8 @@ class Constants:
     FORGOT_PWD = '/forgotpassword'
     VERIFY_OTP = '/blissmake/verify_otp'
     RESET_PWD = '/reset_password/<email>'
+    EDIT_ADDR = '/editaddress/<username>'
+    EDIT_ADDRESS = '/edit_address/<username>'
 
     #HTML
     INDEX_HTML = 'index.html'
@@ -73,7 +75,7 @@ class Constants:
     VERIFY_OTP_HTML = 'verify_otp.html'
     FORGOT_PWD_HTML = 'forgot_password.html'
     RESET_PWD_HTML = 'reset_password.html'
-    
+    EDIT_ADDR_HTML = 'edit_address.html'
 
 
     #Route HTML
@@ -86,6 +88,7 @@ class Constants:
     ADMIN_INDEX = 'admin.admin_index'
     BLISSMAKE_PROFILE = 'blissmake.profile'
     BLISSMAKE_FORGOT_PWD = 'blissmake.forgot_password'
+    BLISSMAKE_PAYMENT = 'blissmake.payment'
 
     EMPTY = ''
     USERNAME = 'username'
@@ -99,6 +102,7 @@ class Constants:
     OTP = 'otp'
     EXP_TIME = "expiration_time"
     SUB = "Your OTP Code"
+    USERNAME_PWD_WRNG = 'Username / Password is wrong!'
     USER_EXISTS = "User Already Exists!"
     USER_NOT_EXISTS = 'User Not Exists'
     ADDED_TO_CART = 'Added to Cart Successfully'
@@ -124,6 +128,7 @@ class Constants:
     PWD_UPDATED = 'Your password has been updated!'
     ERR_UPDATING_PWD = 'Error updating password. Please try again'
     EMAIL_PWD_REQ = 'Email and new password are required.'
+    ADDR_UPDATED = 'Address Updated Successfully'
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"

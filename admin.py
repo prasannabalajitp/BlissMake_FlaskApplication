@@ -83,4 +83,4 @@ def delete_product(product_id):
 @admin.route(Constants.LOGOUT_ADM, methods=[Constants.GET])
 def logout():
     session.clear()
-    return redirect(url_for(Constants.ADMIN_INDEX))
+    return redirect(url_for(Constants.BLISSMAKE_INDEX))

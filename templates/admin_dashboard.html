@@ -13,6 +13,11 @@
     <header class="admin-header">
         <img class="admin-logo-img" src="{{ url_for('static', filename='img/logo.png') }}" alt="BlissMake Logo">
         <h1 class="admin-header-content">Admin Dashboard</h1>
+        <div class="user-actions">
+            <div class="icons">
+                <a href="{{ url_for('blissmake.logout', username=username) }}"><i class="fas fa-sign-out-alt"></i></a>
+            </div>
+        </div>
     </header>
     <main class="admin-main">
         <div class="dashboard-container">
@@ -61,7 +66,7 @@
         </div>
         <br>
         <div class="logout-wrapper">
-            <a href="{{ url_for('admin.logout') }}">
+            <a href="{{ url_for('blissmake.logout', username=username) }}">
                 <button class="logout-btn">Logout</button>
             </a>
         </div>
