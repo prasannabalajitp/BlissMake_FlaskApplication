@@ -266,6 +266,7 @@ def checkout(username):
         total_price=round(total_price, 2)
     )
 
+@blissmake.route('/home/<username>/<password>', methods=[Constants.POST])
 @blissmake.route(Constants.MAIN_HOME_PAGE, methods=[Constants.POST])
 def authenticate_user():
     if request.method == Constants.POST:

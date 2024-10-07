@@ -56,6 +56,7 @@ class Constants:
     RESET_PWD = '/reset_password/<email>'
     EDIT_ADDR = '/editaddress/<username>'
     EDIT_ADDRESS = '/edit_address/<username>'
+    ADM_RELOGIN = '/home/<username>/<password>'
 
     #HTML
     INDEX_HTML = 'index.html'

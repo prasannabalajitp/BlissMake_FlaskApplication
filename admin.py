@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify
 from app import mongo
 from AppConstants.Constants import Constants
 
@@ -16,6 +16,8 @@ def admin_login():
 
         admin = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
         if admin and admin[Constants.PASSWORD] == password:
+            session[Constants.USERNAME] = username
+            print(f"Logged in as: {session[Constants.USERNAME]}")
             products = mongo.db.products.find({})
             product_list = list(products)
 
@@ -24,6 +26,17 @@ def admin_login():
             flash(Constants.INVALID_ADM_PWD)
             return redirect(url_for(Constants.ADMIN_INDEX))
     return render_template(Constants.ADMIN_LOGIN_HTML)
+
+@admin.route(Constants.ADM_RELOGIN, methods=[Constants.POST, Constants.GET])
+def re_login(username, password):
+    admin = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
+    if username == admin[Constants.USERNAME] and password == admin[Constants.PASSWORD]:
+        password = admin[Constants.PASSWORD]
+        products = mongo.db.products.find({})
+        product_list = list(products)
+
+        return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list, username=username, password=password)
+    
 
 @admin.route(Constants.ADD_PRODUCT, methods=[Constants.POST])
 def add_product():
@@ -64,9 +77,12 @@ def edit_product(product_id):
         product_list = list(products)
         
         return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list)
-    
+    admin__detail = mongo.db.admin_credentials.find({})
+    for admin in admin__detail:
+        username = admin[Constants.USERNAME]
+        password = admin[Constants.PASSWORD]
     product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
-    return render_template(Constants.ADMIN_EDIT_HTML, product=product)
+    return render_template(Constants.ADMIN_EDIT_HTML, product=product, username=username, password=password)
 
 
 @admin.route(Constants.DEL_PRODCUT, methods=[Constants.GET])

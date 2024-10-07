@@ -783,10 +783,12 @@ header.admin-header {
     text-decoration: none;
     color: #7f19ec;
     font-size: 1rem;
+    font-weight: bold;
 }
 
 .admin-link:hover {
-    color: #5a13b1;
+    color: #3e0f77;
+    font-weight: bolder;
 }
 
 /* Logout button */

@@ -30,8 +30,16 @@
                 <input type="file" name="product_img" value="{{ product.product_img }}" class="admin-input-form">
                 <button type="submit" class="admin-button">Update Product</button>
             </form>
-            <a href="{{ url_for('admin.admin_login') }}" class="admin-link">Go Back</a>
+            <a href="{{ url_for('admin.re_login', username=username, password=password ) }}" class="admin-link">Go Back</a>
         </div>
     </main>
+    <footer>
+        <p>&copy; 2024 BlissMake Creations. All rights reserved.</p>
+        <div>
+            <a href="https://www.instagram.com/blissmake_?igsh=MWZpM29lOHo2MWxvaA==" target="_blank">
+                <i class="fab fa-instagram"></i> Follow us on Instagram
+            </a>
+        </div>
+    </footer>
 </body>
 </html>
