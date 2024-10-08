@@ -28,7 +28,7 @@ def admin_login():
     return render_template(Constants.ADMIN_LOGIN_HTML)
 
 @admin.route(Constants.ADM_RELOGIN, methods=[Constants.POST, Constants.GET])
-def re_login(username, password):
+def re_login(username, password, product_id):
     admin = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
     if username == admin[Constants.USERNAME] and password == admin[Constants.PASSWORD]:
         password = admin[Constants.PASSWORD]
@@ -36,7 +36,8 @@ def re_login(username, password):
         product_list = list(products)
 
         return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list, username=username, password=password)
-    
+    else:
+        return redirect(url_for(Constants.ADMIN_EDIT_PROD, product_id=product_id))
 
 @admin.route(Constants.ADD_PRODUCT, methods=[Constants.POST])
 def add_product():
@@ -72,7 +73,6 @@ def edit_product(product_id):
             }}
         )
         flash(Constants.PROD_UPDATED, Constants.INFO)
-        # Fetch the updated product list after editing
         products = mongo.db.products.find({})
         product_list = list(products)
         
@@ -87,7 +87,6 @@ def edit_product(product_id):
 
 @admin.route(Constants.DEL_PRODCUT, methods=[Constants.GET])
 def delete_product(product_id):
-    # Delete the product from the database
     mongo.db.products.delete_one({Constants.PRODUCT_ID: product_id})
     flash(Constants.PROD_DEL, Constants.SUCCESS)
 

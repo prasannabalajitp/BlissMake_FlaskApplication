@@ -56,7 +56,7 @@ class Constants:
     RESET_PWD = '/reset_password/<email>'
     EDIT_ADDR = '/editaddress/<username>'
     EDIT_ADDRESS = '/edit_address/<username>'
-    ADM_RELOGIN = '/home/<username>/<password>'
+    ADM_RELOGIN = '/home/<username>/<password>/<product_id>'
 
     #HTML
     INDEX_HTML = 'index.html'
@@ -87,6 +87,7 @@ class Constants:
     BLISSMAKE_PROD_DETAIL = 'blissmake.product_detail'
     BLISSMAKE_GET_FAV = 'blissmake.get_favorite'
     ADMIN_INDEX = 'admin.admin_index'
+    ADMIN_EDIT_PROD = 'admin.edit_product'
     BLISSMAKE_PROFILE = 'blissmake.profile'
     BLISSMAKE_FORGOT_PWD = 'blissmake.forgot_password'
     BLISSMAKE_PAYMENT = 'blissmake.payment'

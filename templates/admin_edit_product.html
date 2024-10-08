@@ -30,7 +30,7 @@
                 <input type="file" name="product_img" value="{{ product.product_img }}" class="admin-input-form">
                 <button type="submit" class="admin-button">Update Product</button>
             </form>
-            <a href="{{ url_for('admin.re_login', username=username, password=password ) }}" class="admin-link">Go Back</a>
+            <a href="{{ url_for('admin.re_login', username=username, password=password, product_id=product.product_id ) }}" class="admin-link">Go Back</a>
         </div>
     </main>
     <footer>
