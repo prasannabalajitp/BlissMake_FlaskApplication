@@ -32,6 +32,7 @@ class Constants:
     REGISTER = '/register'
     PROFILE_URL = '/profile/<username>'
     HOME = '/home/<username>'
+    HOME_PAGE = '/home/<username>/<password>'
     CHECKOUT = '/checkout/<username>'
     MAIN_HOME_PAGE = '/home'
     PROD_DET_GUEST = '/product/<product_id>/'
@@ -161,6 +162,12 @@ class Constants:
     TXN_NOTE = "Payment for QR"
     STRF_TIME = '%Y%m%dT%H%M%SZ'
     VALID_EMAIL = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    CACHE_CTRL = "Cache-Control"
+    CACHE_CTRL_VAL = "no-cache, no-store, must-revalidate"
+    PRAGMA = "Pragma"
+    PRAGMA_VAL = "no-cache"
+    EXPIRES = "Expires"
+    EXPIRES_VAL = "0"
 
     #AnalyticClient.py
     INTERCEPTION_KEY = "interception"

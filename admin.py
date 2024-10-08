@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify
 from app import mongo
 from AppConstants.Constants import Constants
+from models.Product import ProductDetail
 
 admin = Blueprint(Constants.ADMIN, __name__, url_prefix=Constants.ADMIN_ROOT_URL)
 
@@ -47,13 +48,14 @@ def add_product():
     product_price = request.form[Constants.PRODUCT_PRICE]
     product_img = request.form[Constants.PRODUCT_IMG]
     
-    mongo.db.products.insert_one({
-        'product_id': product_id,
-        'product_name': product_name,
-        'product_price': product_price,
-        'product_img': product_img
-    })
-    
+    mongo.db.products.insert_one(
+        ProductDetail(
+            product_id=product_id,
+            product_name=product_name,
+            product_price=product_price,
+            product_img=product_img
+        ).dict()
+    )
     flash(Constants.PROD_ADDED, Constants.SUCCESS)
     products = mongo.db.products.find({})
     product_list = list(products)

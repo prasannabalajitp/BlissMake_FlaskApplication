@@ -5,3 +5,7 @@ class User(BaseModel):
     email: str
     address: str
     phone: str
+
+class UpdateAddres(BaseModel):
+    address: str
+    phone: str
