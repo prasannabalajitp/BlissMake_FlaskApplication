@@ -19,16 +19,29 @@ blissmake = Blueprint(Constants.BLISSMAKE, __name__, url_prefix=Constants.ROOT_U
 @blissmake.route(Constants.ROOT)
 def index():
     product_list = BlissmakeService.index_page()
-    return render_template(
+    response = make_response(render_template(
         Constants.INDEX_HTML, 
         products=product_list
-    )
+    ))
+
+    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+
+    return response
+
 
 @blissmake.route(Constants.LOGIN, methods=[Constants.GET, Constants.POST])
 def login():
-    return render_template(
+    response = make_response(render_template(
         Constants.LOGIN_HTML
-    )
+    ))
+
+    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+
+    return response
 
 @blissmake.route(Constants.GENERATE_OTP, methods=[Constants.GET, Constants.POST])
 def generate_otp():
@@ -128,24 +141,42 @@ def register():
         email = request.form.get(Constants.EMAIL)
         password = request.form.get(Constants.PASSWORD)
 
-        response = BlissmakeService.user_exists(username=username)
-        if response == Constants.USER_EXISTS:
+        reg_response = BlissmakeService.user_exists(username=username)
+        if reg_response == Constants.USER_EXISTS:
             flash(Constants.USER_EXISTS, category=Constants.ERROR)
-            return render_template(Constants.REGISTER_HTML, messages=Constants.USER_EXISTS)
+            response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.USER_EXISTS))
+            response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+            response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+            response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+            
+            return response
 
         product_list = BlissmakeService.register_service(username=username, email=email, password=password)
-        return render_template(
+        response = make_response(render_template(
             Constants.HOME_HTML, 
             username=username, 
             products=product_list
-        )
+        ))
+        response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+        response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+        response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+        
+        return response
 
-    return render_template(
+
+    response = make_response(render_template(
         Constants.REGISTER_HTML
-    )
+    ))
+
+    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+    
+    return response
 
 @blissmake.route(Constants.PROFILE_URL)
 def profile(username):
+    print(f'Session : {session}')
     if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     if username == Constants.GUEST:
@@ -154,14 +185,14 @@ def profile(username):
     user = mongo.db.users.find_one({Constants.USERNAME: username})
     if Constants.ADDRESS in user and user[Constants.ADDRESS]:
         if Constants.PHONE in user:
-            return render_template(
+            render_template(
                 Constants.PROFILE_HTML, 
                 username=user[Constants.USERNAME], 
                 email=user[Constants.EMAIL], 
                 address=user[Constants.ADDRESS], 
                 phone=user[Constants.PHONE]
             )
-        return render_template(
+        render_template(
             Constants.PROFILE_HTML, 
             username=user[Constants.USERNAME], 
             email=user[Constants.EMAIL], 
