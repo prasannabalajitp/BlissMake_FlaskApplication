@@ -64,7 +64,21 @@ class BlissmakeService:
             product_price = product[Constants.PRODUCT_PRICE]
             return product_name, product_img, product_price
 
+    @staticmethod
+    def get_user_address(username):
+        user_data = mongo.db.users.find_one({Constants.USERNAME : username})
+        if user_data:
+            address = user_data.get(Constants.ADDRESS, Constants.EMPTY)
+            email = user_data.get(Constants.EMAIL, Constants.EMPTY)
 
+            return address, email
+        
+    @staticmethod
+    def update_user_address(username, new_address):
+            result = mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: {Constants.ADDRESS: new_address}})
+            print(f'RESULT : {result.acknowledged}')
+            return result.acknowledged
+        
     @staticmethod
     def product_detail_service(product_id):
         product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})

@@ -421,7 +421,7 @@ def update_quantity(product_id, action, username):
             return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     
     cart_products, total_price = BlissmakeService.update_cart_quantity(prod_id=product_id, action=action, username=username)
-    
+
     if cart_products in [Constants.CART_NOT_FOUND, Constants.PROD_NOT_FOUND, Constants.CART_EMPTY]:
         flash(cart_products, Constants.ERROR1)
         response = make_response(redirect(url_for(Constants.BLISSMAKE_GETCART, username=username)))
@@ -458,19 +458,30 @@ def payment(username):
 
 @blissmake.route(Constants.EDIT_ADDR, methods=[Constants.GET, Constants.POST])
 def edit_address_page(username):
-    user_data = mongo.db.users.find_one({Constants.USERNAME: username})
-    if user_data:
-        address = user_data.get(Constants.ADDRESS, Constants.EMPTY)
-        email = user_data.get(Constants.EMAIL, Constants.EMPTY)
-    return render_template(Constants.EDIT_ADDR_HTML, username=username, address=address, email=email)
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    address, email = BlissmakeService.get_user_address(username=username)
+    response = make_response(render_template(
+        Constants.EDIT_ADDR_HTML, 
+        username=username,
+         address=address, 
+         email=email
+    ))
+    BlissmakeService.response_headers(response)
+    return response
 
 @blissmake.route(Constants.EDIT_ADDRESS, methods=[Constants.GET, Constants.POST])
 def edit_address(username):
     if request.method == Constants.POST:
+        if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
         new_address = request.form[Constants.ADDRESS]
-        mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: {Constants.ADDRESS: new_address}})
-        flash(Constants.ADDR_UPDATED, Constants.SUCCESS)
-        return redirect(url_for(Constants.BLISSMAKE_PAYMENT, username=username))
+        result = BlissmakeService.update_user_address(username=username, new_address=new_address)
+        if result == True:
+            flash(Constants.ADDR_UPDATED, Constants.SUCCESS)
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_PAYMENT, username=username)))
+            BlissmakeService.response_headers(response)
+            return response
 
 @blissmake.route(Constants.PAYMENT_QR, methods=[Constants.POST])
 def payment_qr(username):
