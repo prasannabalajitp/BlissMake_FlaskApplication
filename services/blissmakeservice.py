@@ -1,9 +1,10 @@
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import session
 from AppConstants.Constants import Constants
 from app import mongo
 from models.Product import ProductDetail, Product
 from models.User import UpdateAddres
-import re
+import re, uuid
 
 class BlissmakeService:
 
@@ -149,13 +150,47 @@ class BlissmakeService:
         return Constants.PRF_UPDATED
 
 
-    # @staticmethod
-    # def checkout(username):
-    #     cart = mongo.db.usercart.find_one({
-    #         Constants.USERNAME : username
-    #     })
-    #     if not cart:
-    #         return Constants.CART_NOT_FOUND
-    #     products = cart.get(Constants.PRODUCTS, [])
-    #     total_price = BlissmakeService.calculate_total_price(products)
-    #     return products, total_price
+    @staticmethod
+    def checkout(username):
+        cart = mongo.db.usercart.find_one({
+            Constants.USERNAME : username
+        })
+        if not cart:
+            return Constants.CART_NOT_FOUND
+        products = cart.get(Constants.PRODUCTS, [])
+        total_price = BlissmakeService.calculate_total_price(products)
+        return products, round(total_price,2)
+    
+    @staticmethod
+    def admin_login(username, password):
+        print(f'USERNAME : {username}\tPASSWORD : {password}')
+        if Constants.ADMIN in username:
+            admin_data = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
+            if admin_data:
+                admin_password = admin_data[Constants.PASSWORD]
+                if admin_password == password:
+                    products = mongo.db.products.find({})
+                    product_list = list(products)
+                    return product_list
+                return Constants.USERNAME_PWD_WRNG
+            return Constants.INVALID_ADM_PWD
+    
+    @staticmethod
+    def user_login(username, password):
+        user = mongo.db.users.find_one({Constants.USERNAME: username})
+        if user:
+            session[Constants.USER_ID] = str(uuid.uuid4())
+            session[Constants.USERNAME] = username
+            print(f'Session : {session}')
+            if check_password_hash(user[Constants.PASSWORD], password):
+                session[Constants.USERNAME] = username
+                return Constants.SUCCESS
+            return Constants.INVALID_PASSWORD
+        return Constants.USER_NOT_EXISTS
+    
+
+    @staticmethod
+    def response_headers(response):
+        response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+        response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+        response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL

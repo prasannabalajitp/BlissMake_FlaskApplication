@@ -157,6 +157,7 @@ class Constants:
     INCREASE = 'increase'
     DECREASE = 'decrease'
     SUCCESS = "success"
+    FAILURE = "failure"
     UPI_ID = 'UPI_ID'
     PAYEE_NAME = 'PAYEE_NAME'
     TXN_NOTE = "Payment for QR"
