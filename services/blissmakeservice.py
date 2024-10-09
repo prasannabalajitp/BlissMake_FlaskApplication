@@ -2,6 +2,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from AppConstants.Constants import Constants
 from app import mongo
 from models.Product import ProductDetail, Product
+from models.User import UpdateAddres
 import re
 
 class BlissmakeService:
@@ -128,3 +129,33 @@ class BlissmakeService:
             mongo.db.usercart.insert_one(data)
         return Constants.ADDED_TO_CART
     
+    @staticmethod
+    def get_profile(username):
+        user = mongo.db.users.find_one({Constants.USERNAME : username})
+        return user
+    
+    @staticmethod
+    def update_profile_servcice(username, new_password, confirm_password, new_address, phone):
+        user = mongo.db.users.find_one({Constants.USERNAME: username})
+        if not user:
+            return Constants.USER_NOT_EXISTS
+        update_data = UpdateAddres(address=new_address, phone=phone).dict()
+        if new_password and new_password == confirm_password:
+            hashed_password = generate_password_hash(new_password)
+            update_data[Constants.PASSWORD] = hashed_password
+        elif new_password != confirm_password:
+            return Constants.PWD_NOT_MATCH
+        mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: update_data})
+        return Constants.PRF_UPDATED
+
+
+    # @staticmethod
+    # def checkout(username):
+    #     cart = mongo.db.usercart.find_one({
+    #         Constants.USERNAME : username
+    #     })
+    #     if not cart:
+    #         return Constants.CART_NOT_FOUND
+    #     products = cart.get(Constants.PRODUCTS, [])
+    #     total_price = BlissmakeService.calculate_total_price(products)
+    #     return products, total_price

@@ -176,36 +176,50 @@ def register():
 
 @blissmake.route(Constants.PROFILE_URL)
 def profile(username):
-    print(f'Session : {session}')
     if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     if username == Constants.GUEST:
         return render_template(Constants.LOGIN_HTML)
 
-    user = mongo.db.users.find_one({Constants.USERNAME: username})
+    user = BlissmakeService.get_profile(username=username)
     if Constants.ADDRESS in user and user[Constants.ADDRESS]:
         if Constants.PHONE in user:
-            render_template(
+            response = make_response(render_template(
                 Constants.PROFILE_HTML, 
                 username=user[Constants.USERNAME], 
                 email=user[Constants.EMAIL], 
                 address=user[Constants.ADDRESS], 
                 phone=user[Constants.PHONE]
-            )
-        render_template(
+            ))
+            response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+            response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+            response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+
+            return response
+        response = make_response(render_template(
             Constants.PROFILE_HTML, 
             username=user[Constants.USERNAME], 
             email=user[Constants.EMAIL], 
             address=user[Constants.ADDRESS], 
-            phone=None
-        )
-    return render_template(
+            phone=Constants.EMPTY
+        ))
+        response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+        response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+        response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+
+        return response
+    response = make_response(render_template(
         Constants.PROFILE_HTML, 
         username=user[Constants.USERNAME], 
         email=user[Constants.EMAIL], 
         address=None, 
         phone=None
-    )
+    ))
+    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+
+    return response
 
 
 @blissmake.route(Constants.UPDATE_PROFILE, methods=[Constants.GET, Constants.POST])
@@ -216,29 +230,29 @@ def update_profile(username):
         new_password = request.form[Constants.PASSWORD]
         confirm_password = request.form[Constants.CNF_PWD]
 
-        user = mongo.db.users.find_one({Constants.USERNAME: username})
-        if not user:
+        user = BlissmakeService.update_profile_servcice(username=username, new_password=new_password, confirm_password=confirm_password, new_address=new_address, phone=phone)
+        if user == Constants.USER_NOT_EXISTS:
             flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
-            return redirect(url_for(Constants.PROFILE, username=username))
-        
-        update_data = UpdateAddres(address=new_address, phone=phone).dict()
-        if new_password and new_password == confirm_password:
-            hashed_password = generate_password_hash(new_password)
-            update_data[Constants.PASSWORD] = hashed_password
-        elif new_password != confirm_password:
+            response = make_response(redirect(url_for(Constants.PROFILE, username=username)))
+            return response
+        elif user == Constants.PWD_NOT_MATCH:
             flash(Constants.PWD_NOT_MATCH, Constants.ERROR)
-            return redirect(url_for(Constants.PROFILE, username=username))
-        
-        mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: update_data})
-
-        flash(Constants.PRF_UPDATED, Constants.SUCCESS)
-        return redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username))
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username)))
+            return response
+        elif user == Constants.PRF_UPDATED:
+            flash(Constants.PRF_UPDATED, Constants.SUCCESS)
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username)))
+            return response
     
     user = mongo.db.users.find_one({Constants.USERNAME: username})
 
     if not user:
         flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
-        return redirect(url_for(Constants.PROFILE, username=username))
+        response = make_response(redirect(url_for(Constants.PROFILE, username=username)))
+        response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+        response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+        response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+        return response
     
     user_data = User(
         username=user[Constants.USERNAME],
@@ -246,7 +260,12 @@ def update_profile(username):
         address=user.get(Constants.ADDRESS, Constants.EMPTY),
         phone=user.get(Constants.PHONE, Constants.EMPTY)).dict()
 
-    return render_template(Constants.PROFILE_HTML, **user_data)
+    response = make_response(render_template(Constants.PROFILE_HTML, **user_data))
+
+    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+    return response
 
 @blissmake.route(Constants.HOME, methods=[Constants.POST, Constants.GET])
 def home(username):
