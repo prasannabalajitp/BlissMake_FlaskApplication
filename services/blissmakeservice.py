@@ -48,6 +48,22 @@ class BlissmakeService:
             return Constants.USER_EXISTS
         else:
             return Constants.USER_NOT_EXISTS
+        
+    @staticmethod
+    def response_headers(response):
+        response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+        response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+        response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+        
+    @staticmethod
+    def get_product(prod_id):
+        product = mongo.db.products.find_one({Constants.PRODUCT_ID: prod_id})
+        if product:
+            product_name = product[Constants.PRODUCT_NAME]
+            product_img = product[Constants.PRODUCT_IMG]
+            product_price = product[Constants.PRODUCT_PRICE]
+            return product_name, product_img, product_price
+
 
     @staticmethod
     def product_detail_service(product_id):
@@ -104,13 +120,10 @@ class BlissmakeService:
         return del_response.acknowledged
     
     @staticmethod
-    def add_to_cart_service(username, quantity, product_id):
-        product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
-        product_name = product[Constants.PRODUCT_NAME]
-        product_img = product[Constants.PRODUCT_IMG]
-        product_price = product[Constants.PRODUCT_PRICE]
+    def add_to_cart_service(username, prod_id, quantity):
+        product_name, product_img, product_price = BlissmakeService.get_product(prod_id=prod_id)
         new_product = Product(
-                product_id=product_id, 
+                product_id=prod_id, 
                 product_name=product_name, 
                 product_price=product_price, 
                 product_img=product_img, 
@@ -130,6 +143,27 @@ class BlissmakeService:
             mongo.db.usercart.insert_one(data)
         return Constants.ADDED_TO_CART
     
+    @staticmethod
+    def update_cart_quantity(prod_id, action, username):
+        cart = mongo.db.usercart.find_one({Constants.USERNAME : username})
+        if not cart:
+            return Constants.CART_NOT_FOUND, None
+        
+        updated = BlissmakeService.update_product_quantity_in_cart(cart=cart, product_id=prod_id, action=action)
+        if not updated:
+            return Constants.PROD_NOT_FOUND
+        mongo.db.usercart.update_one(
+            {Constants.USERNAME: username},
+            {Constants.SET: {Constants.PRODUCTS: cart[Constants.PRODUCTS]}}
+        )
+        cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
+        cart_products = cart[Constants.PRODUCTS] if cart else []
+        total_price = BlissmakeService.calculate_total_price(cart_products)
+        if not cart_products:
+            return Constants.CART_EMPTY, None
+        return cart_products, total_price
+
+
     @staticmethod
     def get_profile(username):
         user = mongo.db.users.find_one({Constants.USERNAME : username})
@@ -187,10 +221,3 @@ class BlissmakeService:
                 return Constants.SUCCESS
             return Constants.INVALID_PASSWORD
         return Constants.USER_NOT_EXISTS
-    
-
-    @staticmethod
-    def response_headers(response):
-        response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-        response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-        response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
