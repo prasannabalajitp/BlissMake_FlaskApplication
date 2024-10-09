@@ -46,7 +46,7 @@ def authenticate_user():
 
         if Constants.ADMIN in username:
             admin_data = BlissmakeService.admin_login(username=username, password=password)
-            if admin_data == Constants.USERNAME_PWD_WRNG or Constants.INVALID_ADM_PWD:
+            if admin_data in [Constants.USERNAME_PWD_WRNG, Constants.INVALID_ADM_PWD]:
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=admin_data)))
                 BlissmakeService.response_headers(response)
                 return response
