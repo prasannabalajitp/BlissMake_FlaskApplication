@@ -1,15 +1,12 @@
 from flask import Blueprint, request, jsonify, redirect, url_for, session, render_template, flash, make_response    
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from flask_mail import Message
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 from app import mongo, mail
 from AppConstants.Constants import Constants
-from models.Product import ProductDetail, Product
-from models.Favorite import Favorite
-from models.User import User, UpdateAddres
 from services.blissmakeservice import BlissmakeService
-import pyqrcode, os, random, string, re, smtplib, uuid
+import os, random, string, smtplib
 
 load_dotenv()
 
@@ -370,9 +367,10 @@ def get_favorite(username):
         return render_template(Constants.LOGIN_HTML)
 
     favorites = BlissmakeService.get_favorites(username=username)
-
     if favorites == Constants.FAV_NOT_EXISTS:
-        response = make_response(render_template(Constants.FAV_HTML, username=username, message=Constants.FAV_NOT_EXISTS))
+        flash(favorites, Constants.ERROR)
+        response = make_response(render_template(Constants.FAV_HTML, username=username, messages=favorites, category=Constants.ERROR))
+        response = make_response(render_template(Constants.FAV_HTML, username=username, category=Constants.ERROR))
         BlissmakeService.response_headers(response)
         return response
 
@@ -438,23 +436,27 @@ def update_quantity(product_id, action, username):
 
 @blissmake.route(Constants.PAYMENT, methods=[Constants.GET, Constants.POST])
 def payment(username):
-    cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-    cart_products = cart[Constants.PRODUCTS] if cart else []
-    total_price = BlissmakeService.calculate_total_price(cart_products)
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    cart_products, total_price = BlissmakeService.get_cart_service(username=username)
 
     if request.method == Constants.POST:
         flash(Constants.PAYMENT_SUCCESS, Constants.SUCCESS)
-        return redirect(url_for(
+        response = make_response(redirect(url_for(
                 Constants.BLISSMAKE_HOME, 
                 username=username
-            ))
+            )))
+        BlissmakeService.response_headers(response)
+        return response
     
-    return render_template(
+    response = make_response(render_template(
             Constants.PAYMENT_HTML, 
             username=username, 
             cart_products=cart_products, 
             total_price=total_price
-        )
+        ))
+    BlissmakeService.response_headers(response)
+    return response
 
 @blissmake.route(Constants.EDIT_ADDR, methods=[Constants.GET, Constants.POST])
 def edit_address_page(username):
@@ -485,81 +487,40 @@ def edit_address(username):
 
 @blissmake.route(Constants.PAYMENT_QR, methods=[Constants.POST])
 def payment_qr(username):
-    cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-    if not cart:
+    if request.method == Constants.POST:
+        if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    qr_filename, total_price = BlissmakeService.payment_qr_service(username=username)
+    if qr_filename == Constants.CART_NOT_FOUND:
         flash(Constants.CART_NOT_FOUND, Constants.ERROR)
-        return redirect(url_for(
-                Constants.BLISSMAKE_HOME, username=username
-            ))
-    
-    total_price = BlissmakeService.calculate_total_price(cart.get(Constants.PRODUCTS, []))
-    
-    upi_id = os.getenv(Constants.UPI_ID)
-    payee_name = os.getenv(Constants.PAYEE_NAME)
-    amount = round(total_price, 2)
-    transaction_note = Constants.TXN_NOTE
-
-    upi_url = f"upi://pay?pa={upi_id}&pn={payee_name}&am={amount}&cu=INR&tn={transaction_note}"
-
-    time = datetime.now(timezone.utc).strftime(Constants.STRF_TIME)
-    qr = pyqrcode.create(upi_url)
-    qr_filename = f'static/qr/payment_qr_{username}_{time}.png'
-    qr.png(qr_filename, scale=8)
-
-    return render_template(
-            Constants.QR_PAYMENT_HTML, 
-            username=username, 
-            qr_image=qr_filename, 
-            total_price=round(total_price)
-        )
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_HOME, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
+    response = make_response(render_template(Constants.QR_PAYMENT_HTML, username=username, qr_image=qr_filename, total_price=total_price))
+    BlissmakeService.response_headers(response)
+    return response
 
 @blissmake.route(Constants.ADD_TO_WISHLIST, methods=[Constants.POST, Constants.GET])
 def add_to_wishlist(username, product_id):
     if username == Constants.GUEST:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     
-    product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
-    if not product:
-        flash(Constants.PROD_NOT_FOUND, Constants.ERROR)
-        return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
-    
-    user_favorites = mongo.db.favorites.find_one({
-        Constants.USERNAME: username,
-    })
-    if user_favorites:
-        if any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS]):
-            flash(Constants.PROD_IN_WISHLIST, Constants.INFO)
-            return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
-        
-        mongo.db.favorites.update_one(
-            {Constants.USERNAME: username},
-            {Constants.PUSH: {
-                Constants.PRODUCTS: ProductDetail(
-                    product_id=product[Constants.PRODUCT_ID],
-                    product_name=product[Constants.PRODUCT_NAME],
-                    product_price=product[Constants.PRODUCT_PRICE],
-                    product_img=product[Constants.PRODUCT_IMG]
-                ).dict()
-            }}
-        )
-        flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
+    favorites = BlissmakeService.add_to_wishlist_service(username=username, product_id=product_id)
+    if favorites in [Constants.PROD_IN_WISHLIST, Constants.PROD_NOT_FOUND]:
+        if favorites == Constants.PROD_IN_WISHLIST:
+            flash(favorites, Constants.INFO)
+        else:
+            flash(favorites, Constants.ERROR)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
     else:
-        data = ProductDetail(
-            product_id=product[Constants.PRODUCT_ID],
-            product_name=product[Constants.PRODUCT_NAME],
-            product_price=product[Constants.PRODUCT_PRICE],
-            product_img=product[Constants.PRODUCT_IMG]
-        ).dict()
-
-        favorite_data = Favorite(
-            username=username,
-            products=[data]
-        ).dict()
-        
-        result = mongo.db.favorites.insert_one(favorite_data)
-        favorite_data[Constants.ID] = str(result.inserted_id)
-        flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
-    return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
+        flash(favorites,Constants.SUCCESS)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
 
 
 
@@ -568,26 +529,22 @@ def remove_favorite(username, product_id):
     if username == Constants.GUEST:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     
-    product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
-    if not product:
+    user_favorites = BlissmakeService.remove_from_favorites(username=username, product_id=product_id)
+    if user_favorites == Constants.PROD_NOT_FOUND:
         flash(Constants.PROD_NOT_FOUND, Constants.ERROR)
-        return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
-    
-    user_favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
-    if user_favorites:
-        product_exist = any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS])
-        if product_exist:
-            mongo.db.favorites.update_one(
-                {Constants.USERNAME: username},
-                {Constants.PULL: {Constants.PRODUCTS: {Constants.PRODUCT_ID: product_id}}}
-            )
-            flash(Constants.REM_FRM_WISHLIST, Constants.SUCCESS)
-        else:
-            flash(Constants.PROD_NOT_WISHLIST, Constants.INFO)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
+    elif user_favorites in [Constants.PROD_NOT_WISHLIST, Constants.NO_FAV_FOUND]:
+        flash(user_favorites, Constants.INFO)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
     else:
-        flash(Constants.NO_FAV_FOUND, Constants.INFO)
-    
-    return redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username))
+        flash(user_favorites, Constants.SUCCESS)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
 
 @blissmake.route(Constants.LOGOUT, methods=[Constants.GET])
 def logout(username):

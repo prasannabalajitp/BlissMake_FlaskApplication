@@ -1,11 +1,16 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
+from dotenv import load_dotenv
+from datetime import datetime, timezone
 from AppConstants.Constants import Constants
 from app import mongo
 from models.Product import ProductDetail, Product
 from models.User import UpdateAddres
-import re, uuid
+from models.Favorite import Favorite
+import re, uuid, os, pyqrcode
 
+
+load_dotenv()
 class BlissmakeService:
 
     @staticmethod
@@ -76,7 +81,6 @@ class BlissmakeService:
     @staticmethod
     def update_user_address(username, new_address):
             result = mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: {Constants.ADDRESS: new_address}})
-            print(f'RESULT : {result.acknowledged}')
             return result.acknowledged
         
     @staticmethod
@@ -102,11 +106,71 @@ class BlissmakeService:
     @staticmethod
     def get_favorites(username):
         favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
-        if not favorites:
+        if favorites is None:
+            return Constants.FAV_NOT_EXISTS
+        if not favorites.get(Constants.PRODUCTS):
             return Constants.FAV_NOT_EXISTS
         favorites[Constants.ID] = str(favorites[Constants.ID])
 
         return favorites
+
+    @staticmethod
+    def add_to_wishlist_service(username, product_id):
+        product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
+        if not product:
+            return Constants.PROD_NOT_FOUND
+        
+        user_favorites = mongo.db.favorites.find_one({
+            Constants.USERNAME: username
+        })
+        if user_favorites:
+            if any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS]):
+                return Constants.PROD_IN_WISHLIST
+            mongo.db.favorites.update_one(
+                {Constants.USERNAME : username},
+                {Constants.PUSH: {
+                Constants.PRODUCTS: ProductDetail(
+                        product_id=product[Constants.PRODUCT_ID],
+                        product_name=product[Constants.PRODUCT_NAME],
+                        product_price=product[Constants.PRODUCT_PRICE],
+                        product_img=product[Constants.PRODUCT_IMG]
+                    ).dict()
+                }}                
+            )
+            return Constants.ADDED_TO_WISHLIST
+        else:
+            data = ProductDetail(
+                product_id=product[Constants.PRODUCT_ID],
+                product_name=product[Constants.PRODUCT_NAME],
+                product_price=product[Constants.PRODUCT_PRICE],
+                product_img=product[Constants.PRODUCT_IMG]
+            ).dict()
+
+            favorite_data = Favorite(
+                username=username,
+                products=[data]
+            )
+            result = mongo.db.favorites.insert_one(favorite_data)
+            favorite_data[Constants.ID] = str(result.inserted_id)
+            return Constants.ADDED_TO_WISHLIST
+    
+    @staticmethod
+    def remove_from_favorites(username, product_id):
+        product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
+        if not product:
+            return Constants.PROD_NOT_FOUND
+        user_favorites = mongo.db.favorites.find_one({Constants.USERNAME : username})
+        if user_favorites:
+            product_exists = any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS])
+            if product_exists:
+                mongo.db.favorites.update_one(
+                    {Constants.USERNAME: username},
+                    {Constants.PULL: {Constants.PRODUCTS: {Constants.PRODUCT_ID: product_id}}}
+                )
+                return Constants.REM_FRM_WISHLIST
+            return Constants.PROD_NOT_WISHLIST
+        return Constants.NO_FAV_FOUND
+    
 
     @staticmethod
     def register_service(username, email, password):    
@@ -211,7 +275,6 @@ class BlissmakeService:
     
     @staticmethod
     def admin_login(username, password):
-        print(f'USERNAME : {username}\tPASSWORD : {password}')
         if Constants.ADMIN in username:
             admin_data = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
             if admin_data:
@@ -229,9 +292,30 @@ class BlissmakeService:
         if user:
             session[Constants.USER_ID] = str(uuid.uuid4())
             session[Constants.USERNAME] = username
-            print(f'Session : {session}')
             if check_password_hash(user[Constants.PASSWORD], password):
                 session[Constants.USERNAME] = username
                 return Constants.SUCCESS
             return Constants.INVALID_PASSWORD
         return Constants.USER_NOT_EXISTS
+
+    @staticmethod
+    def payment_qr_service(username):
+        cart = mongo.db.usercart.find_one({Constants.USERNAME : username})
+        if not cart:
+            return Constants.CART_NOT_FOUND, None
+        total_price = BlissmakeService.calculate_total_price(cart.get(Constants.PRODUCTS, []))
+
+        upi_id = os.getenv(Constants.UPI_ID)
+        payee_name = os.getenv(Constants.PAYEE_NAME)
+        amount = round(total_price, 2)
+        transaction_note = Constants.TXN_NOTE
+
+        upi_url = f"upi://pay?pa={upi_id}&pn={payee_name}&am={amount}&cu=INR&tn={transaction_note}"
+
+        time = datetime.now(timezone.utc).strftime(Constants.STRF_TIME)
+        qr = pyqrcode.create(upi_url)
+        qr_filename = f'static/qr/payment_qr_{username}_{time}.png'
+        qr.png(qr_filename, scale=8)
+
+        return qr_filename, total_price
+    

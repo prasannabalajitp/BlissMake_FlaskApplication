@@ -31,7 +31,7 @@
         <section class="fav-hero">
             <h2>{{ username }}'s Favorites</h2>
         </section>
-        {% if favorites %}
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 <div class="flash-messages">
@@ -41,6 +41,7 @@
                 </div>
             {% endif %}
         {% endwith %}
+        {% if favorites %}
         <div class="favorites-list">
             {% for product in favorites['products'] %}
             <div class="favorite-item">
