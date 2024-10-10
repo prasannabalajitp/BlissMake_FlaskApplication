@@ -5,6 +5,7 @@ from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
 from app import mongo, mail
 from AppConstants.Constants import Constants
+from models.User import User
 from services.blissmakeservice import BlissmakeService
 import os, random, string, smtplib
 
