@@ -214,15 +214,8 @@ class BlissmakeService:
     
     @staticmethod
     def user_login(username, password):
-        user = mongo.db.users.find_one({Constants.USERNAME: username})
-        if user:
-            session[Constants.USER_ID] = str(uuid.uuid4())
-            session[Constants.USERNAME] = username
-            if check_password_hash(user[Constants.PASSWORD], password):
-                session[Constants.USERNAME] = username
-                return Constants.SUCCESS
-            return Constants.INVALID_PASSWORD
-        return Constants.USER_NOT_EXISTS
+        user = BlissmakeRepository.user_login_repository(username=username, password=password)
+        return user
 
     @staticmethod
     def payment_qr_service(username):

@@ -88,7 +88,7 @@ class BlissmakeRepository:
             favorite_data = Favorite(
                 username=username,
                 products=[data]
-            )
+            ).dict()
             result = mongo.db.favorites.insert_one(favorite_data)
             favorite_data[Constants.ID] = str(result.inserted_id)
             return Constants.ADDED_TO_WISHLIST
@@ -189,3 +189,15 @@ class BlissmakeRepository:
                 return product_list
             return Constants.USERNAME_PWD_WRNG
         return Constants.INVALID_ADM_PWD
+    
+    @staticmethod
+    def user_login_repository(username, password):
+        user = mongo.db.users.find_one({Constants.USERNAME: username})
+        if user:
+            session[Constants.USER_ID] = str(uuid.uuid4())
+            session[Constants.USERNAME] = username
+            if check_password_hash(user[Constants.PASSWORD], password):
+                session[Constants.USERNAME] = username
+                return Constants.SUCCESS
+            return Constants.INVALID_PASSWORD
+        return Constants.USER_NOT_EXISTS
