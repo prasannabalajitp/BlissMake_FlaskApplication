@@ -397,9 +397,9 @@ def delete_from_cart(product_id, quantity, username):
 @blissmake.route(Constants.ADD_TO_CART, methods=[Constants.POST])
 def add_to_cart(product_id, username):
     if request.method == Constants.POST:
-        if username == Constants.GUEST:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
         if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        if username == Constants.GUEST:
             return redirect(url_for(Constants.BLISSMAKE_LOGIN))
         quantity = request.form.get(Constants.QUANTITY)
         add_cart = BlissmakeService.add_to_cart_service(username=username, prod_id=product_id, quantity=quantity)

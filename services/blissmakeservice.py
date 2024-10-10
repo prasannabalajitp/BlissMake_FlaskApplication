@@ -7,6 +7,7 @@ from app import mongo
 from models.Product import ProductDetail, Product
 from models.User import UpdateAddres
 from models.Favorite import Favorite
+from repository.blissmakerepository import BlissmakeRepository
 import re, uuid, os, pyqrcode
 
 
@@ -15,10 +16,8 @@ class BlissmakeService:
 
     @staticmethod
     def index_page():
-        products = mongo.db.products.find({})
-        product_list = list(products)
-
-        return product_list
+        products = BlissmakeRepository.get_all_products()
+        return products
 
     @staticmethod
     def update_product_quantity_in_cart(cart, product_id, action):
@@ -48,11 +47,8 @@ class BlissmakeService:
 
     @staticmethod
     def user_exists(username):
-        user_exists = mongo.db.users.find_one({Constants.USERNAME: username})
-        if user_exists:
-            return Constants.USER_EXISTS
-        else:
-            return Constants.USER_NOT_EXISTS
+        user_exists = BlissmakeRepository.chech_user_exists(username=username)
+        return user_exists
         
     @staticmethod
     def response_headers(response):
@@ -62,16 +58,17 @@ class BlissmakeService:
         
     @staticmethod
     def get_product(prod_id):
-        product = mongo.db.products.find_one({Constants.PRODUCT_ID: prod_id})
-        if product:
-            product_name = product[Constants.PRODUCT_NAME]
-            product_img = product[Constants.PRODUCT_IMG]
-            product_price = product[Constants.PRODUCT_PRICE]
-            return product_name, product_img, product_price
+        product = BlissmakeRepository.get_products(prod_id=prod_id)
+        if product is None:
+            return Constants.PROD_NOT_FOUND
+        product_name = product[Constants.PRODUCT_NAME]
+        product_img = product[Constants.PRODUCT_IMG]
+        product_price = product[Constants.PRODUCT_PRICE]
+        return product_name, product_img, product_price
 
     @staticmethod
     def get_user_address(username):
-        user_data = mongo.db.users.find_one({Constants.USERNAME : username})
+        user_data = BlissmakeRepository.get_user_data(username=username)
         if user_data:
             address = user_data.get(Constants.ADDRESS, Constants.EMPTY)
             email = user_data.get(Constants.EMAIL, Constants.EMPTY)
@@ -80,12 +77,12 @@ class BlissmakeService:
         
     @staticmethod
     def update_user_address(username, new_address):
-            result = mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: {Constants.ADDRESS: new_address}})
-            return result.acknowledged
+            result = BlissmakeRepository.update_address(username=username, address=new_address)
+            return result
         
     @staticmethod
     def product_detail_service(product_id):
-        product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
+        product = BlissmakeRepository.get_products(prod_id=product_id)
         product_data = ProductDetail(
             product_id=product[Constants.PRODUCT_ID],
             product_name=product[Constants.PRODUCT_NAME],
@@ -97,7 +94,7 @@ class BlissmakeService:
 
     @staticmethod
     def get_cart_service(username):
-        cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
+        cart = BlissmakeRepository.get_cart(username=username)
         cart_products = cart[Constants.PRODUCTS] if cart else []
         total_price = BlissmakeService.calculate_total_price(cart_products)
 
@@ -105,7 +102,7 @@ class BlissmakeService:
     
     @staticmethod
     def get_favorites(username):
-        favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
+        favorites = BlissmakeRepository.get_favorites(username=username)
         if favorites is None:
             return Constants.FAV_NOT_EXISTS
         if not favorites.get(Constants.PRODUCTS):
@@ -116,85 +113,41 @@ class BlissmakeService:
 
     @staticmethod
     def add_to_wishlist_service(username, product_id):
-        product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
+        product = BlissmakeRepository.get_products(prod_id=product_id)
         if not product:
             return Constants.PROD_NOT_FOUND
-        
-        user_favorites = mongo.db.favorites.find_one({
-            Constants.USERNAME: username
-        })
-        if user_favorites:
-            if any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS]):
-                return Constants.PROD_IN_WISHLIST
-            mongo.db.favorites.update_one(
-                {Constants.USERNAME : username},
-                {Constants.PUSH: {
-                Constants.PRODUCTS: ProductDetail(
-                        product_id=product[Constants.PRODUCT_ID],
-                        product_name=product[Constants.PRODUCT_NAME],
-                        product_price=product[Constants.PRODUCT_PRICE],
-                        product_img=product[Constants.PRODUCT_IMG]
-                    ).dict()
-                }}                
-            )
-            return Constants.ADDED_TO_WISHLIST
-        else:
-            data = ProductDetail(
-                product_id=product[Constants.PRODUCT_ID],
-                product_name=product[Constants.PRODUCT_NAME],
-                product_price=product[Constants.PRODUCT_PRICE],
-                product_img=product[Constants.PRODUCT_IMG]
-            ).dict()
 
-            favorite_data = Favorite(
-                username=username,
-                products=[data]
-            )
-            result = mongo.db.favorites.insert_one(favorite_data)
-            favorite_data[Constants.ID] = str(result.inserted_id)
-            return Constants.ADDED_TO_WISHLIST
+        user_favorites = BlissmakeRepository.get_favorites(username=username)
+        result =BlissmakeRepository.add_to_wishlist(username=username, user_favorites=user_favorites, product_id=product_id, product=product)
+        return result
     
     @staticmethod
     def remove_from_favorites(username, product_id):
-        product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
+        product = BlissmakeRepository.get_products(prod_id=product_id)
         if not product:
             return Constants.PROD_NOT_FOUND
-        user_favorites = mongo.db.favorites.find_one({Constants.USERNAME : username})
-        if user_favorites:
-            product_exists = any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS])
-            if product_exists:
-                mongo.db.favorites.update_one(
-                    {Constants.USERNAME: username},
-                    {Constants.PULL: {Constants.PRODUCTS: {Constants.PRODUCT_ID: product_id}}}
-                )
-                return Constants.REM_FRM_WISHLIST
-            return Constants.PROD_NOT_WISHLIST
-        return Constants.NO_FAV_FOUND
+        user_favorites = BlissmakeRepository.get_favorites(username=username)
+        result = BlissmakeRepository.remove_from_wishlist(username=username, user_favorites=user_favorites, product_id=product_id)
+        return result
     
 
     @staticmethod
     def register_service(username, email, password):    
         hashed_password = generate_password_hash(password, method=Constants.PASSWORD_HASH_METHOD)
-        mongo.db.users.insert_one({
-            Constants.USERNAME: username, 
-            Constants.EMAIL: email, 
-            Constants.PASSWORD: hashed_password
-        })
-        products = mongo.db.products.find({})
-        product_list = list(products)
-
-        return product_list
+        reg_response = BlissmakeService.user_exists(username=username)
+        if reg_response == Constants.USER_EXISTS:
+            return Constants.USER_EXISTS
+        else:
+            result = BlissmakeRepository.user_register_repository(username=username, email=email, hashed_password=hashed_password)
+            return result
     
     @staticmethod
     def delete_from_cart_service(username, product_id, quantity):
-        del_response = mongo.db.usercart.update_one(
-            {Constants.USERNAME: username},
-            {Constants.PULL: {Constants.PRODUCTS: {
-                    Constants.PRODUCT_ID: product_id, 
-                    Constants.QUANTITY: int(quantity)
-                }}}
-        )
+        cart = BlissmakeRepository.get_cart(username=username)
+        if cart is None:
+            return Constants.CART_NOT_FOUND
 
+        del_response = BlissmakeRepository.delete_from_cart_repository(username=username, prod_id=product_id, quantity=quantity)
         return del_response.acknowledged
     
     @staticmethod
@@ -207,19 +160,8 @@ class BlissmakeService:
                 product_img=product_img, 
                 quantity=quantity
             ).dict()
-        existing_cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-        if existing_cart:
-            mongo.db.usercart.update_one(
-                {Constants.USERNAME: username},
-                {Constants.PUSH: {Constants.PRODUCTS: new_product}}
-            )
-        else:
-            data = {
-                Constants.USERNAME: username,
-                Constants.PRODUCTS: [new_product]
-            }
-            mongo.db.usercart.insert_one(data)
-        return Constants.ADDED_TO_CART
+        result = BlissmakeRepository.add_to_cart_repository(username=username, new_product=new_product)
+        return result
     
     @staticmethod
     def update_cart_quantity(prod_id, action, username):
@@ -230,21 +172,16 @@ class BlissmakeService:
         updated = BlissmakeService.update_product_quantity_in_cart(cart=cart, product_id=prod_id, action=action)
         if not updated:
             return Constants.PROD_NOT_FOUND
-        mongo.db.usercart.update_one(
-            {Constants.USERNAME: username},
-            {Constants.SET: {Constants.PRODUCTS: cart[Constants.PRODUCTS]}}
-        )
-        cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-        cart_products = cart[Constants.PRODUCTS] if cart else []
-        total_price = BlissmakeService.calculate_total_price(cart_products)
-        if not cart_products:
-            return Constants.CART_EMPTY, None
-        return cart_products, total_price
+        cart_products = BlissmakeRepository.update_cart_quantity_repository(username=username, cart=cart)
+        if isinstance(cart_products, list):
+            total_price = BlissmakeService.calculate_total_price(cart_products)
+            return cart_products, total_price
+        return cart_products, None
 
 
     @staticmethod
     def get_profile(username):
-        user = mongo.db.users.find_one({Constants.USERNAME : username})
+        user = BlissmakeRepository.get_user_data(username=username)
         return user
     
     @staticmethod
@@ -258,33 +195,22 @@ class BlissmakeService:
             update_data[Constants.PASSWORD] = hashed_password
         elif new_password != confirm_password:
             return Constants.PWD_NOT_MATCH
-        mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: update_data})
-        return Constants.PRF_UPDATED
+        update_profile = BlissmakeRepository.update_profile_repository(username=username, update_data=update_data)
+        if update_profile:
+            return Constants.PRF_UPDATED
 
 
     @staticmethod
     def checkout(username):
-        cart = mongo.db.usercart.find_one({
-            Constants.USERNAME : username
-        })
-        if not cart:
-            return Constants.CART_NOT_FOUND
-        products = cart.get(Constants.PRODUCTS, [])
+        products = BlissmakeRepository.checkout_repository(username=username)
         total_price = BlissmakeService.calculate_total_price(products)
         return products, round(total_price,2)
     
     @staticmethod
     def admin_login(username, password):
         if Constants.ADMIN in username:
-            admin_data = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
-            if admin_data:
-                admin_password = admin_data[Constants.PASSWORD]
-                if admin_password == password:
-                    products = mongo.db.products.find({})
-                    product_list = list(products)
-                    return product_list
-                return Constants.USERNAME_PWD_WRNG
-            return Constants.INVALID_ADM_PWD
+            admin_data = BlissmakeRepository.admin_login_repository(username=username, password=password)
+            return admin_data
     
     @staticmethod
     def user_login(username, password):
