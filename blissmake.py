@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash
 from flask_mail import Message
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
+from functools import wraps
 from app import mongo, mail
 from AppConstants.Constants import Constants
 from models.User import User
@@ -13,6 +14,14 @@ load_dotenv()
 
 # Define the blueprint
 blissmake = Blueprint(Constants.BLISSMAKE, __name__, url_prefix=Constants.ROOT_URL)
+
+def add_response_headers(func):
+    @wraps
+    def wrapper(*args, **kwargs):
+        response = func(*args, **kwargs)
+        BlissmakeService.response_headers(response)
+        return response
+    return wrapper
 
 @blissmake.route(Constants.ROOT)
 def index():
@@ -51,12 +60,14 @@ def authenticate_user():
             response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=admin_data, username=username, password=password))
             BlissmakeService.response_headers(response)
             return response
+
         else:
             user = BlissmakeService.user_login(username=username, password=password)
             if user == Constants.SUCCESS:
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_HOME, username=username)))
                 BlissmakeService.response_headers(response)
                 return response
+
             response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=user)))
             BlissmakeService.response_headers(response)
             return response

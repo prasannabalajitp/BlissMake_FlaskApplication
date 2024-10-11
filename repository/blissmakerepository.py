@@ -1,13 +1,11 @@
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import check_password_hash
 from flask import session
 from dotenv import load_dotenv
-from datetime import datetime, timezone
 from AppConstants.Constants import Constants
 from app import mongo
-from models.Product import ProductDetail, Product
-from models.User import UpdateAddres
+from models.Product import ProductDetail
 from models.Favorite import Favorite
-import re, uuid, os, pyqrcode
+import uuid
 
 load_dotenv()
 
