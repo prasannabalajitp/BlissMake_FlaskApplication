@@ -1,9 +1,17 @@
 from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify
 from app import mongo
+from werkzeug.utils import secure_filename
 from AppConstants.Constants import Constants
 from models.Product import ProductDetail
+import os
+
+UPLOAD_FOLDER = os.path.join(Constants.STATIC, Constants.IMG)
+ALLOWED_EXTENSIONS = Constants.EXTENSIONS
 
 admin = Blueprint(Constants.ADMIN, __name__, url_prefix=Constants.ADMIN_ROOT_URL)
+
+def allowed_file(filename):
+    return Constants.IMG_CONDITION in filename and filename.rsplit(Constants.IMG_CONDITION, 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @admin.route(Constants.ROOT)
 def admin_index():
@@ -42,21 +50,28 @@ def re_login(username, password, product_id):
 
 @admin.route(Constants.ADD_PRODUCT, methods=[Constants.POST])
 def add_product():
-
     product_id = request.form[Constants.PRODUCT_ID]
     product_name = request.form[Constants.PRODUCT_NAME]
     product_price = request.form[Constants.PRODUCT_PRICE]
-    product_img = request.form[Constants.PRODUCT_IMG]
-    
-    mongo.db.products.insert_one(
-        ProductDetail(
-            product_id=product_id,
-            product_name=product_name,
-            product_price=product_price,
-            product_img=product_img
-        ).dict()
-    )
-    flash(Constants.PROD_ADDED, Constants.SUCCESS)
+    product_img = request.files.get(Constants.PRODUCT_IMG)
+
+    if product_img and allowed_file(product_img.filename):
+        filename = secure_filename(product_img.filename)
+        product_img.save(os.path.join(UPLOAD_FOLDER, filename))
+
+        mongo.db.products.insert_one(
+            ProductDetail(
+                product_id=product_id,
+                product_name=product_name,
+                product_price=product_price,
+                product_img=filename
+            ).dict()
+        )
+        flash(Constants.PROD_ADDED, Constants.SUCCESS)
+
+    else:
+        flash(Constants.NO_IMG_PROVIDED, Constants.ERROR1)
+
     products = mongo.db.products.find({})
     product_list = list(products)
 

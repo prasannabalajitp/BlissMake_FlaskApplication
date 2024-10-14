@@ -134,6 +134,8 @@ class Constants:
     ERR_UPDATING_PWD = 'Error updating password. Please try again'
     EMAIL_PWD_REQ = 'Email and new password are required.'
     ADDR_UPDATED = 'Address Updated Successfully'
+    NO_IMG_PROVIDED = 'Invalid Image or no image provided'
+    EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
@@ -150,6 +152,9 @@ class Constants:
     PRODUCT_PRICE = "product_price"
     PRODUCT_IMG = "product_img"
     PRODUCTS = "products"
+    STATIC = 'static'
+    IMG = 'img'
+    IMG_CONDITION = '.'
     GUEST = 'guest'
     WARNING = "warning"
     PULL = '$pull'
