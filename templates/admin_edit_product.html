@@ -27,7 +27,7 @@
             <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.product_id) }}" class="admin-form">
                 <input type="text" name="product_name" value="{{ product.product_name }}" class="admin-input-form">
                 <input type="number" name="product_price" value="{{ product.product_price }}" class="admin-input-form">
-                <input type="file" name="product_img" value="{{ product.product_img }}" class="admin-input-form">
+                <input type="file" name="product_img" class="admin-input-form">
                 <button type="submit" class="admin-button">Update Product</button>
             </form>
             <a href="{{ url_for('admin.re_login', username=username, password=password, product_id=product.product_id ) }}" class="admin-link">Go Back</a>

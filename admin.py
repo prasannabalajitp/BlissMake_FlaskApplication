@@ -1,7 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, make_response
 from app import mongo
 from werkzeug.utils import secure_filename
 from AppConstants.Constants import Constants
+from services.adminservice import AdminService
 from models.Product import ProductDetail
 import os
 
@@ -55,32 +56,36 @@ def add_product():
     product_price = request.form[Constants.PRODUCT_PRICE]
     product_img = request.files.get(Constants.PRODUCT_IMG)
 
-    if product_img and allowed_file(product_img.filename):
-        filename = secure_filename(product_img.filename)
-        product_img.save(os.path.join(UPLOAD_FOLDER, filename))
-
-        mongo.db.products.insert_one(
-            ProductDetail(
-                product_id=product_id,
-                product_name=product_name,
-                product_price=product_price,
-                product_img=filename
-            ).dict()
-        )
-        flash(Constants.PROD_ADDED, Constants.SUCCESS)
-
-    else:
+    result, prod_list = AdminService.add_product_service(prod_id=product_id, prod_name=product_name, prod_price=product_price, prod_img=product_img, img_filename=product_img.filename)
+    if result == Constants.NO_IMG_PROVIDED:
         flash(Constants.NO_IMG_PROVIDED, Constants.ERROR1)
-
-    products = mongo.db.products.find({})
-    product_list = list(products)
-
-    return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list)
+    elif result == Constants.DB_ERROR:
+        flash(result, Constants.ERROR1)
+    else:
+        flash(Constants.PROD_ADDED, Constants.SUCCESS)
+    return render_template(Constants.ADMIN_DASHBOARD_HTML, products=prod_list)
+    
 
 @admin.route(Constants.EDIT_PRODUCT, methods=[Constants.GET, Constants.POST])
 def edit_product(product_id):
     if request.method == Constants.POST:
-        
+    #     try:
+    #         AdminService.update_product_service(
+    #             product_id=product_id,
+    #             product_name=request.form[Constants.PRODUCT_NAME],
+    #             product_price=request.form[Constants.PRODUCT_PRICE],
+    #             product_img=request.form[Constants.PRODUCT_IMG]
+    #             )
+    #         flash(Constants.PROD_UPDATED, Constants.INFO)
+    #     except Exception as e:
+    #         flash(Constants.ERR_UPD, Constants.ERROR1)
+    
+    # product = AdminService.get_all_products()
+    # if not product:
+    #     flash(Constants.PROD_NOT_FOUND, Constants.ERROR1)
+    #     return redirect(url_for('admin.product_list'))
+    # return  render_template(Constants.ADMIN_EDIT_HTML, product=product, username=username, password=password)
+
         mongo.db.products.update_one(
             {Constants.PRODUCT_ID: product_id},
             {Constants.SET: {
@@ -104,11 +109,15 @@ def edit_product(product_id):
 
 @admin.route(Constants.DEL_PRODCUT, methods=[Constants.GET])
 def delete_product(product_id):
-    mongo.db.products.delete_one({Constants.PRODUCT_ID: product_id})
-    flash(Constants.PROD_DEL, Constants.SUCCESS)
+    result, product_list = AdminService.delete_product_service(product_id=product_id)
 
-    products = mongo.db.products.find({})
-    product_list = list(products)
+    if result == Constants.PROD_DEL:
+        flash(Constants.PROD_DEL, Constants.SUCCESS)
+    elif result == Constants.PROD_NOT_FOUND:
+        flash(Constants.PROD_NOT_FOUND, Constants.ERROR1)
+    else:
+        flash(Constants.PROD_DEL_FAIL, Constants.ERROR1)
+    
     return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list)
 
 

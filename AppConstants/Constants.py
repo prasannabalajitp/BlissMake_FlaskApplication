@@ -126,6 +126,8 @@ class Constants:
     PROD_ADDED = 'Product added successfully!'
     PROD_UPDATED = 'Product updated successfully!'
     PROD_DEL = 'Product deleted successfully!'
+    PROD_DEL_FAIL = "An error occurred while trying to delete the product."
+    ERR_UPD = "An error occurred while updating the product."
     PWD_NOT_MATCH = "Passwords do not match!"
     PRF_UPDATED = "Profile updated successfully!"
     OTP_SENT = "OTP sent successfully!"
@@ -134,7 +136,7 @@ class Constants:
     ERR_UPDATING_PWD = 'Error updating password. Please try again'
     EMAIL_PWD_REQ = 'Email and new password are required.'
     ADDR_UPDATED = 'Address Updated Successfully'
-    NO_IMG_PROVIDED = 'Invalid Image or no image provided'
+    NO_IMG_PROVIDED = 'Invalid Image or no image file provided'
     EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
@@ -207,3 +209,7 @@ class Constants:
     RESPONSE_OK = "OK"
     RESPONSE_INT_SER_ERR = "INTERNAL SERVER ERROR"
     RESPONSE_BAD_REQ = "BAD REQUEST"
+
+
+    #Exception
+    DB_ERROR = "An error occurred while accessing the database."
