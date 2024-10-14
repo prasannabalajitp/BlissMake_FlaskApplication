@@ -1,20 +1,27 @@
 from flask import Blueprint, request, jsonify, redirect, url_for, session, render_template, flash, make_response    
-from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash
 from flask_mail import Message
 from datetime import datetime, timezone, timedelta
 from dotenv import load_dotenv
+from functools import wraps
 from app import mongo, mail
 from AppConstants.Constants import Constants
-from models.Product import ProductDetail, Product
-from models.Favorite import Favorite
-from models.User import User, UpdateAddres
+from models.User import User
 from services.blissmakeservice import BlissmakeService
-import pyqrcode, os, random, string, re, smtplib, uuid
+import os, random, string, smtplib
 
 load_dotenv()
 
 # Define the blueprint
 blissmake = Blueprint(Constants.BLISSMAKE, __name__, url_prefix=Constants.ROOT_URL)
+
+def add_response_headers(func):
+    @wraps
+    def wrapper(*args, **kwargs):
+        response = func(*args, **kwargs)
+        BlissmakeService.response_headers(response)
+        return response
+    return wrapper
 
 @blissmake.route(Constants.ROOT)
 def index():
@@ -24,10 +31,7 @@ def index():
         products=product_list
     ))
 
-    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
-
+    BlissmakeService.response_headers(response=response)
     return response
 
 
@@ -37,10 +41,65 @@ def login():
         Constants.LOGIN_HTML
     ))
 
-    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+    BlissmakeService.response_headers(response=response)
+    return response
 
+@blissmake.route(Constants.HOME_PAGE, methods=[Constants.POST])
+@blissmake.route(Constants.MAIN_HOME_PAGE, methods=[Constants.POST])
+def authenticate_user():
+    if request.method == Constants.POST:
+        username = request.form.get(Constants.USERNAME)
+        password = request.form.get(Constants.PASSWORD)
+
+        if Constants.ADMIN in username:
+            admin_data = BlissmakeService.admin_login(username=username, password=password)
+            if admin_data in [Constants.USERNAME_PWD_WRNG, Constants.INVALID_ADM_PWD]:
+                response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=admin_data)))
+                BlissmakeService.response_headers(response)
+                return response
+            response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=admin_data, username=username, password=password))
+            BlissmakeService.response_headers(response)
+            return response
+
+        else:
+            user = BlissmakeService.user_login(username=username, password=password)
+            if user == Constants.SUCCESS:
+                response = make_response(redirect(url_for(Constants.BLISSMAKE_HOME, username=username)))
+                BlissmakeService.response_headers(response)
+                return response
+
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=user)))
+            BlissmakeService.response_headers(response)
+            return response
+
+@blissmake.route(Constants.REGISTER, methods=[Constants.GET, Constants.POST])
+def register():
+    if request.method == Constants.POST:
+        username = request.form.get(Constants.USERNAME)
+        email = request.form.get(Constants.EMAIL)
+        password = request.form.get(Constants.PASSWORD)
+
+        reg_response = BlissmakeService.user_exists(username=username)
+        if reg_response == Constants.USER_EXISTS:
+            flash(Constants.USER_EXISTS, category=Constants.ERROR)
+            response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.USER_EXISTS))
+            BlissmakeService.response_headers(response=response)
+            return response
+
+        product_list = BlissmakeService.register_service(username=username, email=email, password=password)
+        response = make_response(render_template(
+            Constants.HOME_HTML, 
+            username=username, 
+            products=product_list
+        ))
+        BlissmakeService.response_headers(response=response)
+        return response
+
+
+    response = make_response(render_template(
+        Constants.REGISTER_HTML
+    ))
+    BlissmakeService.response_headers(response=response)
     return response
 
 @blissmake.route(Constants.GENERATE_OTP, methods=[Constants.GET, Constants.POST])
@@ -134,78 +193,48 @@ def reset_password(email):
             flash(Constants.EMAIL_PWD_REQ, Constants.ERROR)
     return render_template(Constants.LOGIN_HTML)
 
-@blissmake.route(Constants.REGISTER, methods=[Constants.GET, Constants.POST])
-def register():
-    if request.method == Constants.POST:
-        username = request.form.get(Constants.USERNAME)
-        email = request.form.get(Constants.EMAIL)
-        password = request.form.get(Constants.PASSWORD)
 
-        reg_response = BlissmakeService.user_exists(username=username)
-        if reg_response == Constants.USER_EXISTS:
-            flash(Constants.USER_EXISTS, category=Constants.ERROR)
-            response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.USER_EXISTS))
-            response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-            response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-            response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
-            
-            return response
-
-        product_list = BlissmakeService.register_service(username=username, email=email, password=password)
-        response = make_response(render_template(
-            Constants.HOME_HTML, 
-            username=username, 
-            products=product_list
-        ))
-        response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-        response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-        response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
-        
-        return response
-
-
-    response = make_response(render_template(
-        Constants.REGISTER_HTML
-    ))
-
-    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
-    
-    return response
 
 @blissmake.route(Constants.PROFILE_URL)
 def profile(username):
-    print(f'Session : {session}')
     if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     if username == Constants.GUEST:
         return render_template(Constants.LOGIN_HTML)
 
-    user = mongo.db.users.find_one({Constants.USERNAME: username})
+    user = BlissmakeService.get_profile(username=username)
     if Constants.ADDRESS in user and user[Constants.ADDRESS]:
         if Constants.PHONE in user:
-            render_template(
+            response = make_response(render_template(
                 Constants.PROFILE_HTML, 
                 username=user[Constants.USERNAME], 
                 email=user[Constants.EMAIL], 
                 address=user[Constants.ADDRESS], 
                 phone=user[Constants.PHONE]
-            )
-        render_template(
+            ))
+            BlissmakeService.response_headers(response)
+
+            return response
+        response = make_response(render_template(
             Constants.PROFILE_HTML, 
             username=user[Constants.USERNAME], 
             email=user[Constants.EMAIL], 
             address=user[Constants.ADDRESS], 
-            phone=None
-        )
-    return render_template(
+            phone=Constants.EMPTY
+        ))
+        BlissmakeService.response_headers(response)
+
+        return response
+    response = make_response(render_template(
         Constants.PROFILE_HTML, 
         username=user[Constants.USERNAME], 
         email=user[Constants.EMAIL], 
         address=None, 
         phone=None
-    )
+    ))
+    BlissmakeService.response_headers(response)
+
+    return response
 
 
 @blissmake.route(Constants.UPDATE_PROFILE, methods=[Constants.GET, Constants.POST])
@@ -216,29 +245,30 @@ def update_profile(username):
         new_password = request.form[Constants.PASSWORD]
         confirm_password = request.form[Constants.CNF_PWD]
 
-        user = mongo.db.users.find_one({Constants.USERNAME: username})
-        if not user:
+        user = BlissmakeService.update_profile_servcice(username=username, new_password=new_password, confirm_password=confirm_password, new_address=new_address, phone=phone)
+        if user == Constants.USER_NOT_EXISTS:
             flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
-            return redirect(url_for(Constants.PROFILE, username=username))
-        
-        update_data = UpdateAddres(address=new_address, phone=phone).dict()
-        if new_password and new_password == confirm_password:
-            hashed_password = generate_password_hash(new_password)
-            update_data[Constants.PASSWORD] = hashed_password
-        elif new_password != confirm_password:
+            response = make_response(redirect(url_for(Constants.PROFILE, username=username)))
+            BlissmakeService.response_headers(response)
+            return response
+        elif user == Constants.PWD_NOT_MATCH:
             flash(Constants.PWD_NOT_MATCH, Constants.ERROR)
-            return redirect(url_for(Constants.PROFILE, username=username))
-        
-        mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: update_data})
-
-        flash(Constants.PRF_UPDATED, Constants.SUCCESS)
-        return redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username))
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username)))
+            BlissmakeService.response_headers(response)
+            return response
+        elif user == Constants.PRF_UPDATED:
+            flash(Constants.PRF_UPDATED, Constants.SUCCESS)
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username)))
+            BlissmakeService.response_headers(response)
+            return response
     
     user = mongo.db.users.find_one({Constants.USERNAME: username})
 
     if not user:
         flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
-        return redirect(url_for(Constants.PROFILE, username=username))
+        response = make_response(redirect(url_for(Constants.PROFILE, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
     
     user_data = User(
         username=user[Constants.USERNAME],
@@ -246,7 +276,10 @@ def update_profile(username):
         address=user.get(Constants.ADDRESS, Constants.EMPTY),
         phone=user.get(Constants.PHONE, Constants.EMPTY)).dict()
 
-    return render_template(Constants.PROFILE_HTML, **user_data)
+    response = make_response(render_template(Constants.PROFILE_HTML, **user_data))
+
+    BlissmakeService.response_headers(response)
+    return response
 
 @blissmake.route(Constants.HOME, methods=[Constants.POST, Constants.GET])
 def home(username):
@@ -262,72 +295,40 @@ def home(username):
             products=product_list
         )
     )
-
-    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
-
+    BlissmakeService.response_headers(response=response)
     return response
 
 
 @blissmake.route(Constants.CHECKOUT)
 def checkout(username):
+    if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
+        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+
     cart = mongo.db.usercart.find_one({
             Constants.USERNAME: username
             })
     if not cart:
-        return jsonify({
+        response = jsonify({
             Constants.ERROR: Constants.CART_NOT_FOUND
             })
+        BlissmakeService.response_headers(response=response)
+        return response
     
     products = cart.get(Constants.PRODUCTS, [])
 
     total_price = BlissmakeService.calculate_total_price(products)
 
-    return render_template(
+    response = make_response(render_template(
         Constants.CHECKOUT_HTML, 
         username=username, 
         products=products, 
         total_price=round(total_price, 2)
-    )
+    ))
+    BlissmakeService.response_headers(response=response)
+    return response
 
-@blissmake.route(Constants.HOME_PAGE, methods=[Constants.POST])
-@blissmake.route(Constants.MAIN_HOME_PAGE, methods=[Constants.POST])
-def authenticate_user():
-    if request.method == Constants.POST:
-        username = request.form.get(Constants.USERNAME)
-        password = request.form.get(Constants.PASSWORD)
-        
-        if Constants.ADMIN in username:
-            admin_data = mongo.db.admin_credentials.find_one({Constants.USERNAME : username})
-            admin_password = admin_data[Constants.PASSWORD]
-            if admin_password == password:
-                products = mongo.db.products.find({})
-                product_list = list(products)
-                return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list, username=username, password=password)
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.USERNAME_PWD_WRNG))
-        user = mongo.db.users.find_one({Constants.USERNAME: username})
-        if user:
-            session[Constants.USER_ID] = str(uuid.uuid4())
-            session[Constants.USERNAME] = username
-            print(f'Session : {session}')
-            if check_password_hash(user[Constants.PASSWORD], password):
-                session[Constants.USER] = username
-                return redirect(url_for(
-                    Constants.BLISSMAKE_HOME, 
-                    username=username
-                ))
-                
-            else:
-                return redirect(url_for(
-                    Constants.BLISSMAKE_LOGIN, 
-                    error=Constants.INVALID_PASSWORD
-                ))
-        
-        return redirect(url_for(
-            Constants.BLISSMAKE_LOGIN, 
-            error=Constants.USER_NOT_EXISTS
-        ))
+
+
 
 @blissmake.route(Constants.PROD_DET_GUEST, defaults={Constants.USERNAME: Constants.GUEST})
 @blissmake.route(Constants.PRODUCT_DETAIL)
@@ -343,10 +344,7 @@ def product_detail(product_id, username):
                 username=username
             )
         )
-    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
-
+    BlissmakeService.response_headers(response)
     return response
 
 
@@ -359,7 +357,9 @@ def get_cart(username):
     cart_products, total_price = BlissmakeService.get_cart_service(username=username)
     if not cart_products:
         flash(Constants.CART_EMPTY, Constants.WARNING)
-        return render_template(Constants.USER_CART_HTML, username=username)
+        response = make_response(render_template(Constants.USER_CART_HTML, username=username))
+        BlissmakeService.response_headers(response=response)
+        return response
     
     response = make_response(
         render_template(
@@ -368,214 +368,8 @@ def get_cart(username):
             cart_products=cart_products, 
             total_price=total_price
         ))
-    
-    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
-
+    BlissmakeService.response_headers(response)
     return response
-
-@blissmake.route(Constants.DELETE_FROM_CART, methods=[Constants.POST])
-def delete_from_cart(product_id, quantity, username):
-
-    mongo.db.usercart.update_one(
-        {Constants.USERNAME: username},
-        {Constants.PULL: {Constants.PRODUCTS: {
-                Constants.PRODUCT_ID: product_id, 
-                Constants.QUANTITY: int(quantity)
-            }}}
-    )
-
-    return redirect(url_for(
-        Constants.BLISSMAKE_GETCART, 
-        username=username
-    ))
-
-@blissmake.route(Constants.ADD_TO_CART, methods=[Constants.POST])
-def add_to_cart(product_id, username):
-    if request.method == Constants.POST:
-        if username == Constants.GUEST:
-            return redirect(url_for(
-                Constants.BLISSMAKE_LOGIN
-            ))
-        
-        quantity = request.form.get(Constants.QUANTITY)
-        product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
-        product_name = product[Constants.PRODUCT_NAME]
-        product_img = product[Constants.PRODUCT_IMG]
-        product_price = product[Constants.PRODUCT_PRICE]
-        new_product = Product(
-                product_id=product_id, 
-                product_name=product_name, 
-                product_price=product_price, 
-                product_img=product_img, 
-                quantity=quantity
-            ).dict()
-        existing_cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-        if existing_cart:
-            mongo.db.usercart.update_one(
-                {Constants.USERNAME: username},
-                {Constants.PUSH: {Constants.PRODUCTS: new_product}}
-            )
-        else:
-            data = {
-                Constants.USERNAME: username,
-                Constants.PRODUCTS: [new_product]
-            }
-            mongo.db.usercart.insert_one(data)
-        
-        flash(Constants.ADDED_TO_CART, Constants.SUCCESS)
-        return redirect(url_for(
-                Constants.BLISSMAKE_PROD_DETAIL, 
-                product_id=product_id, 
-                username=username
-            ))
-
-@blissmake.route(Constants.UPDATE_QUANTITY, methods=[Constants.POST])
-def update_quantity(product_id, action, username):
-    cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-
-    if not cart:
-        flash(Constants.CART_NOT_FOUND, Constants.ERROR1)
-        return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username))
-
-    updated = BlissmakeService.update_product_quantity_in_cart(cart, product_id, action)
-    if not updated:
-        flash(Constants.PROD_NOT_FOUND, Constants.ERROR)
-        return redirect(url_for(Constants.BLISSMAKE_GETCART, username=username))
-
-    mongo.db.usercart.update_one(
-        {Constants.USERNAME: username},
-        {Constants.SET: {Constants.PRODUCTS: cart[Constants.PRODUCTS]}}
-    )
-
-    cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-    cart_products = cart[Constants.PRODUCTS] if cart else []
-    
-    total_price = BlissmakeService.calculate_total_price(cart_products)
-    if not cart_products:
-        flash(Constants.CART_EMPTY, Constants.WARNING)
-
-    return render_template(
-        Constants.USER_CART_HTML, 
-        username=username, 
-        cart_products=cart_products, 
-        total_price=total_price
-    )
-
-@blissmake.route(Constants.PAYMENT, methods=[Constants.GET, Constants.POST])
-def payment(username):
-    cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-    cart_products = cart[Constants.PRODUCTS] if cart else []
-    total_price = BlissmakeService.calculate_total_price(cart_products)
-
-    if request.method == Constants.POST:
-        flash(Constants.PAYMENT_SUCCESS, Constants.SUCCESS)
-        return redirect(url_for(
-                Constants.BLISSMAKE_HOME, 
-                username=username
-            ))
-    
-    return render_template(
-            Constants.PAYMENT_HTML, 
-            username=username, 
-            cart_products=cart_products, 
-            total_price=total_price
-        )
-
-@blissmake.route(Constants.EDIT_ADDR, methods=[Constants.GET, Constants.POST])
-def edit_address_page(username):
-    user_data = mongo.db.users.find_one({Constants.USERNAME: username})
-    if user_data:
-        address = user_data.get(Constants.ADDRESS, Constants.EMPTY)
-        email = user_data.get(Constants.EMAIL, Constants.EMPTY)
-    return render_template(Constants.EDIT_ADDR_HTML, username=username, address=address, email=email)
-
-@blissmake.route(Constants.EDIT_ADDRESS, methods=[Constants.GET, Constants.POST])
-def edit_address(username):
-    if request.method == Constants.POST:
-        new_address = request.form[Constants.ADDRESS]
-        mongo.db.users.update_one({Constants.USERNAME: username}, {Constants.SET: {Constants.ADDRESS: new_address}})
-        flash(Constants.ADDR_UPDATED, Constants.SUCCESS)
-        return redirect(url_for(Constants.BLISSMAKE_PAYMENT, username=username))
-
-@blissmake.route(Constants.PAYMENT_QR, methods=[Constants.POST])
-def payment_qr(username):
-    cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
-    if not cart:
-        flash(Constants.CART_NOT_FOUND, Constants.ERROR)
-        return redirect(url_for(
-                Constants.BLISSMAKE_HOME, username=username
-            ))
-    
-    total_price = BlissmakeService.calculate_total_price(cart.get(Constants.PRODUCTS, []))
-    
-    upi_id = os.getenv(Constants.UPI_ID)
-    payee_name = os.getenv(Constants.PAYEE_NAME)
-    amount = round(total_price, 2)
-    transaction_note = Constants.TXN_NOTE
-
-    upi_url = f"upi://pay?pa={upi_id}&pn={payee_name}&am={amount}&cu=INR&tn={transaction_note}"
-
-    time = datetime.now(timezone.utc).strftime(Constants.STRF_TIME)
-    qr = pyqrcode.create(upi_url)
-    qr_filename = f'static/qr/payment_qr_{username}_{time}.png'
-    qr.png(qr_filename, scale=8)
-
-    return render_template(
-            Constants.QR_PAYMENT_HTML, 
-            username=username, 
-            qr_image=qr_filename, 
-            total_price=round(total_price)
-        )
-
-@blissmake.route(Constants.ADD_TO_WISHLIST, methods=[Constants.POST, Constants.GET])
-def add_to_wishlist(username, product_id):
-    if username == Constants.GUEST:
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
-    
-    product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
-    if not product:
-        flash(Constants.PROD_NOT_FOUND, Constants.ERROR)
-        return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
-    
-    user_favorites = mongo.db.favorites.find_one({
-        Constants.USERNAME: username,
-    })
-    if user_favorites:
-        if any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS]):
-            flash(Constants.PROD_IN_WISHLIST, Constants.INFO)
-            return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
-        
-        mongo.db.favorites.update_one(
-            {Constants.USERNAME: username},
-            {Constants.PUSH: {
-                Constants.PRODUCTS: ProductDetail(
-                    product_id=product[Constants.PRODUCT_ID],
-                    product_name=product[Constants.PRODUCT_NAME],
-                    product_price=product[Constants.PRODUCT_PRICE],
-                    product_img=product[Constants.PRODUCT_IMG]
-                ).dict()
-            }}
-        )
-        flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
-    else:
-        data = ProductDetail(
-            product_id=product[Constants.PRODUCT_ID],
-            product_name=product[Constants.PRODUCT_NAME],
-            product_price=product[Constants.PRODUCT_PRICE],
-            product_img=product[Constants.PRODUCT_IMG]
-        ).dict()
-
-        favorite_data = Favorite(
-            username=username,
-            products=[data]
-        ).dict()
-        
-        result = mongo.db.favorites.insert_one(favorite_data)
-        favorite_data[Constants.ID] = str(result.inserted_id)
-        flash(Constants.ADDED_TO_WISHLIST, Constants.SUCCESS)
-    return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
 
 @blissmake.route(Constants.GET_FAV)
 def get_favorite(username):
@@ -585,42 +379,184 @@ def get_favorite(username):
         return render_template(Constants.LOGIN_HTML)
 
     favorites = BlissmakeService.get_favorites(username=username)
-
     if favorites == Constants.FAV_NOT_EXISTS:
-        return render_template(Constants.FAV_HTML, username=username, message=Constants.FAV_NOT_EXISTS)
+        flash(favorites, Constants.ERROR)
+        response = make_response(render_template(Constants.FAV_HTML, username=username, messages=favorites, category=Constants.ERROR))
+        response = make_response(render_template(Constants.FAV_HTML, username=username, category=Constants.ERROR))
+        BlissmakeService.response_headers(response)
+        return response
 
     response = make_response(render_template(Constants.FAV_HTML, username=username, favorites=favorites, message=None))
-    response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
-    response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
-    response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
+    BlissmakeService.response_headers(response=response)
 
     return response
+
+@blissmake.route(Constants.DELETE_FROM_CART, methods=[Constants.POST])
+def delete_from_cart(product_id, quantity, username):
+
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    delete_prod = BlissmakeService.delete_from_cart_service(username=username, product_id=product_id, quantity=quantity)
+    if delete_prod == True:
+        response = make_response(redirect(url_for(
+            Constants.BLISSMAKE_GETCART, 
+            username=username
+        )))
+        BlissmakeService.response_headers(response=response)
+        return response
+
+@blissmake.route(Constants.ADD_TO_CART, methods=[Constants.POST])
+def add_to_cart(product_id, username):
+    if request.method == Constants.POST:
+        if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        if username == Constants.GUEST:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        quantity = request.form.get(Constants.QUANTITY)
+        add_cart = BlissmakeService.add_to_cart_service(username=username, prod_id=product_id, quantity=quantity)
+
+        if add_cart == Constants.ADDED_TO_CART:
+            flash(Constants.ADDED_TO_CART, Constants.SUCCESS)
+            response = make_response(redirect(url_for(
+                    Constants.BLISSMAKE_PROD_DETAIL, 
+                    product_id=product_id, 
+                    username=username
+                )))
+            BlissmakeService.response_headers(response=response)
+            return response
+
+@blissmake.route(Constants.UPDATE_QUANTITY, methods=[Constants.POST])
+def update_quantity(product_id, action, username):
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    
+    cart_products, total_price = BlissmakeService.update_cart_quantity(prod_id=product_id, action=action, username=username)
+
+    if cart_products in [Constants.CART_NOT_FOUND, Constants.PROD_NOT_FOUND, Constants.CART_EMPTY]:
+        flash(cart_products, Constants.ERROR1)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_GETCART, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
+    response = make_response(render_template(
+                                Constants.USER_CART_HTML, 
+                                username=username, 
+                                cart_products=cart_products, 
+                                total_price=total_price
+                            ))
+    BlissmakeService.response_headers(response=response)
+    return response
+
+@blissmake.route(Constants.PAYMENT, methods=[Constants.GET, Constants.POST])
+def payment(username):
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    cart_products, total_price = BlissmakeService.get_cart_service(username=username)
+
+    if request.method == Constants.POST:
+        flash(Constants.PAYMENT_SUCCESS, Constants.SUCCESS)
+        response = make_response(redirect(url_for(
+                Constants.BLISSMAKE_HOME, 
+                username=username
+            )))
+        BlissmakeService.response_headers(response)
+        return response
+    
+    response = make_response(render_template(
+            Constants.PAYMENT_HTML, 
+            username=username, 
+            cart_products=cart_products, 
+            total_price=total_price
+        ))
+    BlissmakeService.response_headers(response)
+    return response
+
+@blissmake.route(Constants.EDIT_ADDR, methods=[Constants.GET, Constants.POST])
+def edit_address_page(username):
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    address, email = BlissmakeService.get_user_address(username=username)
+    response = make_response(render_template(
+        Constants.EDIT_ADDR_HTML, 
+        username=username,
+         address=address, 
+         email=email
+    ))
+    BlissmakeService.response_headers(response)
+    return response
+
+@blissmake.route(Constants.EDIT_ADDRESS, methods=[Constants.GET, Constants.POST])
+def edit_address(username):
+    if request.method == Constants.POST:
+        if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        new_address = request.form[Constants.ADDRESS]
+        result = BlissmakeService.update_user_address(username=username, new_address=new_address)
+        if result == True:
+            flash(Constants.ADDR_UPDATED, Constants.SUCCESS)
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_PAYMENT, username=username)))
+            BlissmakeService.response_headers(response)
+            return response
+
+@blissmake.route(Constants.PAYMENT_QR, methods=[Constants.POST])
+def payment_qr(username):
+    if request.method == Constants.POST:
+        if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    qr_filename, total_price = BlissmakeService.payment_qr_service(username=username)
+    if qr_filename == Constants.CART_NOT_FOUND:
+        flash(Constants.CART_NOT_FOUND, Constants.ERROR)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_HOME, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
+    response = make_response(render_template(Constants.QR_PAYMENT_HTML, username=username, qr_image=qr_filename, total_price=total_price))
+    BlissmakeService.response_headers(response)
+    return response
+
+@blissmake.route(Constants.ADD_TO_WISHLIST, methods=[Constants.POST, Constants.GET])
+def add_to_wishlist(username, product_id):
+    if username == Constants.GUEST:
+        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+    
+    favorites = BlissmakeService.add_to_wishlist_service(username=username, product_id=product_id)
+    if favorites in [Constants.PROD_IN_WISHLIST, Constants.PROD_NOT_FOUND]:
+        if favorites == Constants.PROD_IN_WISHLIST:
+            flash(favorites, Constants.INFO)
+        else:
+            flash(favorites, Constants.ERROR)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
+    else:
+        flash(favorites,Constants.SUCCESS)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
+
+
 
 @blissmake.route(Constants.REMOVE_FAV, methods=[Constants.POST])
 def remove_favorite(username, product_id):
     if username == Constants.GUEST:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     
-    product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
-    if not product:
+    user_favorites = BlissmakeService.remove_from_favorites(username=username, product_id=product_id)
+    if user_favorites == Constants.PROD_NOT_FOUND:
         flash(Constants.PROD_NOT_FOUND, Constants.ERROR)
-        return redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username))
-    
-    user_favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
-    if user_favorites:
-        product_exist = any(fav_product[Constants.PRODUCT_ID] == product_id for fav_product in user_favorites[Constants.PRODUCTS])
-        if product_exist:
-            mongo.db.favorites.update_one(
-                {Constants.USERNAME: username},
-                {Constants.PULL: {Constants.PRODUCTS: {Constants.PRODUCT_ID: product_id}}}
-            )
-            flash(Constants.REM_FRM_WISHLIST, Constants.SUCCESS)
-        else:
-            flash(Constants.PROD_NOT_WISHLIST, Constants.INFO)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
+    elif user_favorites in [Constants.PROD_NOT_WISHLIST, Constants.NO_FAV_FOUND]:
+        flash(user_favorites, Constants.INFO)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
     else:
-        flash(Constants.NO_FAV_FOUND, Constants.INFO)
-    
-    return redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username))
+        flash(user_favorites, Constants.SUCCESS)
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username)))
+        BlissmakeService.response_headers(response)
+        return response
 
 @blissmake.route(Constants.LOGOUT, methods=[Constants.GET])
 def logout(username):

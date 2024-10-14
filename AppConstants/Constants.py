@@ -6,6 +6,8 @@ class Constants:
     MAIL_SERVER = 'MAIL_SERVER'
     MAIL_USERNAME = 'MAIL_USERNAME'
     MAIL_PWD = 'MAIL_PASSWORD'
+    MAIL_PORT = 'MAIL_PORT'
+    MAIL_TLS = 'MAIL_USE_TLS'
     MAIN = '__main__'
 
     #blissmake.py
@@ -157,6 +159,7 @@ class Constants:
     INCREASE = 'increase'
     DECREASE = 'decrease'
     SUCCESS = "success"
+    FAILURE = "failure"
     UPI_ID = 'UPI_ID'
     PAYEE_NAME = 'PAYEE_NAME'
     TXN_NOTE = "Payment for QR"
