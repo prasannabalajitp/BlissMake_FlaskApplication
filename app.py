@@ -11,11 +11,11 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv(Constants.SECRET_KEY)
 
-app.config['MAIL_SERVER'] = os.getenv('MAIL_SERVER')
-app.config['MAIL_PORT'] = os.getenv('MAIL_PORT')
-app.config['MAIL_USERNAME'] = os.getenv('MAIL_USERNAME')
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
-app.config['MAIL_USE_TLS'] = True
+app.config[Constants.MAIL_SERVER] = os.getenv(Constants.MAIL_SERVER)
+app.config[Constants.MAIL_PORT] = os.getenv(Constants.MAIL_PORT)
+app.config[Constants.MAIL_USERNAME] = os.getenv(Constants.MAIL_USERNAME)
+app.config[Constants.MAIL_PWD] = os.getenv(Constants.MAIL_PWD)
+app.config[Constants.MAIL_TLS] = True
 
 
 mongo_uri = os.getenv(Constants.MONGO_URI)
