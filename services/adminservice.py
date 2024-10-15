@@ -33,6 +33,15 @@ class AdminService:
         return AdminRepository.get_all_products()
     
     @staticmethod
+    def get_all_admins():
+        return AdminRepository.get_all_admins()
+    
+    @staticmethod
+    def get_product_by_id(product_id):
+        product = AdminRepository.get_product_by_id(prod_id=product_id)
+        return product
+    
+    @staticmethod
     def add_product_service(prod_id, prod_name, prod_price, prod_img, img_filename):
         product_list = AdminRepository.get_all_products()
         if prod_img and AdminService.allowed_file(img_filename):
@@ -64,7 +73,7 @@ class AdminService:
             return str(e), AdminRepository.get_all_products()
         
         except Exception as e:
-            return "An unexpected error occurred.", AdminRepository.get_all_products()
+            return Constants.ERR_UPD, AdminRepository.get_all_products()
 
 
     @staticmethod

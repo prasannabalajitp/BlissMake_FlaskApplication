@@ -22,6 +22,11 @@ class AdminRepository:
         return product_list
     
     @staticmethod
+    def get_all_admins():
+        admin_detail = mongo.db.admin_credentials.find({})
+        return admin_detail
+    
+    @staticmethod
     def get_product_by_id(prod_id):
         return mongo.db.products.find_one({Constants.PRODUCT_ID: prod_id})
 
@@ -78,6 +83,6 @@ class AdminRepository:
             else:
                 raise ValueError(Constants.PROD_NOT_FOUND)
         except PyMongoError as e:
-            print(f'Datanase error occured : {e}')
+            print(f'{Constants.DB_ERROR} : {e}')
             raise
         

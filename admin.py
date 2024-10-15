@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, make_response
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, make_response, jsonify
 from app import mongo
 from werkzeug.utils import secure_filename
 from AppConstants.Constants import Constants
@@ -64,46 +64,30 @@ def add_product():
     else:
         flash(Constants.PROD_ADDED, Constants.SUCCESS)
     return render_template(Constants.ADMIN_DASHBOARD_HTML, products=prod_list)
-    
+
 
 @admin.route(Constants.EDIT_PRODUCT, methods=[Constants.GET, Constants.POST])
 def edit_product(product_id):
     if request.method == Constants.POST:
-    #     try:
-    #         AdminService.update_product_service(
-    #             product_id=product_id,
-    #             product_name=request.form[Constants.PRODUCT_NAME],
-    #             product_price=request.form[Constants.PRODUCT_PRICE],
-    #             product_img=request.form[Constants.PRODUCT_IMG]
-    #             )
-    #         flash(Constants.PROD_UPDATED, Constants.INFO)
-    #     except Exception as e:
-    #         flash(Constants.ERR_UPD, Constants.ERROR1)
-    
-    # product = AdminService.get_all_products()
-    # if not product:
-    #     flash(Constants.PROD_NOT_FOUND, Constants.ERROR1)
-    #     return redirect(url_for('admin.product_list'))
-    # return  render_template(Constants.ADMIN_EDIT_HTML, product=product, username=username, password=password)
+        product_name = request.form[Constants.PRODUCT_NAME]
+        product_price = request.form[Constants.PRODUCT_PRICE]
+        product_img = request.form[Constants.PRODUCT_IMG]
 
-        mongo.db.products.update_one(
-            {Constants.PRODUCT_ID: product_id},
-            {Constants.SET: {
-                Constants.PRODUCT_NAME: request.form[Constants.PRODUCT_NAME],
-                Constants.PRODUCT_PRICE: request.form[Constants.PRODUCT_PRICE],
-                Constants.PRODUCT_IMG: request.form[Constants.PRODUCT_IMG]
-            }}
-        )
-        flash(Constants.PROD_UPDATED, Constants.INFO)
-        products = mongo.db.products.find({})
-        product_list = list(products)
-        
-        return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list)
-    admin__detail = mongo.db.admin_credentials.find({})
-    for admin in admin__detail:
-        username = admin[Constants.USERNAME]
-        password = admin[Constants.PASSWORD]
-    product = mongo.db.products.find_one({Constants.PRODUCT_ID: product_id})
+        response, products = AdminService.update_product_service(product_id, product_name, product_price, product_img)
+        flash(response, Constants.INFO)
+
+        return render_template(Constants.ADMIN_DASHBOARD_HTML, products=products)
+    
+    product = AdminService.get_product_by_id(product_id)
+    admin_details = AdminService.get_all_admins()
+
+    if admin_details:
+        admin = next(iter(admin_details), {})
+        username = admin.get(Constants.USERNAME)
+        password = admin.get(Constants.PASSWORD)
+    else:
+        username, password = None, None
+    
     return render_template(Constants.ADMIN_EDIT_HTML, product=product, username=username, password=password)
 
 
