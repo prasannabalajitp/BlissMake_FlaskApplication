@@ -1,12 +1,9 @@
-from werkzeug.security import check_password_hash
 from flask import session
 from dotenv import load_dotenv
 from AppConstants.Constants import Constants
 from app import mongo
 from models.Product import ProductDetail
-from models.Favorite import Favorite
 from pymongo.errors import PyMongoError
-import uuid
 
 
 load_dotenv()

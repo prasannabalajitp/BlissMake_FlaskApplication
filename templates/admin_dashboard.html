@@ -42,7 +42,7 @@
                             <h3>{{ product['product_name'] }}</h3>
                             <p class="price">Rs. {{ product['product_price'] }}</p>
                             <div class="admin-actions">
-                                <a href="{{ url_for('admin.edit_product', product_id=product['product_id'], username=username, password=password) }}">
+                                <a href="{{ url_for('admin.edit_product', product_id=product['product_id'], username=username) }}">
                                     <button class="edit-btn"><i class="fas fa-edit"></i></button>
                                 </a>
                                 <a href="{{ url_for('admin.delete_product', product_id=product['product_id']) }}">

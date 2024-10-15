@@ -50,7 +50,7 @@ class Constants:
     REMOVE_FAV = '/remove_favorite/<username>/<product_id>'
     ADMIN_DASHBOARD = '/admindashboard'
     ADD_PRODUCT = '/add_product'
-    EDIT_PRODUCT = '/edit_product/<product_id>'
+    EDIT_PRODUCT = '/edit_product/<product_id>/<username>'
     DEL_PRODCUT = '/delete_product/<product_id>'
     UPDATE_PROFILE = '/updateprofile/<username>'
     GENERATE_OTP = '/blissmake/generate_otp'
@@ -107,6 +107,7 @@ class Constants:
     OTP = 'otp'
     EXP_TIME = "expiration_time"
     SUB = "Your OTP Code"
+    ADMIN_USER_ID = "admin_user_id"
     USERNAME_PWD_WRNG = 'Username / Password is wrong!'
     USER_EXISTS = "User Already Exists!"
     USER_NOT_EXISTS = 'User Not Exists'

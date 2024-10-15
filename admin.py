@@ -1,6 +1,8 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, make_response, jsonify
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, make_response
 from app import mongo
 from werkzeug.utils import secure_filename
+from functools import wraps
+
 from AppConstants.Constants import Constants
 from services.adminservice import AdminService
 from models.Product import ProductDetail
@@ -10,6 +12,16 @@ UPLOAD_FOLDER = os.path.join(Constants.STATIC, Constants.IMG)
 ALLOWED_EXTENSIONS = Constants.EXTENSIONS
 
 admin = Blueprint(Constants.ADMIN, __name__, url_prefix=Constants.ADMIN_ROOT_URL)
+
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if Constants.USERNAME not in session:
+            flash("You must be logged in as an admin to access this page.", "error")
+            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        return f(*args, **kwargs)
+    return decorated_function
 
 def allowed_file(filename):
     return Constants.IMG_CONDITION in filename and filename.rsplit(Constants.IMG_CONDITION, 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -67,7 +79,9 @@ def add_product():
 
 
 @admin.route(Constants.EDIT_PRODUCT, methods=[Constants.GET, Constants.POST])
-def edit_product(product_id):
+def edit_product(product_id, username):
+    print(f'Session : {session}')
+    print(f'USERNAME : {username}')
     if request.method == Constants.POST:
         product_name = request.form[Constants.PRODUCT_NAME]
         product_price = request.form[Constants.PRODUCT_PRICE]

@@ -1,15 +1,9 @@
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from dotenv import load_dotenv
-from datetime import datetime, timezone
 from werkzeug.utils import secure_filename
 from AppConstants.Constants import Constants
-from app import mongo
-from models.Product import ProductDetail, Product
-from models.User import UpdateAddres
-from models.Favorite import Favorite
 from repository.adminrepository import AdminRepository
-import re, uuid, os, pyqrcode
+import os
 
 
 load_dotenv()
@@ -18,6 +12,12 @@ class AdminService:
 
     UPLOAD_FOLDER = os.path.join(Constants.STATIC, Constants.IMG)
     ALLOWED_EXTENSIONS = Constants.EXTENSIONS
+
+    @staticmethod
+    def response_headers(response):
+        response.headers[Constants.CACHE_CTRL] = Constants.CACHE_CTRL_VAL
+        response.headers[Constants.PRAGMA] = Constants.PRAGMA_VAL
+        response.headers[Constants.EXPIRES] = Constants.EXPIRES_VAL
 
     @staticmethod
     def allowed_file(filename):

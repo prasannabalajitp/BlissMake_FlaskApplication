@@ -24,7 +24,7 @@
     <main class="admin-main">
         <div class="admin-dashboard-container">
             <h3>Edit Product Details</h3>
-            <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.product_id) }}" class="admin-form">
+            <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.product_id, username=username, password=password ) }}" class="admin-form">
                 <input type="text" name="product_name" value="{{ product.product_name }}" class="admin-input-form">
                 <input type="number" name="product_price" value="{{ product.product_price }}" class="admin-input-form">
                 <input type="file" name="product_img" class="admin-input-form">
