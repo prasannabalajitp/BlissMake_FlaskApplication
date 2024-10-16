@@ -181,7 +181,10 @@ class BlissmakeRepository:
         admin_data = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
         if admin_data:
             admin_password = admin_data[Constants.PASSWORD]
+            session[Constants.ADMIN_USER_ID] = str(uuid.uuid4())
+            session[Constants.USERNAME] = username
             if admin_password == password:
+                session[Constants.USERNAME] = username
                 products = mongo.db.products.find({})
                 product_list = list(products)
                 return product_list

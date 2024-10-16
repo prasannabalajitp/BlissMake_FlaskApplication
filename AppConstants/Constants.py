@@ -50,7 +50,7 @@ class Constants:
     REMOVE_FAV = '/remove_favorite/<username>/<product_id>'
     ADMIN_DASHBOARD = '/admindashboard'
     ADD_PRODUCT = '/add_product'
-    EDIT_PRODUCT = '/edit_product/<product_id>'
+    EDIT_PRODUCT = '/edit_product/<product_id>/<username>'
     DEL_PRODCUT = '/delete_product/<product_id>'
     UPDATE_PROFILE = '/updateprofile/<username>'
     GENERATE_OTP = '/blissmake/generate_otp'
@@ -59,7 +59,7 @@ class Constants:
     RESET_PWD = '/reset_password/<email>'
     EDIT_ADDR = '/editaddress/<username>'
     EDIT_ADDRESS = '/edit_address/<username>'
-    ADM_RELOGIN = '/home/<username>/<password>/<product_id>'
+    ADM_RELOGIN = '/home/<username>/'
 
     #HTML
     INDEX_HTML = 'index.html'
@@ -94,6 +94,7 @@ class Constants:
     BLISSMAKE_PROFILE = 'blissmake.profile'
     BLISSMAKE_FORGOT_PWD = 'blissmake.forgot_password'
     BLISSMAKE_PAYMENT = 'blissmake.payment'
+    ADMIN_LOGIN = 'admin.admin_login'
 
     EMPTY = ''
     USERNAME = 'username'
@@ -107,6 +108,7 @@ class Constants:
     OTP = 'otp'
     EXP_TIME = "expiration_time"
     SUB = "Your OTP Code"
+    ADMIN_USER_ID = "admin_user_id"
     USERNAME_PWD_WRNG = 'Username / Password is wrong!'
     USER_EXISTS = "User Already Exists!"
     USER_NOT_EXISTS = 'User Not Exists'
@@ -126,6 +128,8 @@ class Constants:
     PROD_ADDED = 'Product added successfully!'
     PROD_UPDATED = 'Product updated successfully!'
     PROD_DEL = 'Product deleted successfully!'
+    PROD_DEL_FAIL = "An error occurred while trying to delete the product."
+    ERR_UPD = "An error occurred while updating the product."
     PWD_NOT_MATCH = "Passwords do not match!"
     PRF_UPDATED = "Profile updated successfully!"
     OTP_SENT = "OTP sent successfully!"
@@ -134,6 +138,10 @@ class Constants:
     ERR_UPDATING_PWD = 'Error updating password. Please try again'
     EMAIL_PWD_REQ = 'Email and new password are required.'
     ADDR_UPDATED = 'Address Updated Successfully'
+    NO_IMG_PROVIDED = 'Invalid Image or no image file provided'
+    ADM_NOT_LOG_IN = "You must be logged in as an admin to access this page."
+    LOGIN_ERR = "Kindly Login to Proceed"
+    EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
@@ -150,6 +158,9 @@ class Constants:
     PRODUCT_PRICE = "product_price"
     PRODUCT_IMG = "product_img"
     PRODUCTS = "products"
+    STATIC = 'static'
+    IMG = 'img'
+    IMG_CONDITION = '.'
     GUEST = 'guest'
     WARNING = "warning"
     PULL = '$pull'
@@ -202,3 +213,7 @@ class Constants:
     RESPONSE_OK = "OK"
     RESPONSE_INT_SER_ERR = "INTERNAL SERVER ERROR"
     RESPONSE_BAD_REQ = "BAD REQUEST"
+
+
+    #Exception
+    DB_ERROR = "An error occurred while accessing the database."

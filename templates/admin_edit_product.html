@@ -17,20 +17,20 @@
         <h1 class="edit-prod-header-h1">Edit Product</h1>
         <div class="user-actions">
             <div class="icons">
-                <a href="{{ url_for('admin.logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+                <a href="{{ url_for('admin.logout', username=username) }}"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>
     </header>
     <main class="admin-main">
         <div class="admin-dashboard-container">
             <h3>Edit Product Details</h3>
-            <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.product_id) }}" class="admin-form">
+            <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.product_id, username=username, password=password ) }}" class="admin-form">
                 <input type="text" name="product_name" value="{{ product.product_name }}" class="admin-input-form">
                 <input type="number" name="product_price" value="{{ product.product_price }}" class="admin-input-form">
-                <input type="file" name="product_img" value="{{ product.product_img }}" class="admin-input-form">
+                <input type="file" name="product_img" class="admin-input-form">
                 <button type="submit" class="admin-button">Update Product</button>
             </form>
-            <a href="{{ url_for('admin.re_login', username=username, password=password, product_id=product.product_id ) }}" class="admin-link">Go Back</a>
+            <a href="{{ url_for('admin.re_login', username=username ) }}" class="admin-link">Go Back</a>
         </div>
     </main>
     <footer>

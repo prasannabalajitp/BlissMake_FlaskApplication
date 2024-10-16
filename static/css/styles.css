@@ -410,7 +410,7 @@ button:hover {
     padding: 10px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
-    background: #fff;
+    /* background: #fff; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1212,6 +1212,20 @@ header.admin-header {
     transition: color 0.3s ease;
 }
 .user-cart-back-link:hover {
+    color: #7f19ec;
+    font-weight: bold;
+    border: #5f16b6;
+}
+.user-cart-back-link-fav {
+    display: block;
+    margin-top: 20px;
+    margin-left: 65px;
+    color: #383838;    /*  #383838 */
+    text-decoration: none;
+    font-size: 1.2em;
+    transition: color 0.3s ease;
+}
+.user-cart-back-link-fav:hover {
     color: #7f19ec;
     font-weight: bold;
     border: #5f16b6;

@@ -8,6 +8,7 @@ from app import mongo, mail
 from AppConstants.Constants import Constants
 from models.User import User
 from services.blissmakeservice import BlissmakeService
+from services.adminservice import AdminService
 import os, random, string, smtplib
 
 load_dotenv()
@@ -52,13 +53,13 @@ def authenticate_user():
         password = request.form.get(Constants.PASSWORD)
 
         if Constants.ADMIN in username:
-            admin_data = BlissmakeService.admin_login(username=username, password=password)
-            if admin_data in [Constants.USERNAME_PWD_WRNG, Constants.INVALID_ADM_PWD]:
+            admin_data = AdminService.admin_login_service(username=username, password=password)
+            if admin_data == Constants.INVALID_ADM_PWD:
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=admin_data)))
-                BlissmakeService.response_headers(response)
+                AdminService.response_headers(response)
                 return response
             response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=admin_data, username=username, password=password))
-            BlissmakeService.response_headers(response)
+            AdminService.response_headers(response)
             return response
 
         else:
@@ -382,7 +383,6 @@ def get_favorite(username):
     if favorites == Constants.FAV_NOT_EXISTS:
         flash(favorites, Constants.ERROR)
         response = make_response(render_template(Constants.FAV_HTML, username=username, messages=favorites, category=Constants.ERROR))
-        response = make_response(render_template(Constants.FAV_HTML, username=username, category=Constants.ERROR))
         BlissmakeService.response_headers(response)
         return response
 
