@@ -4,7 +4,7 @@ from AppConstants.Constants import Constants
 from app import mongo
 from models.Product import ProductDetail
 from pymongo.errors import PyMongoError
-
+import uuid
 
 load_dotenv()
 
@@ -21,6 +21,12 @@ class AdminRepository:
     @staticmethod
     def get_all_admins():
         admin_detail = mongo.db.admin_credentials.find({})
+        admins = list(admin_detail)
+        return admins
+    
+    @staticmethod
+    def get_admin(username):
+        admin_detail = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
         return admin_detail
     
     @staticmethod
@@ -31,6 +37,7 @@ class AdminRepository:
     def admin_login_repository(username, password):
         admin = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
         if admin and admin[Constants.PASSWORD] == password:
+            session[Constants.USER_ID] = str(uuid.uuid4())
             session[Constants.USERNAME] = username
             print(f"Logged in as: {session[Constants.USERNAME]}")
             products = mongo.db.products.find({})

@@ -17,7 +17,7 @@
         <h1 class="edit-prod-header-h1">Edit Product</h1>
         <div class="user-actions">
             <div class="icons">
-                <a href="{{ url_for('admin.logout') }}"><i class="fas fa-sign-out-alt"></i></a>
+                <a href="{{ url_for('admin.logout', username=username) }}"><i class="fas fa-sign-out-alt"></i></a>
             </div>
         </div>
     </header>
@@ -30,7 +30,7 @@
                 <input type="file" name="product_img" class="admin-input-form">
                 <button type="submit" class="admin-button">Update Product</button>
             </form>
-            <a href="{{ url_for('admin.re_login', username=username, password=password, product_id=product.product_id ) }}" class="admin-link">Go Back</a>
+            <a href="{{ url_for('admin.re_login', username=username ) }}" class="admin-link">Go Back</a>
         </div>
     </main>
     <footer>

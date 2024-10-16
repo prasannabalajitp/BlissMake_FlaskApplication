@@ -24,8 +24,9 @@ class AdminService:
         return Constants.IMG_CONDITION in filename and filename.rsplit(Constants.IMG_CONDITION, 1)[1].lower() in AdminService.ALLOWED_EXTENSIONS
 
     @staticmethod
-    def admin_login_service(username, password):    
-        result = AdminRepository.admin_login_repository(username=username, password=password)
+    def admin_login_service(username, password):   
+        if Constants.ADMIN in username: 
+            result = AdminRepository.admin_login_repository(username=username, password=password)
         return result
     
     @staticmethod
@@ -35,6 +36,10 @@ class AdminService:
     @staticmethod
     def get_all_admins():
         return AdminRepository.get_all_admins()
+    
+    @staticmethod
+    def get_admin_by_id(username):
+        return AdminRepository.get_admin(username)
     
     @staticmethod
     def get_product_by_id(product_id):

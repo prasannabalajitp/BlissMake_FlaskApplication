@@ -1,6 +1,5 @@
-from flask import Blueprint, render_template, redirect, url_for, request, session, flash, make_response
+from flask import Blueprint, render_template, redirect, url_for, request, session, flash, make_response, jsonify
 from app import mongo
-from werkzeug.utils import secure_filename
 from functools import wraps
 
 from AppConstants.Constants import Constants
@@ -50,16 +49,14 @@ def admin_login():
     return render_template(Constants.ADMIN_LOGIN_HTML)
 
 @admin.route(Constants.ADM_RELOGIN, methods=[Constants.POST, Constants.GET])
-def re_login(username, password, product_id):
-    admin = mongo.db.admin_credentials.find_one({Constants.USERNAME: username})
-    if username == admin[Constants.USERNAME] and password == admin[Constants.PASSWORD]:
-        password = admin[Constants.PASSWORD]
-        products = mongo.db.products.find({})
+def re_login(username):
+    if Constants.USER_ID in session and session.get(Constants.USERNAME) == username:
+        admin_details = AdminService.get_admin_by_id(username)
+        password = admin_details[Constants.PASSWORD]
+        products = AdminService.get_all_products()
         product_list = list(products)
-
         return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list, username=username, password=password)
-    else:
-        return redirect(url_for(Constants.ADMIN_EDIT_PROD, product_id=product_id))
+    return render_template(Constants.LOGIN_HTML)
 
 @admin.route(Constants.ADD_PRODUCT, methods=[Constants.POST])
 def add_product():
@@ -75,34 +72,29 @@ def add_product():
         flash(result, Constants.ERROR1)
     else:
         flash(Constants.PROD_ADDED, Constants.SUCCESS)
-    return render_template(Constants.ADMIN_DASHBOARD_HTML, products=prod_list)
+    response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=prod_list))
+    return response
 
 
 @admin.route(Constants.EDIT_PRODUCT, methods=[Constants.GET, Constants.POST])
 def edit_product(product_id, username):
-    print(f'Session : {session}')
-    print(f'USERNAME : {username}')
     if request.method == Constants.POST:
         product_name = request.form[Constants.PRODUCT_NAME]
         product_price = request.form[Constants.PRODUCT_PRICE]
         product_img = request.form[Constants.PRODUCT_IMG]
 
-        response, products = AdminService.update_product_service(product_id, product_name, product_price, product_img)
-        flash(response, Constants.INFO)
+        result, products = AdminService.update_product_service(product_id, product_name, product_price, product_img)
+        flash(result, Constants.INFO)
 
-        return render_template(Constants.ADMIN_DASHBOARD_HTML, products=products)
+        response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=products))
+        return response
     
-    product = AdminService.get_product_by_id(product_id)
-    admin_details = AdminService.get_all_admins()
-
-    if admin_details:
-        admin = next(iter(admin_details), {})
-        username = admin.get(Constants.USERNAME)
-        password = admin.get(Constants.PASSWORD)
-    else:
-        username, password = None, None
+    if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
+            return render_template(Constants.LOGIN_HTML)
     
-    return render_template(Constants.ADMIN_EDIT_HTML, product=product, username=username, password=password)
+    product_details = AdminService.get_product_by_id(product_id)
+    return render_template(Constants.ADMIN_EDIT_HTML, product=product_details, username=username)
+    
 
 
 @admin.route(Constants.DEL_PRODCUT, methods=[Constants.GET])
@@ -119,7 +111,11 @@ def delete_product(product_id):
     return render_template(Constants.ADMIN_DASHBOARD_HTML, products=product_list)
 
 
-@admin.route(Constants.LOGOUT_ADM, methods=[Constants.GET])
-def logout():
+@admin.route(Constants.LOGOUT, methods=[Constants.GET])
+def logout(username):
+    print(f'Session before logout : {session}')
+    session.pop(Constants.ADMIN_USER_ID, None)
+    session.pop(Constants.USERNAME, username)
     session.clear()
+    print(f'Session after logout : {session}')
     return redirect(url_for(Constants.BLISSMAKE_INDEX))
