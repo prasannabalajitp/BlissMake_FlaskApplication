@@ -5,7 +5,6 @@ from AppConstants.Constants import Constants
 from repository.adminrepository import AdminRepository
 import os
 
-
 load_dotenv()
 
 class AdminService:
@@ -57,7 +56,7 @@ class AdminService:
                 product_list = AdminRepository.get_all_products()
                 return response, product_list
             else:
-                return Constants.DATABASE_ERROR, product_list
+                return Constants.DB_ERROR, product_list
         return Constants.NO_IMG_PROVIDED, product_list
     
     @staticmethod
@@ -84,16 +83,13 @@ class AdminService:
     @staticmethod
     def delete_product_service(product_id):
         product = AdminRepository.get_product_by_id(prod_id=product_id)
-
         if product:
             img_path = os.path.join(AdminService.UPLOAD_FOLDER, product[Constants.PRODUCT_IMG])
 
             if os.path.exists(img_path):
                 os.remove(img_path)
-            
             response = AdminRepository.delete_product(product_id)
             product_list = AdminRepository.get_all_products()
 
             return response, product_list
-        
         return Constants.PROD_NOT_FOUND, AdminRepository.get_all_products()

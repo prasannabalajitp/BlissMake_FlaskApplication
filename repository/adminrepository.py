@@ -10,7 +10,6 @@ load_dotenv()
 
 class AdminRepository:
 
-
     @staticmethod
     def get_all_products():
         products = mongo.db.products.find({})
@@ -65,7 +64,6 @@ class AdminRepository:
         except Exception as e:
             print(f'Error occured : {e}')
             return Constants.DB_ERROR
-        
     
     @staticmethod
     def delete_product(product_id):

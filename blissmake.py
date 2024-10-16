@@ -54,6 +54,10 @@ def authenticate_user():
 
         if Constants.ADMIN in username:
             admin_data = AdminService.admin_login_service(username=username, password=password)
+            if admin_data == Constants.INVALID_ADM_PWD:
+                response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=admin_data)))
+                AdminService.response_headers(response)
+                return response
             response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=admin_data, username=username, password=password))
             AdminService.response_headers(response)
             return response
@@ -379,7 +383,6 @@ def get_favorite(username):
     if favorites == Constants.FAV_NOT_EXISTS:
         flash(favorites, Constants.ERROR)
         response = make_response(render_template(Constants.FAV_HTML, username=username, messages=favorites, category=Constants.ERROR))
-        response = make_response(render_template(Constants.FAV_HTML, username=username, category=Constants.ERROR))
         BlissmakeService.response_headers(response)
         return response
 

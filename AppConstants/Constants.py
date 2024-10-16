@@ -94,6 +94,7 @@ class Constants:
     BLISSMAKE_PROFILE = 'blissmake.profile'
     BLISSMAKE_FORGOT_PWD = 'blissmake.forgot_password'
     BLISSMAKE_PAYMENT = 'blissmake.payment'
+    ADMIN_LOGIN = 'admin.admin_login'
 
     EMPTY = ''
     USERNAME = 'username'
@@ -138,6 +139,8 @@ class Constants:
     EMAIL_PWD_REQ = 'Email and new password are required.'
     ADDR_UPDATED = 'Address Updated Successfully'
     NO_IMG_PROVIDED = 'Invalid Image or no image file provided'
+    ADM_NOT_LOG_IN = "You must be logged in as an admin to access this page."
+    LOGIN_ERR = "Kindly Login to Proceed"
     EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
     PASSWORD_HASH_METHOD = 'sha256'
     CART_NOT_FOUND = 'Cart Not Found'

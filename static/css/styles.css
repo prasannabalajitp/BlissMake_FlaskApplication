@@ -1216,6 +1216,20 @@ header.admin-header {
     font-weight: bold;
     border: #5f16b6;
 }
+.user-cart-back-link-fav {
+    display: block;
+    margin-top: 20px;
+    margin-left: 65px;
+    color: #383838;    /*  #383838 */
+    text-decoration: none;
+    font-size: 1.2em;
+    transition: color 0.3s ease;
+}
+.user-cart-back-link-fav:hover {
+    color: #7f19ec;
+    font-weight: bold;
+    border: #5f16b6;
+}
 .edit-prod-header{
     width: 100%;
     background: #7f19ec;

@@ -22,6 +22,9 @@
         {% if request.args.get('error') %}
             <p class="error-message">{{ request.args.get('error') }}</p>
         {% endif %}
+        {% if messages %}
+            <p class="error-message">{{ messages }}</p>
+        {% endif %}
         <form method="post" action="{{ url_for('blissmake.authenticate_user') }}">
             <label for="username" class="login-label">Username:</label>
             <input type="text" id="username" name="username" required><br>

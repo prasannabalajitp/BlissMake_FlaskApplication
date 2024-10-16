@@ -60,7 +60,7 @@
             {% endfor %}
         </div>
         {% else %}
-            <p>No favorites found.</p>
+        <a href="{{ url_for('blissmake.home', username=username) }}" class="user-cart-back-link-fav">Continue Shopping</a>
         {% endif %}
     </main>
 
