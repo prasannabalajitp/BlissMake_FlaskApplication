@@ -88,6 +88,11 @@ def register():
             return response
 
         product_list = BlissmakeService.register_service(username=username, email=email, password=password)
+        if product_list == Constants.INVALID_USR_NAME:
+            flash(Constants.INVALID_USR_NAME, category=Constants.ERROR)
+            response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.INVALID_USR_NAME))
+            BlissmakeService.response_headers(response=response)
+            return response
         response = make_response(render_template(
             Constants.HOME_HTML, 
             username=username, 
@@ -105,45 +110,61 @@ def register():
 
 @blissmake.route(Constants.GENERATE_OTP, methods=[Constants.GET, Constants.POST])
 def generate_otp():
-    email = request.form.get(Constants.EMAIL)
     
-    if not email or not BlissmakeService.is_valid_email(email):
+    email = request.form.get(Constants.EMAIL)
+    gen_otp_response = BlissmakeService.generate_otp_service(email=email)
+
+    if gen_otp_response == Constants.INVALID_EMAIL_ADDR:
         flash(Constants.INVALID_EMAIL_ADDR, Constants.ERROR1)
         return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
     
-    otp = Constants.EMPTY.join(random.choices(string.ascii_letters + string.digits, k=6))
-    expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
-
-    existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
-    if existing_entry:
-        mongo.db.otp.update_one(
-            {Constants.EMAIL: email}, 
-            {Constants.SET: {
-                Constants.OTP: otp, 
-                Constants.EXP_TIME: expiration_time
-                }}, 
-                upsert=True
-        )
+    elif gen_otp_response == Constants.OTP_SENT:
+        flash(Constants.OTP_SENT, Constants.SUCCESS)
+        return render_template(Constants.VERIFY_OTP_HTML, email=email)
+    
     else:
-        mongo.db.otp.insert_one({
-            Constants.EMAIL: email,
-            Constants.OTP: otp,
-            Constants.EXP_TIME: expiration_time
-        })
+        flash(gen_otp_response, Constants.ERROR1)
+        return render_template(Constants.VERIFY_OTP_HTML, email=email)
 
-    try:
-        with smtplib.SMTP(os.getenv(Constants.MAIL_SERVER), 587) as server:
-            server.starttls()
-            server.login(os.getenv(Constants.MAIL_USERNAME), os.getenv(Constants.MAIL_PWD))
-            subject = Constants.SUB
-            body = f"Your OTP is: {otp}"
-            msg = f"Subject: {subject}\n\n{body}"
+    
+    
+    # if not email or not BlissmakeService.is_valid_email(email):
+    #     flash(Constants.INVALID_EMAIL_ADDR, Constants.ERROR1)
+    #     return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
+    
+    # otp = Constants.EMPTY.join(random.choices(string.ascii_letters + string.digits, k=6))
+    # expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
 
-            server.sendmail(os.getenv(Constants.MAIL_USERNAME), email, msg)
-            flash(Constants.OTP_SENT, Constants.SUCCESS)
-    except smtplib.SMTPException as e:
-        flash(f"Error sending email: {str(e)}", Constants.ERROR1)
-    return render_template(Constants.VERIFY_OTP_HTML, email=email)
+    # existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
+    # if existing_entry:
+    #     mongo.db.otp.update_one(
+    #         {Constants.EMAIL: email}, 
+    #         {Constants.SET: {
+    #             Constants.OTP: otp, 
+    #             Constants.EXP_TIME: expiration_time
+    #             }}, 
+    #             upsert=True
+    #     )
+    # else:
+    #     mongo.db.otp.insert_one({
+    #         Constants.EMAIL: email,
+    #         Constants.OTP: otp,
+    #         Constants.EXP_TIME: expiration_time
+    #     })
+
+    # try:
+    #     with smtplib.SMTP(os.getenv(Constants.MAIL_SERVER), 587) as server:
+    #         server.starttls()
+    #         server.login(os.getenv(Constants.MAIL_USERNAME), os.getenv(Constants.MAIL_PWD))
+    #         subject = Constants.SUB
+    #         body = f"Your OTP is: {otp}"
+    #         msg = f"Subject: {subject}\n\n{body}"
+
+    #         server.sendmail(os.getenv(Constants.MAIL_USERNAME), email, msg)
+    #         flash(Constants.OTP_SENT, Constants.SUCCESS)
+    # except smtplib.SMTPException as e:
+    #     flash(f"Error sending email: {str(e)}", Constants.ERROR1)
+    # return render_template(Constants.VERIFY_OTP_HTML, email=email)
 
 
 @blissmake.route(Constants.FORGOT_PWD, methods=[Constants.POST, Constants.GET])
@@ -151,29 +172,42 @@ def forgot_password():
     return render_template(Constants.FORGOT_PWD_HTML)
 
 
-from datetime import datetime, timezone
-
 @blissmake.route(Constants.VERIFY_OTP, methods=[Constants.GET, Constants.POST])
 def verify_otp():
     email = request.form.get(Constants.EMAIL)
     inp_otp = request.form.get(Constants.OTP)
-    record = mongo.db.otp.find_one({Constants.EMAIL: email})
-    if record:
-        expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
-        current_time = datetime.now(timezone.utc)
 
-        if current_time > expiration_time:
-            flash(Constants.OTP_EXP, Constants.ERROR)
-            return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
+    result = BlissmakeService.verify_otp_service(email=email, user_otp=inp_otp)
+    if result == Constants.OTP_EXP:
+        flash(Constants.OTP_EXP, Constants.ERROR)
+        return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
+    
+    elif result == Constants.OTP_VERIFIED:
+        flash(Constants.OTP_VERIFIED, Constants.SUCCESS)
+        return render_template(Constants.RESET_PWD_HTML, email=email)
+    
+    else:
+        flash(result, Constants.ERROR)
+        return render_template(render_template(Constants.VERIFY_OTP_HTML, email=email))
+    
 
-        if record[Constants.OTP] == inp_otp:
-            flash(Constants.OTP_VERIFIED, Constants.SUCCESS)
-            return render_template(Constants.RESET_PWD_HTML, email=email)
-        else:
-            flash(Constants.INVALID_OTP, Constants.ERROR1)
+    # record = mongo.db.otp.find_one({Constants.EMAIL: email})
+    # if record:
+    #     expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
+    #     current_time = datetime.now(timezone.utc)
 
-    email = request.args.get(Constants.EMAIL)
-    return render_template(Constants.VERIFY_OTP_HTML, email=email)
+    #     if current_time > expiration_time:
+    #         flash(Constants.OTP_EXP, Constants.ERROR)
+    #         return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
+
+    #     if record[Constants.OTP] == inp_otp:
+    #         flash(Constants.OTP_VERIFIED, Constants.SUCCESS)
+    #         return render_template(Constants.RESET_PWD_HTML, email=email)
+    #     else:
+    #         flash(Constants.INVALID_OTP, Constants.ERROR1)
+
+    # email = request.args.get(Constants.EMAIL)
+    # return render_template(Constants.VERIFY_OTP_HTML, email=email)
 
 
 @blissmake.route(Constants.RESET_PWD, methods=[Constants.GET, Constants.POST])
@@ -263,22 +297,17 @@ def update_profile(username):
             BlissmakeService.response_headers(response)
             return response
     
-    user = mongo.db.users.find_one({Constants.USERNAME: username})
+    user = BlissmakeService.get_user_by_name(username)
 
-    if not user:
+    if user == Constants.USER_NOT_EXISTS:
         flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
         response = make_response(redirect(url_for(Constants.PROFILE, username=username)))
         BlissmakeService.response_headers(response)
         return response
     
-    user_data = User(
-        username=user[Constants.USERNAME],
-        email=user[Constants.EMAIL],
-        address=user.get(Constants.ADDRESS, Constants.EMPTY),
-        phone=user.get(Constants.PHONE, Constants.EMPTY)).dict()
+    user_data = user.dict()
 
     response = make_response(render_template(Constants.PROFILE_HTML, **user_data))
-
     BlissmakeService.response_headers(response)
     return response
 

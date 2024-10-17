@@ -1,14 +1,15 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import session
 from dotenv import load_dotenv
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from AppConstants.Constants import Constants
 from app import mongo
 from models.Product import ProductDetail, Product
 from models.User import UpdateAddres
+from models.User import User
 from models.Favorite import Favorite
 from repository.blissmakerepository import BlissmakeRepository
-import re, uuid, os, pyqrcode
+import re, uuid, os, pyqrcode, random, string, smtplib
 
 
 load_dotenv()
@@ -132,7 +133,9 @@ class BlissmakeService:
     
 
     @staticmethod
-    def register_service(username, email, password):    
+    def register_service(username, email, password):
+        if Constants.ADMIN in username: 
+            return Constants.INVALID_USR_NAME
         hashed_password = generate_password_hash(password, method=Constants.PASSWORD_HASH_METHOD)
         reg_response = BlissmakeService.user_exists(username=username)
         if reg_response == Constants.USER_EXISTS:
@@ -183,6 +186,19 @@ class BlissmakeService:
     def get_profile(username):
         user = BlissmakeRepository.get_user_data(username=username)
         return user
+    
+    @staticmethod
+    def get_user_by_name(username):
+        user = BlissmakeRepository.get_user_data(username=username)
+        if not user:
+            return Constants.USER_NOT_EXISTS
+        return User(
+            username=user[Constants.USERNAME],
+            email=user[Constants.EMAIL],
+            address=user.get(Constants.ADDRESS, Constants.EMPTY),
+            phone=user.get(Constants.PHONE, Constants.EMPTY)
+        )
+
     
     @staticmethod
     def update_profile_servcice(username, new_password, confirm_password, new_address, phone):
@@ -238,3 +254,56 @@ class BlissmakeService:
 
         return qr_filename, total_price
     
+    @staticmethod
+    def generate_otp_service(email):
+        if not email or not BlissmakeService.is_valid_email(email):
+            return Constants.INVALID_EMAIL_ADDR
+        
+        otp = Constants.EMPTY.join(random.choices(string.ascii_letters + string.digits, k=6))
+        expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
+
+        existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
+        if existing_entry:
+            mongo.db.otp.update_one(
+                {Constants.EMAIL: email}, 
+                {Constants.SET: {
+                    Constants.OTP: otp, 
+                    Constants.EXP_TIME: expiration_time
+                    }}, 
+                    upsert=True
+            )
+        else:
+            mongo.db.otp.insert_one({
+                Constants.EMAIL: email,
+                Constants.OTP: otp,
+                Constants.EXP_TIME: expiration_time
+            })
+        try:
+            with smtplib.SMTP(os.getenv(Constants.MAIL_SERVER), 587) as server:
+                server.starttls()
+                server.login(os.getenv(Constants.MAIL_USERNAME), os.getenv(Constants.MAIL_PWD))
+                subject = Constants.SUB
+                body = f"Your OTP is: {otp}"
+                msg = f"Subject: {subject}\n\n{body}"
+
+                server.sendmail(os.getenv(Constants.MAIL_USERNAME), email, msg)
+                return Constants.OTP_SENT
+        except smtplib.SMTPException as e:
+            return f"Error sending email: {str(e)}"
+
+
+    @staticmethod
+    def verify_otp_service(email, user_otp):
+        record = mongo.db.otp.find_one({Constants.EMAIL: email})
+        if record:
+            expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
+            current_time = datetime.now(timezone.utc)
+
+            if current_time > expiration_time:
+                return Constants.OTP_EXP
+            else:
+                if record[Constants.OTP] == user_otp:
+                    return Constants.OTP_VERIFIED
+                else:
+                    return Constants.INVALID_OTP
+            
