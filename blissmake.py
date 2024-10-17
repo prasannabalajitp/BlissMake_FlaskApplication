@@ -126,47 +126,6 @@ def generate_otp():
         flash(gen_otp_response, Constants.ERROR1)
         return render_template(Constants.VERIFY_OTP_HTML, email=email)
 
-    
-    
-    # if not email or not BlissmakeService.is_valid_email(email):
-    #     flash(Constants.INVALID_EMAIL_ADDR, Constants.ERROR1)
-    #     return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
-    
-    # otp = Constants.EMPTY.join(random.choices(string.ascii_letters + string.digits, k=6))
-    # expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
-
-    # existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
-    # if existing_entry:
-    #     mongo.db.otp.update_one(
-    #         {Constants.EMAIL: email}, 
-    #         {Constants.SET: {
-    #             Constants.OTP: otp, 
-    #             Constants.EXP_TIME: expiration_time
-    #             }}, 
-    #             upsert=True
-    #     )
-    # else:
-    #     mongo.db.otp.insert_one({
-    #         Constants.EMAIL: email,
-    #         Constants.OTP: otp,
-    #         Constants.EXP_TIME: expiration_time
-    #     })
-
-    # try:
-    #     with smtplib.SMTP(os.getenv(Constants.MAIL_SERVER), 587) as server:
-    #         server.starttls()
-    #         server.login(os.getenv(Constants.MAIL_USERNAME), os.getenv(Constants.MAIL_PWD))
-    #         subject = Constants.SUB
-    #         body = f"Your OTP is: {otp}"
-    #         msg = f"Subject: {subject}\n\n{body}"
-
-    #         server.sendmail(os.getenv(Constants.MAIL_USERNAME), email, msg)
-    #         flash(Constants.OTP_SENT, Constants.SUCCESS)
-    # except smtplib.SMTPException as e:
-    #     flash(f"Error sending email: {str(e)}", Constants.ERROR1)
-    # return render_template(Constants.VERIFY_OTP_HTML, email=email)
-
-
 @blissmake.route(Constants.FORGOT_PWD, methods=[Constants.POST, Constants.GET])
 def forgot_password():
     return render_template(Constants.FORGOT_PWD_HTML)
@@ -185,49 +144,24 @@ def verify_otp():
     elif result == Constants.OTP_VERIFIED:
         flash(Constants.OTP_VERIFIED, Constants.SUCCESS)
         return render_template(Constants.RESET_PWD_HTML, email=email)
-    
     else:
         flash(result, Constants.ERROR)
         return render_template(render_template(Constants.VERIFY_OTP_HTML, email=email))
-    
-
-    # record = mongo.db.otp.find_one({Constants.EMAIL: email})
-    # if record:
-    #     expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
-    #     current_time = datetime.now(timezone.utc)
-
-    #     if current_time > expiration_time:
-    #         flash(Constants.OTP_EXP, Constants.ERROR)
-    #         return redirect(url_for(Constants.BLISSMAKE_FORGOT_PWD))
-
-    #     if record[Constants.OTP] == inp_otp:
-    #         flash(Constants.OTP_VERIFIED, Constants.SUCCESS)
-    #         return render_template(Constants.RESET_PWD_HTML, email=email)
-    #     else:
-    #         flash(Constants.INVALID_OTP, Constants.ERROR1)
-
-    # email = request.args.get(Constants.EMAIL)
-    # return render_template(Constants.VERIFY_OTP_HTML, email=email)
 
 
 @blissmake.route(Constants.RESET_PWD, methods=[Constants.GET, Constants.POST])
 def reset_password(email):
     if request.method == Constants.POST:
         new_password = request.form.get(Constants.NEW_PWD)
-        if email and new_password:
-            hashed_password = generate_password_hash(new_password)  # Hash the password
-            result = mongo.db.users.update_one({Constants.EMAIL: email}, {Constants.SET: {Constants.PASSWORD: hashed_password}})
-            if result.modified_count > 0:
-                mongo.db.otp.delete_many({Constants.EMAIL: email})  # Remove OTP after use
-                print(mongo.db.users.find_one({Constants.EMAIL: email}))
-                flash(Constants.PWD_UPDATED, Constants.SUCCESS)
-                return redirect(url_for(Constants.BLISSMAKE_LOGIN))
-            else:
-                flash(Constants.ERR_UPDATING_PWD, Constants.ERROR)
+        result = BlissmakeService.reset_password_service(email=email, password=new_password)
+        if result == Constants.PWD_UPDATED:
+            flash(result, Constants.SUCCESS)
+        elif result == Constants.ERR_UPDATING_PWD:
+            flash(result, Constants.ERROR)
         else:
-            flash(Constants.EMAIL_PWD_REQ, Constants.ERROR)
-    return render_template(Constants.LOGIN_HTML)
-
+            flash(result, Constants.ERROR)
+        response = make_response(render_template(Constants.BLISSMAKE_LOGIN))
+        return response
 
 
 @blissmake.route(Constants.PROFILE_URL)

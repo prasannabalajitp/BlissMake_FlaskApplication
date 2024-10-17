@@ -168,7 +168,8 @@ class BlissmakeService:
     
     @staticmethod
     def update_cart_quantity(prod_id, action, username):
-        cart = mongo.db.usercart.find_one({Constants.USERNAME : username})
+        # cart = mongo.db.usercart.find_one({Constants.USERNAME : username})
+        cart = BlissmakeRepository.get_cart(username=username)
         if not cart:
             return Constants.CART_NOT_FOUND, None
         
@@ -202,7 +203,7 @@ class BlissmakeService:
     
     @staticmethod
     def update_profile_servcice(username, new_password, confirm_password, new_address, phone):
-        user = mongo.db.users.find_one({Constants.USERNAME: username})
+        user = BlissmakeRepository.get_user_data(username=username)
         if not user:
             return Constants.USER_NOT_EXISTS
         update_data = UpdateAddres(address=new_address, phone=phone).dict()
@@ -235,7 +236,8 @@ class BlissmakeService:
 
     @staticmethod
     def payment_qr_service(username):
-        cart = mongo.db.usercart.find_one({Constants.USERNAME : username})
+        # cart = mongo.db.usercart.find_one({Constants.USERNAME : username})
+        cart = BlissmakeRepository.get_cart(username=username)
         if not cart:
             return Constants.CART_NOT_FOUND, None
         total_price = BlissmakeService.calculate_total_price(cart.get(Constants.PRODUCTS, []))
@@ -262,22 +264,24 @@ class BlissmakeService:
         otp = Constants.EMPTY.join(random.choices(string.ascii_letters + string.digits, k=6))
         expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
 
-        existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
-        if existing_entry:
-            mongo.db.otp.update_one(
-                {Constants.EMAIL: email}, 
-                {Constants.SET: {
-                    Constants.OTP: otp, 
-                    Constants.EXP_TIME: expiration_time
-                    }}, 
-                    upsert=True
-            )
-        else:
-            mongo.db.otp.insert_one({
-                Constants.EMAIL: email,
-                Constants.OTP: otp,
-                Constants.EXP_TIME: expiration_time
-            })
+        _ = BlissmakeRepository.generate_user_otp_repository(email=email, otp=otp, expiration_time=expiration_time)
+        # existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
+        # existing_entry = BlissmakeRepository.get_user_otp(email=email)
+        # if existing_entry:
+        #     mongo.db.otp.update_one(
+        #         {Constants.EMAIL: email}, 
+        #         {Constants.SET: {
+        #             Constants.OTP: otp, 
+        #             Constants.EXP_TIME: expiration_time
+        #             }}, 
+        #             upsert=True
+        #     )
+        # else:
+        #     mongo.db.otp.insert_one({
+        #         Constants.EMAIL: email,
+        #         Constants.OTP: otp,
+        #         Constants.EXP_TIME: expiration_time
+        #     })
         try:
             with smtplib.SMTP(os.getenv(Constants.MAIL_SERVER), 587) as server:
                 server.starttls()
@@ -294,16 +298,38 @@ class BlissmakeService:
 
     @staticmethod
     def verify_otp_service(email, user_otp):
-        record = mongo.db.otp.find_one({Constants.EMAIL: email})
-        if record:
-            expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
-            current_time = datetime.now(timezone.utc)
-
-            if current_time > expiration_time:
-                return Constants.OTP_EXP
+        expiration_time, otp = BlissmakeRepository.verify_otp_repository(email=email)
+        current_time = datetime.now(timezone.utc)
+        if current_time > expiration_time:
+            return Constants.OTP_EXP
+        else:
+            if user_otp == otp:
+                return Constants.OTP_VERIFIED
             else:
-                if record[Constants.OTP] == user_otp:
-                    return Constants.OTP_VERIFIED
-                else:
-                    return Constants.INVALID_OTP
-            
+                return Constants.INVALID_OTP
+        # record = mongo.db.otp.find_one({Constants.EMAIL: email})
+        # if record:
+        #     expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
+        #     current_time = datetime.now(timezone.utc)
+
+        #     if current_time > expiration_time:
+        #         return Constants.OTP_EXP
+        #     else:
+        #         if record[Constants.OTP] == user_otp:
+        #             return Constants.OTP_VERIFIED
+        #         else:
+        #             return Constants.INVALID_OTP
+                
+    @staticmethod
+    def reset_password_service(email, password):
+        if email and password:
+            hashed_password = generate_password_hash(password)  # Hash the password
+            result = mongo.db.users.update_one({Constants.EMAIL: email}, {Constants.SET: {Constants.PASSWORD: hashed_password}})
+            if result.modified_count > 0:
+                mongo.db.otp.delete_many({Constants.EMAIL: email})  # Remove OTP after use
+                print(mongo.db.users.find_one({Constants.EMAIL: email}))
+                return Constants.PWD_UPDATED
+            else:
+                return Constants.ERR_UPDATING_PWD
+        else:
+            return Constants.EMAIL_PWD_REQ
