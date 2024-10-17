@@ -1,6 +1,7 @@
 from werkzeug.security import check_password_hash
 from flask import session
 from dotenv import load_dotenv
+from datetime import datetime, timezone, timedelta
 from AppConstants.Constants import Constants
 from app import mongo
 from models.Product import ProductDetail
@@ -46,6 +47,12 @@ class BlissmakeRepository:
     def get_favorites(username):
         favorites = mongo.db.favorites.find_one({Constants.USERNAME: username})
         return favorites
+
+    @staticmethod
+    def get_user_otp(email):
+        otps = mongo.db.otp.find_one({Constants.EMAIL: email})
+        return otps
+
 
     @staticmethod
     def update_address(username, address):
@@ -202,3 +209,47 @@ class BlissmakeRepository:
                 return Constants.SUCCESS
             return Constants.INVALID_PASSWORD
         return Constants.USER_NOT_EXISTS
+    
+    @staticmethod
+    def generate_user_otp_repository(email, otp, expiration_time):
+        existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
+        if existing_entry:
+            mongo.db.otp.update_one(
+                {Constants.EMAIL: email}, 
+                {Constants.SET: {
+                    Constants.OTP: otp, 
+                    Constants.EXP_TIME: expiration_time
+                    }}, 
+                    upsert=True
+            )
+        else:
+            mongo.db.otp.insert_one({
+                Constants.EMAIL: email,
+                Constants.OTP: otp,
+                Constants.EXP_TIME: expiration_time
+            })
+
+    @staticmethod
+    def verify_otp_repository(email):
+        record = mongo.db.otp.find_one({Constants.EMAIL: email})
+        if record:
+            expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
+            otp = record[Constants.OTP]
+            return expiration_time, otp
+        return None
+
+    @staticmethod
+    def reset_password_repository(email, password):
+        result = mongo.db.users.update_one({
+                    Constants.EMAIL: email
+                }, 
+                {Constants.SET: {
+                        Constants.PASSWORD: password
+                        }
+                })
+        if result.modified_count > 0:
+            mongo.db.otp.delete_many({Constants.EMAIL: email})  # Remove OTP after use
+            print(mongo.db.users.find_one({Constants.EMAIL: email}))
+            return Constants.PWD_UPDATED
+        else:
+            return Constants.ERR_UPDATING_PWD

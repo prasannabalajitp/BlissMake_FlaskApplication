@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <title>Verify OTP - BlissMake Creations</title>
     <style>
-        html, body {
+        /* html, body {
             height: 100%;
             margin: 0;
         }
@@ -105,7 +105,7 @@
         .error {
             border-color: none;
             color: red;
-        }
+        } */
     </style>
 </head>
 <body>
@@ -127,9 +127,9 @@
         
         {% with messages = get_flashed_messages(with_categories=True) %}
             {% if messages %}
-                <div class="messages">
+                <div class="flash-messages">
                     {% for category, message in messages %}
-                        <div class="message {{ category }}">
+                        <div class="flash-message {{ category }}">
                             <p>{{ message }}</p>
                         </div>
                     {% endfor %}
