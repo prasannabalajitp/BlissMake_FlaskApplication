@@ -160,7 +160,7 @@ def reset_password(email):
             flash(result, Constants.ERROR)
         else:
             flash(result, Constants.ERROR)
-        response = make_response(render_template(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
         return response
 
 

@@ -168,7 +168,6 @@ class BlissmakeService:
     
     @staticmethod
     def update_cart_quantity(prod_id, action, username):
-        # cart = mongo.db.usercart.find_one({Constants.USERNAME : username})
         cart = BlissmakeRepository.get_cart(username=username)
         if not cart:
             return Constants.CART_NOT_FOUND, None
@@ -236,7 +235,6 @@ class BlissmakeService:
 
     @staticmethod
     def payment_qr_service(username):
-        # cart = mongo.db.usercart.find_one({Constants.USERNAME : username})
         cart = BlissmakeRepository.get_cart(username=username)
         if not cart:
             return Constants.CART_NOT_FOUND, None
@@ -265,23 +263,7 @@ class BlissmakeService:
         expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
 
         _ = BlissmakeRepository.generate_user_otp_repository(email=email, otp=otp, expiration_time=expiration_time)
-        # existing_entry = mongo.db.otp.find_one({Constants.EMAIL: email})
-        # existing_entry = BlissmakeRepository.get_user_otp(email=email)
-        # if existing_entry:
-        #     mongo.db.otp.update_one(
-        #         {Constants.EMAIL: email}, 
-        #         {Constants.SET: {
-        #             Constants.OTP: otp, 
-        #             Constants.EXP_TIME: expiration_time
-        #             }}, 
-        #             upsert=True
-        #     )
-        # else:
-        #     mongo.db.otp.insert_one({
-        #         Constants.EMAIL: email,
-        #         Constants.OTP: otp,
-        #         Constants.EXP_TIME: expiration_time
-        #     })
+
         try:
             with smtplib.SMTP(os.getenv(Constants.MAIL_SERVER), 587) as server:
                 server.starttls()
@@ -307,18 +289,6 @@ class BlissmakeService:
                 return Constants.OTP_VERIFIED
             else:
                 return Constants.INVALID_OTP
-        # record = mongo.db.otp.find_one({Constants.EMAIL: email})
-        # if record:
-        #     expiration_time = record[Constants.EXP_TIME].replace(tzinfo=timezone.utc)
-        #     current_time = datetime.now(timezone.utc)
-
-        #     if current_time > expiration_time:
-        #         return Constants.OTP_EXP
-        #     else:
-        #         if record[Constants.OTP] == user_otp:
-        #             return Constants.OTP_VERIFIED
-        #         else:
-        #             return Constants.INVALID_OTP
                 
     @staticmethod
     def reset_password_service(email, password):
