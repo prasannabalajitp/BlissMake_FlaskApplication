@@ -74,7 +74,7 @@ def edit_product(product_id, username):
         session[Constants.USERNAME] = username
 
         flash(Constants.LOGIN_ERR)
-        return redirect(url_for(Constants.ADMIN_LOGIN))
+        return redirect(url_for(Constants.ADMIN_INDEX))
     
     if request.method == Constants.POST:
         product_name = request.form[Constants.PRODUCT_NAME]
