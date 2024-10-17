@@ -125,6 +125,7 @@ class Constants:
     PROD_NOT_WISHLIST = 'Product Not in Wishlist'
     NO_FAV_FOUND = 'No Favorites Found'
     INVALID_ADM_PWD = "Invalid Admin/Admin Password. Please try again..."
+    INVALID_USR_NAME = "Admin can't be a username"
     PROD_ADDED = 'Product added successfully!'
     PROD_UPDATED = 'Product updated successfully!'
     PROD_DEL = 'Product deleted successfully!'
