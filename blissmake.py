@@ -9,6 +9,7 @@ from AppConstants.Constants import Constants
 from models.User import User
 from services.blissmakeservice import BlissmakeService
 from services.adminservice import AdminService
+from Common.AnalyticClient import configure_and_generate_logs
 import os, random, string, smtplib
 
 load_dotenv()
@@ -51,22 +52,36 @@ def authenticate_user():
     if request.method == Constants.POST:
         username = request.form.get(Constants.USERNAME)
         password = request.form.get(Constants.PASSWORD)
+        start_time = datetime.now(timezone.utc).isoformat()
 
+        query = request.form.to_dict()
+        masked_password = Constants.MASK_PWD * len(password)
+        query[Constants.PASSWORD] = masked_password
         if Constants.ADMIN in username:
             admin_data = AdminService.admin_login_service(username=username, password=password)
             if admin_data == Constants.INVALID_ADM_PWD:
+                response_status = 500
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=admin_data)))
                 AdminService.response_headers(response)
+                end_time = datetime.now(timezone.utc).isoformat()
+                configure_and_generate_logs(username, query, start_time, end_time, response, response_status, request.method, request.host)
                 return response
+            response_status = 200
             response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=admin_data, username=username, password=password))
             AdminService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, start_time, end_time, str(response), response_status, request.method, request.host)
             return response
 
         else:
+            start_time = datetime.now(timezone.utc).isoformat()
             user = BlissmakeService.user_login(username=username, password=password)
+            response_status = 200 if user == Constants.SUCCESS else 401
             if user == Constants.SUCCESS:
+                end_time = datetime.now(timezone.utc).isoformat()
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_HOME, username=username)))
                 BlissmakeService.response_headers(response)
+                configure_and_generate_logs(username, query, start_time, end_time, user, response_status, request.method, request.host)
                 return response
 
             response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=user)))
@@ -75,16 +90,23 @@ def authenticate_user():
 
 @blissmake.route(Constants.REGISTER, methods=[Constants.GET, Constants.POST])
 def register():
+    start_time = datetime.now(timezone.utc).isoformat()
     if request.method == Constants.POST:
         username = request.form.get(Constants.USERNAME)
         email = request.form.get(Constants.EMAIL)
         password = request.form.get(Constants.PASSWORD)
+
+        query = request.form.to_dict()
+        masked_password = Constants.MASK_PWD * len(password)
+        query[Constants.PASSWORD] = masked_password
 
         reg_response = BlissmakeService.user_exists(username=username)
         if reg_response == Constants.USER_EXISTS:
             flash(Constants.USER_EXISTS, category=Constants.ERROR)
             response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.USER_EXISTS))
             BlissmakeService.response_headers(response=response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, start_time, end_time, reg_response, 400, request.method, request.host)
             return response
 
         product_list = BlissmakeService.register_service(username=username, email=email, password=password)
@@ -92,6 +114,8 @@ def register():
             flash(Constants.INVALID_USR_NAME, category=Constants.ERROR)
             response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.INVALID_USR_NAME))
             BlissmakeService.response_headers(response=response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, start_time,end_time, product_list, 500, request.method, request.host)
             return response
         response = make_response(render_template(
             Constants.HOME_HTML, 
@@ -99,6 +123,8 @@ def register():
             products=product_list
         ))
         BlissmakeService.response_headers(response=response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, query, start_time, end_time, str(product_list), 200, request.method, request.host)
         return response
 
 
@@ -477,6 +503,7 @@ def payment_qr(username):
 
 @blissmake.route(Constants.ADD_TO_WISHLIST, methods=[Constants.POST, Constants.GET])
 def add_to_wishlist(username, product_id):
+    start_time = datetime.now(timezone.utc).isoformat()
     if username == Constants.GUEST:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
@@ -490,11 +517,15 @@ def add_to_wishlist(username, product_id):
             flash(favorites, Constants.ERROR)
         response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, product_id, start_time, end_time, favorites, 200, request.method, request.host)
         return response
     else:
         flash(favorites,Constants.SUCCESS)
         response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, product_id, start_time, end_time, favorites, 200, request.method, request.host)
         return response
 
 

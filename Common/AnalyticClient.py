@@ -8,7 +8,7 @@ def convert_set_to_list(log_data):
             log_data[key] = list(value)
     return log_data
 
-def format(user_id, query, start_time, end_time, response_status, http_method, host):
+def format(user_id, query, start_time, end_time, response, response_status, http_method, host):
     if response_status == 200:
         standard_response = Constants.RESPONSE_OK
     elif response_status == 500:
@@ -41,7 +41,7 @@ def format(user_id, query, start_time, end_time, response_status, http_method, h
                 Constants.DATE: end_time,
             },
             Constants.DATE: end_time,
-            # Constants.RESPONSE: response_from_AI
+            Constants.RESPONSE: response
         },
         Constants.START_TIME: start_time,
         Constants.END_TIME: end_time,
@@ -58,9 +58,9 @@ def format(user_id, query, start_time, end_time, response_status, http_method, h
 
     return json.dumps(log_data)
 
-def configure_and_generate_logs(user_id, query, start_time, end_time, response_status, http_method, host):
+def configure_and_generate_logs(user_id, query, start_time, end_time, response, response_status, http_method, host):
     logging.getLogger().setLevel(logging.INFO)
     logging.basicConfig()
-    json_log = format(user_id, query, start_time, end_time, response_status, http_method, host)
+    json_log = format(user_id, query, start_time, end_time, response, response_status, http_method, host)
     logging.info(json_log)
     return json_log

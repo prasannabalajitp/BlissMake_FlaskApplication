@@ -96,6 +96,7 @@ class Constants:
     BLISSMAKE_PAYMENT = 'blissmake.payment'
     ADMIN_LOGIN = 'admin.admin_login'
 
+    MASK_PWD = '*'
     EMPTY = ''
     USERNAME = 'username'
     EMAIL = 'email'
@@ -143,7 +144,7 @@ class Constants:
     ADM_NOT_LOG_IN = "You must be logged in as an admin to access this page."
     LOGIN_ERR = "Kindly Login to Proceed"
     EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    PASSWORD_HASH_METHOD = 'sha256'
+    PASSWORD_HASH_METHOD = 'pbkdf2:sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
     OTP_EXP = "OTP Expired"
@@ -186,7 +187,7 @@ class Constants:
 
     #AnalyticClient.py
     INTERCEPTION_KEY = "interception"
-    INTERCEPTION = 'HTT_INBOUND'
+    INTERCEPTION = 'HTTP_INBOUND'
     USER_ID = 'user_id'
     REQUEST = 'request'
     RESPONSE = 'response'
