@@ -193,6 +193,7 @@ class Constants:
     RESPONSE = 'response'
     HTTP_STATUS_CODE = 'httpStatusCode'
     HTTP_STATUS = 'httpStatus'
+    ROUTE_URL = 'routingURL'
     HEADERS = 'headers'
     DATA = 'data'
     HTTP_METHOD_KEY = 'httpMethod'
@@ -215,6 +216,8 @@ class Constants:
     RESPONSE_OK = "OK"
     RESPONSE_INT_SER_ERR = "INTERNAL SERVER ERROR"
     RESPONSE_BAD_REQ = "BAD REQUEST"
+    RESPONSE_UNKNOWN = 'RESPONSE_UNKNOWN'
+    RESPONSE_UNAUTHORIZED = 'UNAUTHORIZED'
 
 
     #Exception

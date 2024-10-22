@@ -27,22 +27,26 @@ def add_response_headers(func):
 
 @blissmake.route(Constants.ROOT)
 def index():
+    start_time = datetime.now(timezone.utc).isoformat()
     product_list = BlissmakeService.index_page()
     response = make_response(render_template(
         Constants.INDEX_HTML, 
         products=product_list
     ))
-
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(user_id=None, query=None, route_url=Constants.ROOT, start_time=start_time, end_time=end_time, response=str(response),response_status=response.status_code, http_method=request.method, host=request.host_url)
     BlissmakeService.response_headers(response=response)
     return response
 
 
 @blissmake.route(Constants.LOGIN, methods=[Constants.GET, Constants.POST])
 def login():
+    start_time = datetime.now(timezone.utc).isoformat()
     response = make_response(render_template(
         Constants.LOGIN_HTML
     ))
-
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(user_id=None, query=Constants.LOGIN, route_url=Constants.LOGIN, start_time=start_time, end_time=end_time, response=str(response), response_status=response.status_code, http_method=request.method, host=request.host_url)
     BlissmakeService.response_headers(response=response)
     return response
 
@@ -64,13 +68,13 @@ def authenticate_user():
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=admin_data)))
                 AdminService.response_headers(response)
                 end_time = datetime.now(timezone.utc).isoformat()
-                configure_and_generate_logs(username, query, start_time, end_time, response, response_status, request.method, request.host)
+                configure_and_generate_logs(username, query, Constants.MAIN_HOME_PAGE, start_time, end_time, response, response_status, request.method, request.host)
                 return response
-            response_status = 200
+
             response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=admin_data, username=username, password=password))
             AdminService.response_headers(response)
             end_time = datetime.now(timezone.utc).isoformat()
-            configure_and_generate_logs(username, query, start_time, end_time, str(response), response_status, request.method, request.host)
+            configure_and_generate_logs(username, query, Constants.MAIN_HOME_PAGE,start_time, end_time, str(response), response.status_code, request.method, request.host)
             return response
 
         else:
@@ -81,11 +85,13 @@ def authenticate_user():
                 end_time = datetime.now(timezone.utc).isoformat()
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_HOME, username=username)))
                 BlissmakeService.response_headers(response)
-                configure_and_generate_logs(username, query, start_time, end_time, user, response_status, request.method, request.host)
+                configure_and_generate_logs(username, query, Constants.MAIN_HOME_PAGE, start_time, end_time, user, response_status, request.method, request.host)
                 return response
 
             response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=user)))
             BlissmakeService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, Constants.MAIN_HOME_PAGE, start_time, end_time, user, response_status, request.method, request.host)
             return response
 
 @blissmake.route(Constants.REGISTER, methods=[Constants.GET, Constants.POST])
@@ -115,7 +121,7 @@ def register():
             response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.INVALID_USR_NAME))
             BlissmakeService.response_headers(response=response)
             end_time = datetime.now(timezone.utc).isoformat()
-            configure_and_generate_logs(username, query, start_time,end_time, product_list, 500, request.method, request.host)
+            configure_and_generate_logs(username, query, Constants.REGISTER, start_time, end_time, product_list, response.status_code, request.method, request.host_url)
             return response
         response = make_response(render_template(
             Constants.HOME_HTML, 
@@ -124,7 +130,7 @@ def register():
         ))
         BlissmakeService.response_headers(response=response)
         end_time = datetime.now(timezone.utc).isoformat()
-        configure_and_generate_logs(username, query, start_time, end_time, str(product_list), 200, request.method, request.host)
+        configure_and_generate_logs(username, query, Constants.REGISTER, start_time, end_time, str(product_list), response.status_code, request.method, request.host_url)
         return response
 
 
@@ -192,10 +198,13 @@ def reset_password(email):
 
 @blissmake.route(Constants.PROFILE_URL)
 def profile(username):
+    start_time = datetime.now(timezone.utc).isoformat()
     if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        return response
     if username == Constants.GUEST:
-        return render_template(Constants.LOGIN_HTML)
+        response = make_response(render_template(Constants.LOGIN_HTML))
+        return response
 
     user = BlissmakeService.get_profile(username=username)
     if Constants.ADDRESS in user and user[Constants.ADDRESS]:
@@ -208,7 +217,8 @@ def profile(username):
                 phone=user[Constants.PHONE]
             ))
             BlissmakeService.response_headers(response)
-
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, Constants.PROFILE_URL, Constants.PROFILE_URL, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
             return response
         response = make_response(render_template(
             Constants.PROFILE_HTML, 
@@ -218,7 +228,8 @@ def profile(username):
             phone=Constants.EMPTY
         ))
         BlissmakeService.response_headers(response)
-
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, Constants.PROFILE_URL, Constants.PROFILE_URL, start_time, end_time, response, response.status_code, request.method, request.host_url)
         return response
     response = make_response(render_template(
         Constants.PROFILE_HTML, 
@@ -228,7 +239,8 @@ def profile(username):
         phone=None
     ))
     BlissmakeService.response_headers(response)
-
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, Constants.PROFILE_URL, Constants.PROFILE_URL, start_time, end_time, response, response.status_code, request.method, request.host_url)
     return response
 
 
