@@ -3,7 +3,7 @@ from flask_mail import Mail
 from flask_pymongo import PyMongo
 from dotenv import load_dotenv
 from AppConstants.Constants import Constants
-import os
+import os, logging
 
 # Load environment variables
 load_dotenv()
@@ -24,6 +24,8 @@ mongo_uri = os.getenv(Constants.MONGO_URI)
 mongo = PyMongo(app, uri=mongo_uri)
 
 mail = Mail(app)
+
+logging.getLogger(Constants.LOG_SUPPRESS).setLevel(logging.WARNING)
 
 # Import and register the blueprint
 from blissmake import blissmake

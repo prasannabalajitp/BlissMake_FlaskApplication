@@ -34,7 +34,7 @@ def index():
         products=product_list
     ))
     end_time = datetime.now(timezone.utc).isoformat()
-    configure_and_generate_logs(user_id=None, query=None, route_url=Constants.ROOT, start_time=start_time, end_time=end_time, response=str(response),response_status=response.status_code, http_method=request.method, host=request.host_url)
+    configure_and_generate_logs(user_id=None, query=None, route_url=request.path, start_time=start_time, end_time=end_time, response=str(response.data),response_status=response.status_code, http_method=request.method, host=request.host_url)
     BlissmakeService.response_headers(response=response)
     return response
 
@@ -46,7 +46,7 @@ def login():
         Constants.LOGIN_HTML
     ))
     end_time = datetime.now(timezone.utc).isoformat()
-    configure_and_generate_logs(user_id=None, query=Constants.LOGIN, route_url=Constants.LOGIN, start_time=start_time, end_time=end_time, response=str(response), response_status=response.status_code, http_method=request.method, host=request.host_url)
+    configure_and_generate_logs(user_id=None, query=Constants.LOGIN, route_url=request.path, start_time=start_time, end_time=end_time, response=str(response), response_status=response.status_code, http_method=request.method, host=request.host_url)
     BlissmakeService.response_headers(response=response)
     return response
 
@@ -68,13 +68,13 @@ def authenticate_user():
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=admin_data)))
                 AdminService.response_headers(response)
                 end_time = datetime.now(timezone.utc).isoformat()
-                configure_and_generate_logs(username, query, Constants.MAIN_HOME_PAGE, start_time, end_time, response, response_status, request.method, request.host)
+                configure_and_generate_logs(username, query, request.path, start_time, end_time, response, response_status, request.method, request.host)
                 return response
 
             response = make_response(render_template(Constants.ADMIN_DASHBOARD_HTML, products=admin_data, username=username, password=password))
             AdminService.response_headers(response)
             end_time = datetime.now(timezone.utc).isoformat()
-            configure_and_generate_logs(username, query, Constants.MAIN_HOME_PAGE,start_time, end_time, str(response), response.status_code, request.method, request.host)
+            configure_and_generate_logs(username, query, request.path,start_time, end_time, str(response), response.status_code, request.method, request.host)
             return response
 
         else:
@@ -85,13 +85,13 @@ def authenticate_user():
                 end_time = datetime.now(timezone.utc).isoformat()
                 response = make_response(redirect(url_for(Constants.BLISSMAKE_HOME, username=username)))
                 BlissmakeService.response_headers(response)
-                configure_and_generate_logs(username, query, Constants.MAIN_HOME_PAGE, start_time, end_time, user, response_status, request.method, request.host)
+                configure_and_generate_logs(username, query, request.path, start_time, end_time, user, response_status, request.method, request.host)
                 return response
 
             response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=user)))
             BlissmakeService.response_headers(response)
             end_time = datetime.now(timezone.utc).isoformat()
-            configure_and_generate_logs(username, query, Constants.MAIN_HOME_PAGE, start_time, end_time, user, response_status, request.method, request.host)
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, user, response_status, request.method, request.host)
             return response
 
 @blissmake.route(Constants.REGISTER, methods=[Constants.GET, Constants.POST])
@@ -112,7 +112,7 @@ def register():
             response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.USER_EXISTS))
             BlissmakeService.response_headers(response=response)
             end_time = datetime.now(timezone.utc).isoformat()
-            configure_and_generate_logs(username, query, start_time, end_time, reg_response, 400, request.method, request.host)
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, reg_response, 400, request.method, request.host)
             return response
 
         product_list = BlissmakeService.register_service(username=username, email=email, password=password)
@@ -121,7 +121,7 @@ def register():
             response = make_response(render_template(Constants.REGISTER_HTML, messages=Constants.INVALID_USR_NAME))
             BlissmakeService.response_headers(response=response)
             end_time = datetime.now(timezone.utc).isoformat()
-            configure_and_generate_logs(username, query, Constants.REGISTER, start_time, end_time, product_list, response.status_code, request.method, request.host_url)
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, product_list, response.status_code, request.method, request.host_url)
             return response
         response = make_response(render_template(
             Constants.HOME_HTML, 
@@ -130,7 +130,7 @@ def register():
         ))
         BlissmakeService.response_headers(response=response)
         end_time = datetime.now(timezone.utc).isoformat()
-        configure_and_generate_logs(username, query, Constants.REGISTER, start_time, end_time, str(product_list), response.status_code, request.method, request.host_url)
+        configure_and_generate_logs(username, query, request.path, start_time, end_time, str(product_list), response.status_code, request.method, request.host_url)
         return response
 
 
@@ -201,6 +201,8 @@ def profile(username):
     start_time = datetime.now(timezone.utc).isoformat()
     if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
         response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, Constants.PROFILE_URL, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
     if username == Constants.GUEST:
         response = make_response(render_template(Constants.LOGIN_HTML))
@@ -218,7 +220,7 @@ def profile(username):
             ))
             BlissmakeService.response_headers(response)
             end_time = datetime.now(timezone.utc).isoformat()
-            configure_and_generate_logs(username, Constants.PROFILE_URL, Constants.PROFILE_URL, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+            configure_and_generate_logs(username, Constants.PROFILE_URL, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
             return response
         response = make_response(render_template(
             Constants.PROFILE_HTML, 
@@ -229,7 +231,7 @@ def profile(username):
         ))
         BlissmakeService.response_headers(response)
         end_time = datetime.now(timezone.utc).isoformat()
-        configure_and_generate_logs(username, Constants.PROFILE_URL, Constants.PROFILE_URL, start_time, end_time, response, response.status_code, request.method, request.host_url)
+        configure_and_generate_logs(username, Constants.PROFILE_URL, request.path, start_time, end_time, response, response.status_code, request.method, request.host_url)
         return response
     response = make_response(render_template(
         Constants.PROFILE_HTML, 
@@ -240,51 +242,64 @@ def profile(username):
     ))
     BlissmakeService.response_headers(response)
     end_time = datetime.now(timezone.utc).isoformat()
-    configure_and_generate_logs(username, Constants.PROFILE_URL, Constants.PROFILE_URL, start_time, end_time, response, response.status_code, request.method, request.host_url)
+    configure_and_generate_logs(username, Constants.PROFILE_URL, request.path, start_time, end_time, response, response.status_code, request.method, request.host_url)
     return response
 
 
 @blissmake.route(Constants.UPDATE_PROFILE, methods=[Constants.GET, Constants.POST])
 def update_profile(username):
     if request.method == Constants.POST:
+        start_time = datetime.now(timezone.utc).isoformat()
         new_address = request.form[Constants.ADDRESS]
         phone = request.form[Constants.PHONE]
         new_password = request.form[Constants.PASSWORD]
         confirm_password = request.form[Constants.CNF_PWD]
 
+        query = request.form.to_dict()
+
         user = BlissmakeService.update_profile_servcice(username=username, new_password=new_password, confirm_password=confirm_password, new_address=new_address, phone=phone)
         if user == Constants.USER_NOT_EXISTS:
             flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
             response = make_response(redirect(url_for(Constants.PROFILE, username=username)))
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, response.data, response.status_code, request.method, request.host_url)
             BlissmakeService.response_headers(response)
             return response
         elif user == Constants.PWD_NOT_MATCH:
             flash(Constants.PWD_NOT_MATCH, Constants.ERROR)
             response = make_response(redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username)))
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, response.data, request.method, request.host_url)
             BlissmakeService.response_headers(response)
             return response
         elif user == Constants.PRF_UPDATED:
             flash(Constants.PRF_UPDATED, Constants.SUCCESS)
             response = make_response(redirect(url_for(Constants.BLISSMAKE_PROFILE, username=username)))
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
             BlissmakeService.response_headers(response)
-            return response
     
     user = BlissmakeService.get_user_by_name(username)
 
     if user == Constants.USER_NOT_EXISTS:
         flash(Constants.USER_NOT_EXISTS, Constants.ERROR1)
         response = make_response(redirect(url_for(Constants.PROFILE, username=username)))
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, query, request.path, start_time, end_time, user, response.status_code, request.method, request.host_url)
         BlissmakeService.response_headers(response)
         return response
     
     user_data = user.dict()
 
     response = make_response(render_template(Constants.PROFILE_HTML, **user_data))
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     BlissmakeService.response_headers(response)
     return response
 
 @blissmake.route(Constants.HOME, methods=[Constants.POST, Constants.GET])
 def home(username):
+    start_time = datetime.now(timezone.utc).isoformat()
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
     print(f'USERNAME : {username}')
@@ -297,6 +312,8 @@ def home(username):
             products=product_list
         )
     )
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, Constants.HOME, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     BlissmakeService.response_headers(response=response)
     return response
 
@@ -335,9 +352,14 @@ def checkout(username):
 @blissmake.route(Constants.PROD_DET_GUEST, defaults={Constants.USERNAME: Constants.GUEST})
 @blissmake.route(Constants.PRODUCT_DETAIL)
 def product_detail(product_id, username):
-    
+    start_time = datetime.now(timezone.utc).isoformat()
+    query = request.form.to_dict()
     if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        BlissmakeService.response_headers(response)
+        return response
     product_data = BlissmakeService.product_detail_service(product_id=product_id)
     
     response = make_response(render_template(
@@ -346,21 +368,34 @@ def product_detail(product_id, username):
                 username=username
             )
         )
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     BlissmakeService.response_headers(response)
     return response
 
 
 @blissmake.route(Constants.GET_CART, methods=[Constants.GET])
 def get_cart(username):
+    start_time = datetime.now(timezone.utc).isoformat()
     if username == Constants.GUEST:
-        return render_template(Constants.LOGIN_HTML)
+        response = make_response(render_template(Constants.LOGIN_HTML))
+        BlissmakeService.response_headers(response=response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        return response
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        BlissmakeService.response_headers(response=response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        return response
     cart_products, total_price = BlissmakeService.get_cart_service(username=username)
     if not cart_products:
         flash(Constants.CART_EMPTY, Constants.WARNING)
         response = make_response(render_template(Constants.USER_CART_HTML, username=username))
         BlissmakeService.response_headers(response=response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
     
     response = make_response(
@@ -371,32 +406,51 @@ def get_cart(username):
             total_price=total_price
         ))
     BlissmakeService.response_headers(response)
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     return response
 
 @blissmake.route(Constants.GET_FAV)
 def get_favorite(username):
+    start_time = datetime.now(timezone.utc).isoformat()
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, request.path, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        return response
     if username == Constants.GUEST:
-        return render_template(Constants.LOGIN_HTML)
+        response = make_response(render_template(Constants.LOGIN_HTML))
+        BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, request.path, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        return response
 
     favorites = BlissmakeService.get_favorites(username=username)
     if favorites == Constants.FAV_NOT_EXISTS:
         flash(favorites, Constants.ERROR)
         response = make_response(render_template(Constants.FAV_HTML, username=username, messages=favorites, category=Constants.ERROR))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, request.path, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
 
     response = make_response(render_template(Constants.FAV_HTML, username=username, favorites=favorites, message=None))
     BlissmakeService.response_headers(response=response)
-
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, request.path, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     return response
 
 @blissmake.route(Constants.DELETE_FROM_CART, methods=[Constants.POST])
 def delete_from_cart(product_id, quantity, username):
-
+    start_time = datetime.now(timezone.utc).isoformat()
+    query = request.form.to_dict()
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        return response
     delete_prod = BlissmakeService.delete_from_cart_service(username=username, product_id=product_id, quantity=quantity)
     if delete_prod == True:
         response = make_response(redirect(url_for(
@@ -404,15 +458,27 @@ def delete_from_cart(product_id, quantity, username):
             username=username
         )))
         BlissmakeService.response_headers(response=response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
 
 @blissmake.route(Constants.ADD_TO_CART, methods=[Constants.POST])
 def add_to_cart(product_id, username):
+    start_time = datetime.now(timezone.utc).isoformat()
+    query = request.form.to_dict()
     if request.method == Constants.POST:
         if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+            BlissmakeService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data),response.status_code, request.method, request.host_url )
+            return response
         if username == Constants.GUEST:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+            BlissmakeService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+            return response
         quantity = request.form.get(Constants.QUANTITY)
         add_cart = BlissmakeService.add_to_cart_service(username=username, prod_id=product_id, quantity=quantity)
 
@@ -424,12 +490,21 @@ def add_to_cart(product_id, username):
                     username=username
                 )))
             BlissmakeService.response_headers(response=response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
             return response
 
 @blissmake.route(Constants.UPDATE_QUANTITY, methods=[Constants.POST])
 def update_quantity(product_id, action, username):
+    start_time = datetime.now(timezone.utc).isoformat()
+    query = request.form.to_dict()
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+            print('Not in cache')
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+            BlissmakeService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+            return response
     
     cart_products, total_price = BlissmakeService.update_cart_quantity(prod_id=product_id, action=action, username=username)
 
@@ -437,6 +512,8 @@ def update_quantity(product_id, action, username):
         flash(cart_products, Constants.ERROR1)
         response = make_response(redirect(url_for(Constants.BLISSMAKE_GETCART, username=username)))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
     response = make_response(render_template(
                                 Constants.USER_CART_HTML, 
@@ -445,12 +522,18 @@ def update_quantity(product_id, action, username):
                                 total_price=total_price
                             ))
     BlissmakeService.response_headers(response=response)
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     return response
 
 @blissmake.route(Constants.PAYMENT, methods=[Constants.GET, Constants.POST])
 def payment(username):
+    start_time = datetime.now(timezone.utc).isoformat()
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+            BlissmakeService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     cart_products, total_price = BlissmakeService.get_cart_service(username=username)
 
     if request.method == Constants.POST:
@@ -460,6 +543,8 @@ def payment(username):
                 username=username
             )))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
     
     response = make_response(render_template(
@@ -469,12 +554,19 @@ def payment(username):
             total_price=total_price
         ))
     BlissmakeService.response_headers(response)
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     return response
 
 @blissmake.route(Constants.EDIT_ADDR, methods=[Constants.GET, Constants.POST])
 def edit_address_page(username):
+    start_time = datetime.now(timezone.utc).isoformat()
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        return response
     address, email = BlissmakeService.get_user_address(username=username)
     response = make_response(render_template(
         Constants.EDIT_ADDR_HTML, 
@@ -483,43 +575,69 @@ def edit_address_page(username):
          email=email
     ))
     BlissmakeService.response_headers(response)
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     return response
 
 @blissmake.route(Constants.EDIT_ADDRESS, methods=[Constants.GET, Constants.POST])
 def edit_address(username):
+    start_time = datetime.now(timezone.utc).isoformat()
+    query = request.form.to_dict()
     if request.method == Constants.POST:
         if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+            BlissmakeService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+            return response
         new_address = request.form[Constants.ADDRESS]
         result = BlissmakeService.update_user_address(username=username, new_address=new_address)
         if result == True:
             flash(Constants.ADDR_UPDATED, Constants.SUCCESS)
             response = make_response(redirect(url_for(Constants.BLISSMAKE_PAYMENT, username=username)))
             BlissmakeService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
             return response
 
 @blissmake.route(Constants.PAYMENT_QR, methods=[Constants.POST])
 def payment_qr(username):
+    start_time = datetime.now(timezone.utc).isoformat()
     if request.method == Constants.POST:
         if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+            BlissmakeService.response_headers(response)
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     qr_filename, total_price = BlissmakeService.payment_qr_service(username=username)
     if qr_filename == Constants.CART_NOT_FOUND:
         flash(Constants.CART_NOT_FOUND, Constants.ERROR)
         response = make_response(redirect(url_for(Constants.BLISSMAKE_HOME, username=username)))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
     response = make_response(render_template(Constants.QR_PAYMENT_HTML, username=username, qr_image=qr_filename, total_price=total_price))
     BlissmakeService.response_headers(response)
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
     return response
 
 @blissmake.route(Constants.ADD_TO_WISHLIST, methods=[Constants.POST, Constants.GET])
 def add_to_wishlist(username, product_id):
     start_time = datetime.now(timezone.utc).isoformat()
+    query = request.form.to_dict()
     if username == Constants.GUEST:
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        return response
     if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
-            return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+            response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+            end_time = datetime.now(timezone.utc).isoformat()
+            configure_and_generate_logs(username, query, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+            return response
     
     favorites = BlissmakeService.add_to_wishlist_service(username=username, product_id=product_id)
     if favorites in [Constants.PROD_IN_WISHLIST, Constants.PROD_NOT_FOUND]:
@@ -537,39 +655,55 @@ def add_to_wishlist(username, product_id):
         response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
         BlissmakeService.response_headers(response)
         end_time = datetime.now(timezone.utc).isoformat()
-        configure_and_generate_logs(username, product_id, start_time, end_time, favorites, 200, request.method, request.host)
+        configure_and_generate_logs(username, product_id, request.path, start_time, end_time, favorites, response.status_code, request.method, request.host)
         return response
 
 
 
 @blissmake.route(Constants.REMOVE_FAV, methods=[Constants.POST])
 def remove_favorite(username, product_id):
+    start_time = datetime.now(timezone.utc).isoformat()
     if username == Constants.GUEST:
-        return redirect(url_for(Constants.BLISSMAKE_LOGIN))
+        response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+        return response
     
     user_favorites = BlissmakeService.remove_from_favorites(username=username, product_id=product_id)
     if user_favorites == Constants.PROD_NOT_FOUND:
         flash(Constants.PROD_NOT_FOUND, Constants.ERROR)
         response = make_response(redirect(url_for(Constants.BLISSMAKE_PROD_DETAIL, product_id=product_id, username=username)))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
     elif user_favorites in [Constants.PROD_NOT_WISHLIST, Constants.NO_FAV_FOUND]:
         flash(user_favorites, Constants.INFO)
         response = make_response(redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username)))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
     else:
         flash(user_favorites, Constants.SUCCESS)
         response = make_response(redirect(url_for(Constants.BLISSMAKE_GET_FAV, username=username)))
         BlissmakeService.response_headers(response)
+        end_time = datetime.now(timezone.utc).isoformat()
+        configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
         return response
 
 @blissmake.route(Constants.LOGOUT, methods=[Constants.GET])
 def logout(username):
+    start_time = datetime.now(timezone.utc).isoformat()
     print(f'Session before logout : {session}')
     
     session.pop(Constants.USER_ID, None)
     session.pop(Constants.USERNAME, username)
     session.clear()
     print(f'session after logout : {session}')
-    return redirect(url_for(Constants.BLISSMAKE_INDEX))
+    response = make_response(redirect(url_for(Constants.BLISSMAKE_INDEX)))
+    BlissmakeService.response_headers(response)
+    end_time = datetime.now(timezone.utc).isoformat()
+    configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url)
+
+    return response

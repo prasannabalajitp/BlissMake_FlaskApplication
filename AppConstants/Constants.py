@@ -8,6 +8,7 @@ class Constants:
     MAIL_PWD = 'MAIL_PASSWORD'
     MAIL_PORT = 'MAIL_PORT'
     MAIL_TLS = 'MAIL_USE_TLS'
+    LOG_SUPPRESS = 'werkzeug'
     MAIN = '__main__'
 
     #blissmake.py
