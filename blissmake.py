@@ -587,16 +587,12 @@ def remove_favorite(username, product_id):
 
 @blissmake.route(Constants.LOGOUT, methods=[Constants.GET])
 def logout(username):
-    start_time = datetime.now(timezone.utc).isoformat()
-    print(f'Session before logout : {session}')
-    
+    start_time = datetime.now(timezone.utc).isoformat() 
     session.pop(Constants.USER_ID, None)
     session.pop(Constants.USERNAME, username)
     session.clear()
-    print(f'session after logout : {session}')
     response = make_response(redirect(url_for(Constants.BLISSMAKE_INDEX)))
     BlissmakeService.response_headers(response)
     end_time = datetime.now(timezone.utc).isoformat()
     configure_and_generate_logs(username, None, request.path, start_time, end_time, str(response.data), response.status_code, request.method, request.host_url, response.content_type)
-
     return response
