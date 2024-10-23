@@ -9,9 +9,10 @@ def convert_set_to_list(log_data):
     return log_data
 
 def format(user_id, query, start_time, end_time, route_url, response, response_status, http_method, host, cnt_typ):
-    # Determine the standard response
     if response_status == 200:
         standard_response = Constants.RESPONSE_OK
+    elif response_status == 302:
+        standard_response = Constants.RESPONSE_REDIR
     elif response_status == 500:
         standard_response = Constants.RESPONSE_INT_SER_ERR
     elif response_status == 400:
@@ -19,9 +20,8 @@ def format(user_id, query, start_time, end_time, route_url, response, response_s
     elif response_status == 401:
         standard_response = Constants.RESPONSE_UNAUTHORIZED
     else:
-        standard_response = Constants.RESPONSE_UNKNOWN  # Handle other statuses
+        standard_response = Constants.RESPONSE_UNKNOWN
 
-    # Prepare log data
     log_data = {
         Constants.INTERCEPTION_KEY: Constants.INTERCEPTION,
         Constants.USER_ID: user_id,
@@ -35,8 +35,7 @@ def format(user_id, query, start_time, end_time, route_url, response, response_s
                 Constants.CONNECTION_KEY: [Constants.CONNECTION],
                 Constants.HOST: [host],
                 Constants.ACCEPT_LANGUAGE_KEY: [Constants.ACCEPT_LANGUAGE]
-            },
-            Constants.DATA: query if http_method != Constants.GET else None
+            }
         },
         Constants.RESPONSE: {
             Constants.HTTP_STATUS_CODE: response_status,
@@ -53,12 +52,13 @@ def format(user_id, query, start_time, end_time, route_url, response, response_s
         Constants.RESPONSE_TIME: None
     }
 
-    # Calculate response time
+    if http_method != Constants.GET:
+        log_data[Constants.REQUEST][Constants.DATA] = query
+
     start_time_dt = datetime.fromisoformat(start_time)
     end_time_dt = datetime.fromisoformat(end_time)
     log_data[Constants.RESPONSE_TIME] = max((end_time_dt - start_time_dt).total_seconds(), 0)
 
-    # Convert sets to lists if necessary
     log_data = convert_set_to_list(log_data)
 
     return json.dumps(log_data)

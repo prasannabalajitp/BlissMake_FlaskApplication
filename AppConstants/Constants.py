@@ -109,6 +109,8 @@ class Constants:
     PROFILE = 'profile'
     OTP = 'otp'
     EXP_TIME = "expiration_time"
+    TOT_PRI = 'total_price'
+    CRT_PROD = 'cart_products'
     SUB = "Your OTP Code"
     ADMIN_USER_ID = "admin_user_id"
     USERNAME_PWD_WRNG = 'Username / Password is wrong!'
@@ -148,6 +150,7 @@ class Constants:
     PASSWORD_HASH_METHOD = 'pbkdf2:sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
+    REM_CART = "Removed from Cart Successfully"
     OTP_EXP = "OTP Expired"
     PRODUCTS = 'products'
     QUANTITY = 'quantity'
@@ -215,6 +218,7 @@ class Constants:
     END_TIME = "end time"
     RESPONSE_TIME = "response time"
     RESPONSE_OK = "OK"
+    RESPONSE_REDIR = "REDIRECT"
     RESPONSE_INT_SER_ERR = "INTERNAL SERVER ERROR"
     RESPONSE_BAD_REQ = "BAD REQUEST"
     RESPONSE_UNKNOWN = 'RESPONSE_UNKNOWN'
