@@ -8,7 +8,7 @@ def convert_set_to_list(log_data):
             log_data[key] = list(value)
     return log_data
 
-def format(user_id, query, start_time, end_time, route_url, response, response_status, http_method, host):
+def format(user_id, query, start_time, end_time, route_url, response, response_status, http_method, host, cnt_typ):
     # Determine the standard response
     if response_status == 200:
         standard_response = Constants.RESPONSE_OK
@@ -29,7 +29,7 @@ def format(user_id, query, start_time, end_time, route_url, response, response_s
             Constants.HTTP_METHOD_KEY: http_method,
             Constants.ROUTE_URL: route_url,
             Constants.HTTP_HEADERS: {
-                Constants.CONTENT_TYPE_KEY: Constants.CONTENT_TYPE,
+                Constants.CONTENT_TYPE_KEY: cnt_typ,
                 Constants.DATE: start_time,
                 Constants.ACCEPT: [Constants.ACCEPT_TYPE],
                 Constants.CONNECTION_KEY: [Constants.CONNECTION],
@@ -63,9 +63,9 @@ def format(user_id, query, start_time, end_time, route_url, response, response_s
 
     return json.dumps(log_data)
 
-def configure_and_generate_logs(user_id, query, route_url, start_time, end_time, response, response_status, http_method, host):
+def configure_and_generate_logs(user_id, query, route_url, start_time, end_time, response, response_status, http_method, host, cnt_typ):
     logging.getLogger().setLevel(logging.INFO)
     logging.basicConfig()
-    json_log = format(user_id, query, start_time, end_time, route_url, response, response_status, http_method, host)
+    json_log = format(user_id, query, start_time, end_time, route_url, response, response_status, http_method, host, cnt_typ)
     logging.info(json_log)
     return json_log
