@@ -85,7 +85,7 @@ class Constants:
 
     #Route HTML
     BLISSMAKE_INDEX = 'blissmake.index'
-    BLISSMAKE_LOGIN = 'blissmake.login'
+    BLISSMAKE_LOGIN = 'blissmake.login_page'
     BLISSMAKE_HOME = 'blissmake.home'
     BLISSMAKE_GETCART = 'blissmake.get_cart'
     BLISSMAKE_PROD_DETAIL = 'blissmake.product_detail'
