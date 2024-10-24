@@ -8,6 +8,7 @@ class Constants:
     MAIL_PWD = 'MAIL_PASSWORD'
     MAIL_PORT = 'MAIL_PORT'
     MAIL_TLS = 'MAIL_USE_TLS'
+    LOG_SUPPRESS = 'werkzeug'
     MAIN = '__main__'
 
     #blissmake.py
@@ -84,7 +85,7 @@ class Constants:
 
     #Route HTML
     BLISSMAKE_INDEX = 'blissmake.index'
-    BLISSMAKE_LOGIN = 'blissmake.login'
+    BLISSMAKE_LOGIN = 'blissmake.login_page'
     BLISSMAKE_HOME = 'blissmake.home'
     BLISSMAKE_GETCART = 'blissmake.get_cart'
     BLISSMAKE_PROD_DETAIL = 'blissmake.product_detail'
@@ -96,6 +97,7 @@ class Constants:
     BLISSMAKE_PAYMENT = 'blissmake.payment'
     ADMIN_LOGIN = 'admin.admin_login'
 
+    MASK_PWD = '*'
     EMPTY = ''
     USERNAME = 'username'
     EMAIL = 'email'
@@ -107,6 +109,8 @@ class Constants:
     PROFILE = 'profile'
     OTP = 'otp'
     EXP_TIME = "expiration_time"
+    TOT_PRI = 'total_price'
+    CRT_PROD = 'cart_products'
     SUB = "Your OTP Code"
     ADMIN_USER_ID = "admin_user_id"
     USERNAME_PWD_WRNG = 'Username / Password is wrong!'
@@ -143,9 +147,10 @@ class Constants:
     ADM_NOT_LOG_IN = "You must be logged in as an admin to access this page."
     LOGIN_ERR = "Kindly Login to Proceed"
     EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-    PASSWORD_HASH_METHOD = 'sha256'
+    PASSWORD_HASH_METHOD = 'pbkdf2:sha256'
     CART_NOT_FOUND = 'Cart Not Found'
     CART_EMPTY = "Your cart is empty!"
+    REM_CART = "Removed from Cart Successfully"
     OTP_EXP = "OTP Expired"
     PRODUCTS = 'products'
     QUANTITY = 'quantity'
@@ -186,12 +191,13 @@ class Constants:
 
     #AnalyticClient.py
     INTERCEPTION_KEY = "interception"
-    INTERCEPTION = 'HTT_INBOUND'
+    INTERCEPTION = 'HTTP_INBOUND'
     USER_ID = 'user_id'
     REQUEST = 'request'
     RESPONSE = 'response'
     HTTP_STATUS_CODE = 'httpStatusCode'
     HTTP_STATUS = 'httpStatus'
+    ROUTE_URL = 'routingURL'
     HEADERS = 'headers'
     DATA = 'data'
     HTTP_METHOD_KEY = 'httpMethod'
@@ -212,8 +218,11 @@ class Constants:
     END_TIME = "end time"
     RESPONSE_TIME = "response time"
     RESPONSE_OK = "OK"
+    RESPONSE_REDIR = "REDIRECT"
     RESPONSE_INT_SER_ERR = "INTERNAL SERVER ERROR"
     RESPONSE_BAD_REQ = "BAD REQUEST"
+    RESPONSE_UNKNOWN = 'RESPONSE_UNKNOWN'
+    RESPONSE_UNAUTHORIZED = 'UNAUTHORIZED'
 
 
     #Exception

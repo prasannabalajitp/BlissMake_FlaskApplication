@@ -121,6 +121,8 @@ class BlissmakeRepository:
         })
         products = mongo.db.products.find({})
         product_list = list(products)
+        session[Constants.USER_ID] = str(uuid.uuid4())
+        session[Constants.USERNAME] = username
         return product_list
     
     @staticmethod
