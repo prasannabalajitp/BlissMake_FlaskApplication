@@ -38,7 +38,6 @@ class AdminRepository:
         if admin and admin[Constants.PASSWORD] == password:
             session[Constants.USER_ID] = str(uuid.uuid4())
             session[Constants.USERNAME] = username
-            print(f"Logged in as: {session[Constants.USERNAME]}")
             products = mongo.db.products.find({})
             product_list = list(products)
 

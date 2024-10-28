@@ -79,7 +79,6 @@ class AdminService:
         except Exception as e:
             return Constants.ERR_UPD, AdminRepository.get_all_products()
 
-
     @staticmethod
     def delete_product_service(product_id):
         product = AdminRepository.get_product_by_id(prod_id=product_id)

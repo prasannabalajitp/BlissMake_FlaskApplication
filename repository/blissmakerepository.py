@@ -1,7 +1,7 @@
 from werkzeug.security import check_password_hash
 from flask import session
 from dotenv import load_dotenv
-from datetime import datetime, timezone, timedelta
+from datetime import timezone
 from AppConstants.Constants import Constants
 from app import mongo
 from models.Product import ProductDetail
