@@ -1,5 +1,4 @@
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import session
+from werkzeug.security import generate_password_hash
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
 from AppConstants.Constants import Constants
@@ -7,9 +6,8 @@ from app import mongo
 from models.Product import ProductDetail, Product
 from models.User import UpdateAddres
 from models.User import User
-from models.Favorite import Favorite
 from repository.blissmakerepository import BlissmakeRepository
-import re, uuid, os, pyqrcode, random, string, smtplib
+import re, os, pyqrcode, random, string, smtplib
 
 
 load_dotenv()
@@ -73,7 +71,6 @@ class BlissmakeService:
         if user_data:
             address = user_data.get(Constants.ADDRESS, Constants.EMPTY)
             email = user_data.get(Constants.EMAIL, Constants.EMPTY)
-
             return address, email
         
     @staticmethod
@@ -90,7 +87,6 @@ class BlissmakeService:
             product_price=product[Constants.PRODUCT_PRICE],
             product_img=product[Constants.PRODUCT_IMG]
         ).dict()
-        
         return product_data
 
     @staticmethod
@@ -98,7 +94,6 @@ class BlissmakeService:
         cart = BlissmakeRepository.get_cart(username=username)
         cart_products = cart[Constants.PRODUCTS] if cart else []
         total_price = BlissmakeService.calculate_total_price(cart_products)
-
         return cart_products, total_price
     
     @staticmethod
@@ -109,7 +104,6 @@ class BlissmakeService:
         if not favorites.get(Constants.PRODUCTS):
             return Constants.FAV_NOT_EXISTS
         favorites[Constants.ID] = str(favorites[Constants.ID])
-
         return favorites
 
     @staticmethod
@@ -117,7 +111,6 @@ class BlissmakeService:
         product = BlissmakeRepository.get_products(prod_id=product_id)
         if not product:
             return Constants.PROD_NOT_FOUND
-
         user_favorites = BlissmakeRepository.get_favorites(username=username)
         result =BlissmakeRepository.add_to_wishlist(username=username, user_favorites=user_favorites, product_id=product_id, product=product)
         return result
@@ -130,7 +123,6 @@ class BlissmakeService:
         user_favorites = BlissmakeRepository.get_favorites(username=username)
         result = BlissmakeRepository.remove_from_wishlist(username=username, user_favorites=user_favorites, product_id=product_id)
         return result
-    
 
     @staticmethod
     def register_service(username, email, password):
@@ -149,7 +141,6 @@ class BlissmakeService:
         cart = BlissmakeRepository.get_cart(username=username)
         if cart is None:
             return Constants.CART_NOT_FOUND
-
         del_response = BlissmakeRepository.delete_from_cart_repository(username=username, prod_id=product_id, quantity=quantity)
         return del_response.acknowledged
     
@@ -171,7 +162,6 @@ class BlissmakeService:
         cart = BlissmakeRepository.get_cart(username=username)
         if not cart:
             return Constants.CART_NOT_FOUND, None
-        
         updated = BlissmakeService.update_product_quantity_in_cart(cart=cart, product_id=prod_id, action=action)
         if not updated:
             return Constants.PROD_NOT_FOUND
@@ -180,7 +170,6 @@ class BlissmakeService:
             total_price = BlissmakeService.calculate_total_price(cart_products)
             return cart_products, total_price
         return cart_products, None
-
 
     @staticmethod
     def get_profile(username):
@@ -199,7 +188,6 @@ class BlissmakeService:
             phone=user.get(Constants.PHONE, Constants.EMPTY)
         )
 
-    
     @staticmethod
     def update_profile_servcice(username, new_password, confirm_password, new_address, phone):
         user = BlissmakeRepository.get_user_data(username=username)
@@ -214,7 +202,6 @@ class BlissmakeService:
         update_profile = BlissmakeRepository.update_profile_repository(username=username, update_data=update_data)
         if update_profile:
             return Constants.PRF_UPDATED
-
 
     @staticmethod
     def checkout(username):
@@ -239,14 +226,11 @@ class BlissmakeService:
         if not cart:
             return Constants.CART_NOT_FOUND, None
         total_price = BlissmakeService.calculate_total_price(cart.get(Constants.PRODUCTS, []))
-
         upi_id = os.getenv(Constants.UPI_ID)
         payee_name = os.getenv(Constants.PAYEE_NAME)
         amount = round(total_price, 2)
         transaction_note = Constants.TXN_NOTE
-
         upi_url = f"upi://pay?pa={upi_id}&pn={payee_name}&am={amount}&cu=INR&tn={transaction_note}"
-
         time = datetime.now(timezone.utc).strftime(Constants.STRF_TIME)
         qr = pyqrcode.create(upi_url)
         qr_filename = f'static/qr/payment_qr_{username}_{time}.png'
@@ -261,9 +245,7 @@ class BlissmakeService:
         
         otp = Constants.EMPTY.join(random.choices(string.ascii_letters + string.digits, k=6))
         expiration_time = datetime.now(timezone.utc) + timedelta(minutes=5)
-
         _ = BlissmakeRepository.generate_user_otp_repository(email=email, otp=otp, expiration_time=expiration_time)
-
         try:
             with smtplib.SMTP(os.getenv(Constants.MAIL_SERVER), 587) as server:
                 server.starttls()
@@ -276,7 +258,6 @@ class BlissmakeService:
                 return Constants.OTP_SENT
         except smtplib.SMTPException as e:
             return f"Error sending email: {str(e)}"
-
 
     @staticmethod
     def verify_otp_service(email, user_otp):

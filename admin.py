@@ -104,9 +104,7 @@ def delete_product(product_id):
 
 @admin.route(Constants.LOGOUT, methods=[Constants.GET])
 def logout(username):
-    print(f'Session before logout : {session}')
     session.pop(Constants.ADMIN_USER_ID, None)
     session.pop(Constants.USERNAME, username)
     session.clear()
-    print(f'Session after logout : {session}')
     return redirect(url_for(Constants.BLISSMAKE_INDEX))

@@ -107,6 +107,8 @@ class Constants:
     PHONE = 'phone'
     CNF_PWD = 'confirm_password'
     PROFILE = 'profile'
+    QUERY = 'query'
+    LOG_MSG = 'log_message'
     OTP = 'otp'
     EXP_TIME = "expiration_time"
     TOT_PRI = 'total_price'
