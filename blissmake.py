@@ -105,7 +105,7 @@ def authenticate_user():
                 Constants.INVALID_PASSWORD: (401, make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.INVALID_PASSWORD)))),
                 Constants.USER_NOT_EXISTS: (404, make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.USER_NOT_EXISTS)))),
             }
-            response_status, response = response_map.get(user, (500, make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.RESPONSE_INT_SER_ERR)))))
+            _, response = response_map.get(user, (500, make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN, error=Constants.RESPONSE_INT_SER_ERR)))))
             BlissmakeService.response_headers(response)
         return response
 
@@ -209,7 +209,6 @@ def profile(username):
 @blissmake.route(Constants.UPDATE_PROFILE, methods=[Constants.GET, Constants.POST])
 @log_request
 def update_profile(username):
-    start_time = datetime.now(timezone.utc).isoformat()
     if (Constants.USER_ID not in session and session.get(Constants.USERNAME) != username) or username == Constants.GUEST:
         response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
         return response
