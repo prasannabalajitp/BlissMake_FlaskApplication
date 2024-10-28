@@ -256,20 +256,14 @@ def checkout(username):
     if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
 
-    cart = mongo.db.usercart.find_one({
-            Constants.USERNAME: username
-            })
+    cart = mongo.db.usercart.find_one({Constants.USERNAME: username})
     if not cart:
-        response = jsonify({
-            Constants.ERROR: Constants.CART_NOT_FOUND
-            })
+        response = jsonify({Constants.ERROR: Constants.CART_NOT_FOUND})
         BlissmakeService.response_headers(response=response)
         return response
     
     products = cart.get(Constants.PRODUCTS, [])
-
     total_price = BlissmakeService.calculate_total_price(products)
-
     response = make_response(render_template(
         Constants.CHECKOUT_HTML, 
         username=username, 
@@ -278,9 +272,6 @@ def checkout(username):
     ))
     BlissmakeService.response_headers(response=response)
     return response
-
-
-
 
 @blissmake.route(Constants.PROD_DET_GUEST, defaults={Constants.USERNAME: Constants.GUEST})
 @blissmake.route(Constants.PRODUCT_DETAIL)
@@ -303,7 +294,6 @@ def product_detail(product_id, username):
 
 @blissmake.route(Constants.GET_CART, methods=[Constants.GET])
 def get_cart(username):
-
     start_time = datetime.now(timezone.utc).isoformat()
     if username == Constants.GUEST:
         response = make_response(render_template(Constants.LOGIN_HTML))
@@ -329,10 +319,10 @@ def get_cart(username):
 @blissmake.route(Constants.GET_FAV)
 def get_favorite(username):
     start_time = datetime.now(timezone.utc).isoformat()
-    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username:
+    if Constants.USER_ID not in session or session.get(Constants.USERNAME) != username or username == Constants.GUEST:
         response = make_response(redirect(url_for(Constants.BLISSMAKE_LOGIN)))
-    elif username == Constants.GUEST:
-        response = make_response(render_template(Constants.LOGIN_HTML))
+    # elif username == Constants.GUEST:
+    #     response = make_response(render_template(Constants.LOGIN_HTML))
     else:
         favorites = BlissmakeService.get_favorites(username=username)
         if favorites == Constants.FAV_NOT_EXISTS:
