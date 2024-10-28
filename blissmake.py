@@ -28,14 +28,14 @@ def log_request(func):
         start_time = datetime.now(timezone.utc).isoformat()
         response = func(*args, **kwargs)
         end_time = datetime.now(timezone.utc).isoformat()
-        if hasattr(response, 'data'):
-            username = kwargs.get('username') or request.form.get(Constants.USERNAME)
-            query = kwargs.get('query', None) or request.form.to_dict()
+        if hasattr(response, Constants.DATA):
+            username = kwargs.get(Constants.USERNAME) or request.form.get(Constants.USERNAME)
+            query = kwargs.get(Constants.QUERY, None) or request.form.to_dict()
 
             if Constants.PASSWORD in query:
                 query[Constants.PASSWORD] = Constants.MASK_PWD * len(query[Constants.PASSWORD])
 
-            log_message = kwargs.get('log_message', None)
+            log_message = kwargs.get(Constants.LOG_MSG, None)
             response_data = log_message if log_message else str(response.data)
             configure_and_generate_logs(
                 username, query, request.path, start_time, end_time,
@@ -239,7 +239,6 @@ def update_profile(username):
         return response
     
     user_data = user.dict()
-
     response = make_response(render_template(Constants.PROFILE_HTML, **user_data))
     BlissmakeService.response_headers(response)
     return response
