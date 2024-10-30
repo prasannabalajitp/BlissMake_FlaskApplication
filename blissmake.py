@@ -117,6 +117,7 @@ def register():
     return response
 
 @blissmake.route(Constants.GENERATE_OTP, methods=[Constants.GET, Constants.POST])
+@log_request
 def generate_otp():
     email = request.form.get(Constants.EMAIL)
     gen_otp_response = BlissmakeService.generate_otp_service(email=email)
@@ -131,10 +132,12 @@ def generate_otp():
         return render_template(Constants.VERIFY_OTP_HTML, email=email)
 
 @blissmake.route(Constants.FORGOT_PWD, methods=[Constants.POST, Constants.GET])
+@log_request
 def forgot_password():
     return render_template(Constants.FORGOT_PWD_HTML)
 
 @blissmake.route(Constants.VERIFY_OTP, methods=[Constants.GET, Constants.POST])
+@log_request
 def verify_otp():
     email = request.form.get(Constants.EMAIL)
     inp_otp = request.form.get(Constants.OTP)
@@ -150,6 +153,7 @@ def verify_otp():
         return render_template(render_template(Constants.VERIFY_OTP_HTML, email=email))
 
 @blissmake.route(Constants.RESET_PWD, methods=[Constants.GET, Constants.POST])
+@log_request
 def reset_password(email):
     if request.method == Constants.POST:
         new_password = request.form.get(Constants.NEW_PWD)
@@ -210,6 +214,7 @@ def update_profile(username):
     return response
 
 @blissmake.route(Constants.CHECKOUT)
+@log_request
 def checkout(username):
     if Constants.USER_ID not in session and session.get(Constants.USERNAME) != username:
         return redirect(url_for(Constants.BLISSMAKE_LOGIN))
